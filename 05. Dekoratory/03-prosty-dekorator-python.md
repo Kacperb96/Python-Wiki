@@ -60,6 +60,14 @@ hello = dekorator(hello)
 hello()
 ```
 
+Wynik:
+
+```python
+Przed funkcja
+Hello
+Po funkcji
+```
+
 ---
 
 ## Wrapper
@@ -93,6 +101,10 @@ def hello():
 hello = dekorator(hello)
 ```
 
+Czyli składnia z `@` niczego magicznego nie dodaje.
+
+To tylko krótszy i wygodniejszy zapis.
+
 ---
 
 ## Dekorator z `*args, **kwargs`
@@ -110,6 +122,8 @@ def dekorator(f):
 ```
 
 To bardzo ważny wzorzec.
+
+Jeśli o nim zapomnisz, dekorator będzie działał tylko dla bardzo prostych funkcji bez argumentów.
 
 ---
 
@@ -147,6 +161,19 @@ def dodaj(a, b):
     return a + b
 ```
 
+Przykład użycia:
+
+```python
+print(dodaj(2, 3))
+```
+
+Wynik:
+
+```python
+Wywoluje: dodaj
+5
+```
+
 ---
 
 ## Dobre praktyki
@@ -154,6 +181,10 @@ def dodaj(a, b):
 - zawsze pamiętaj o `*args, **kwargs`, jeśli dekorator ma być uniwersalny,
 - jeśli funkcja coś zwraca, wrapper też powinien zwrócić wynik,
 - zaczynaj od prostych dekoratorów zanim przejdziesz do dekoratorów z argumentami.
+
+Praktyczna zasada:
+
+najpierw zrozum ręcznie zapis `f = dekorator(f)`, a dopiero potem używaj `@dekorator`.
 
 ---
 
@@ -165,6 +196,12 @@ Najważniejsze rzeczy do zapamiętania:
 - wrapper opakowuje jej wykonanie,
 - składnia `@` to tylko skrót,
 - `*args, **kwargs` są bardzo ważne w praktyce.
+
+Najważniejsze do zapamiętania:
+
+- dekorator nie zmienia środka funkcji, tylko podmienia ją na nową wersję,
+- wrapper jest nową funkcją, która decyduje co zrobić przed, po albo zamiast oryginału,
+- brak `return wynik` to jeden z najczęstszych błędów.
 
 ---
 

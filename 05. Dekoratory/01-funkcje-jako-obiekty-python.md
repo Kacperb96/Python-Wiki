@@ -74,6 +74,12 @@ f()
 
 Tutaj `f` wskazuje na tę samą funkcję.
 
+Wynik:
+
+```python
+Czesc
+```
+
 ### Uwaga
 
 To nie jest:
@@ -100,6 +106,12 @@ wykonaj(hello)
 
 To bardzo ważny mechanizm.
 
+Wynik:
+
+```python
+Hello
+```
+
 ---
 
 ## Zwracanie funkcji z funkcji
@@ -116,6 +128,23 @@ def wybierz(przyjaznie):
 ```
 
 Tu funkcja zwraca inną funkcję.
+
+Przykład użycia:
+
+```python
+f1 = wybierz(True)
+f2 = wybierz(False)
+
+f1()
+f2()
+```
+
+Wynik:
+
+```python
+Czesc!
+Dzien dobry
+```
 
 ---
 
@@ -139,6 +168,13 @@ akcje = {"start": a, "stop": b}
 akcje["start"]()
 ```
 
+Wynik:
+
+```python
+A
+A
+```
+
 ---
 
 ## Funkcja jako callback
@@ -146,6 +182,26 @@ akcje["start"]()
 Callback to funkcja przekazana po to, by coś wywołało ją później.
 
 To bardzo częsty wzorzec.
+
+Przykład:
+
+```python
+def zakoncz():
+    print("Koniec zadania")
+
+def zrob_cos(callback):
+    print("Robie cos")
+    callback()
+
+zrob_cos(zakoncz)
+```
+
+Wynik:
+
+```python
+Robie cos
+Koniec zadania
+```
 
 ---
 
@@ -178,10 +234,32 @@ operacja = dodaj
 print(operacja(2, 3))
 ```
 
+Wynik:
+
+```python
+5
+```
+
 ```python
 def wykonaj_dwa_razy(f):
     f()
     f()
+```
+
+Przykład użycia:
+
+```python
+def hej():
+    print("Hej")
+
+wykonaj_dwa_razy(hej)
+```
+
+Wynik:
+
+```python
+Hej
+Hej
 ```
 
 ---
@@ -192,6 +270,10 @@ def wykonaj_dwa_razy(f):
 - nadawaj callbackom czytelne nazwy,
 - pamiętaj, że to bardzo potężny mechanizm, ale nie trzeba go nadużywać.
 
+Praktyczna zasada:
+
+jeśli chcesz przekazać funkcję dalej, zwykle podajesz jej nazwę bez nawiasów.
+
 ---
 
 ## Podsumowanie
@@ -201,6 +283,12 @@ Najważniejsze rzeczy do zapamiętania:
 - funkcje w Pythonie są obiektami,
 - można je przypisywać, przekazywać i zwracać,
 - to fundament dekoratorów i callbacków.
+
+Najważniejsze do zapamiętania:
+
+- `f` to funkcja jako wartość,
+- `f()` to wynik jej wywołania,
+- bez tego rozróżnienia dekoratory i callbacki będą wyglądały nielogicznie.
 
 ---
 

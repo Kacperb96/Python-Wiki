@@ -79,6 +79,10 @@ To oznacza:
 
 Framework rejestruje tę funkcję jako endpoint.
 
+Czyli dekorator nie tylko owija funkcję, ale też mówi frameworkowi:
+
+"ta funkcja obsługuje konkretną trasę".
+
 ---
 
 ## Flask
@@ -100,6 +104,8 @@ def items():
 ```
 
 Dekorator łączy funkcję z trasą.
+
+To dlatego po uruchomieniu aplikacji framework wie, którą funkcję wywołać dla danego adresu.
 
 ---
 
@@ -132,6 +138,8 @@ def test_dodaj(a, b, wynik):
 
 To pokazuje, że dekorator może dodawać nie tylko logikę, ale też opis testu.
 
+W `pytest` dekorator bardzo często nie zmienia samego zachowania funkcji w prosty sposób, tylko przekazuje informacje do silnika testów.
+
 ---
 
 ## Dekorator jako rejestracja
@@ -146,6 +154,30 @@ Funkcja jest:
 
 To ważne, bo pomaga zrozumieć, że frameworkowy dekorator często działa szerzej niż zwykły wrapper.
 
+Uproszczona symulacja:
+
+```python
+routes = {}
+
+def route(path):
+    def dekorator(f):
+        routes[path] = f
+        return f
+    return dekorator
+
+@route("/hello")
+def hello():
+    return "Hello"
+
+print(routes["/hello"]())
+```
+
+Wynik:
+
+```python
+Hello
+```
+
 ---
 
 ## Dekorator jako opis zachowania
@@ -158,6 +190,14 @@ Czasem dekorator mówi:
 - „ta funkcja ma specjalne uprawnienia”.
 
 To bardzo deklaratywny styl programowania.
+
+Zamiast pisać osobno:
+
+- "dodaj tę funkcję do rejestru",
+- "oznacz ją jako endpoint",
+- "połącz ją z trasą",
+
+opisujesz to bezpośrednio nad definicją funkcji.
 
 ---
 
@@ -207,6 +247,10 @@ def ping():
     return {"status": "ok"}
 ```
 
+Efekt praktyczny:
+
+żądanie `GET /ping` trafi do funkcji `ping`.
+
 ### Flask
 
 ```python
@@ -215,12 +259,44 @@ def hello():
     return "Hello"
 ```
 
+Efekt praktyczny:
+
+wejście na trasę `/hello` uruchomi funkcję `hello`.
+
 ### pytest
 
 ```python
 @pytest.mark.parametrize("x", [1, 2, 3])
 def test_positive(x):
     assert x > 0
+```
+
+Efekt praktyczny:
+
+`pytest` uruchomi ten test kilka razy, podstawiając kolejne wartości `x`.
+
+### Uproszczony własny przykład rejestracji
+
+```python
+commands = {}
+
+def command(name):
+    def dekorator(f):
+        commands[name] = f
+        return f
+    return dekorator
+
+@command("start")
+def start():
+    return "Program uruchomiony"
+
+print(commands["start"]())
+```
+
+Wynik:
+
+```python
+Program uruchomiony
 ```
 
 ---
@@ -232,6 +308,20 @@ def test_positive(x):
 - nie traktuj wszystkich dekoratorów frameworkowych jak zwykłych dekoratorów użytkownika,
 - zwracaj uwagę na kolejność dekoratorów.
 
+Praktyczna zasada:
+
+w frameworkach pytaj nie tylko "co ten dekorator robi z funkcją?",
+
+ale też "co rejestruje, opisuje albo przekazuje do systemu?".
+
+Druga praktyczna zasada:
+
+jeśli nie rozumiesz frameworkowego dekoratora, spróbuj najpierw wyobrazić go sobie jako:
+
+- wpis do słownika,
+- dopisanie metadanych,
+- prosty mechanizm rejestracji funkcji.
+
 ---
 
 ## Podsumowanie
@@ -242,6 +332,12 @@ Najważniejsze rzeczy do zapamiętania:
 - dekorator może służyć do rejestracji funkcji, nie tylko jej owinięcia,
 - w FastAPI i Flask dekoratory często definiują routing,
 - w pytest dekoratory często opisują i konfigurują testy.
+
+Najważniejsze do zapamiętania:
+
+- frameworkowy dekorator bardzo często działa szerzej niż zwykły wrapper,
+- może budować rejestr, routing albo konfigurację testów,
+- dlatego dekoratory są tak ważne w nowoczesnym Pythonie.
 
 ---
 

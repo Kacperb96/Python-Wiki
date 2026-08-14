@@ -78,6 +78,20 @@ def hello():
     print("Hello")
 ```
 
+Przykład użycia:
+
+```python
+hello()
+```
+
+Wynik:
+
+```python
+Hello
+Hello
+Hello
+```
+
 ---
 
 ## Jak to czytać
@@ -91,6 +105,12 @@ czytaj jako:
 1. wywołaj `powtorz(3)`,
 2. dostaniesz dekorator,
 3. ten dekorator zastosuj do funkcji `hello`.
+
+To bardzo ważne:
+
+argument `3` trafia do zewnętrznej funkcji `powtorz`,
+
+a dopiero później dekorowana funkcja trafia do wewnętrznego dekoratora.
 
 ---
 
@@ -122,6 +142,23 @@ def loguj(prefix):
     return dekorator
 ```
 
+Przykład użycia:
+
+```python
+@loguj("[INFO]")
+def start():
+    print("Start programu")
+
+start()
+```
+
+Wynik:
+
+```python
+[INFO] start
+Start programu
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -146,6 +183,23 @@ def prefiks(txt):
     return dekorator
 ```
 
+Przykład użycia:
+
+```python
+@prefiks("UWAGA")
+def test():
+    print("Dzialam")
+
+test()
+```
+
+Wynik:
+
+```python
+UWAGA
+Dzialam
+```
+
 ---
 
 ## Dobre praktyki
@@ -154,6 +208,12 @@ def prefiks(txt):
 - dopiero potem ucz się dekoratorów z argumentami,
 - czytaj kod warstwa po warstwie,
 - używaj `*args, **kwargs`.
+
+Praktyczna zasada:
+
+czytaj taki dekorator od zewnątrz do środka:
+
+konfiguracja -> dekorator -> wrapper -> oryginalna funkcja.
 
 ---
 
@@ -165,6 +225,12 @@ Najważniejsze rzeczy do zapamiętania:
 - pierwszy poziom bierze konfigurację,
 - drugi bierze funkcję,
 - trzeci ją opakowuje.
+
+Najważniejsze do zapamiętania:
+
+- argumenty dekoratora i argumenty dekorowanej funkcji to dwie różne rzeczy,
+- jeśli pomylisz te poziomy, kod szybko przestanie być zrozumiały,
+- ten mechanizm jest naturalnym rozszerzeniem zwykłego dekoratora.
 
 ---
 

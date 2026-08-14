@@ -75,6 +75,19 @@ def zewnetrzna():
 
 Mimo że `zewnetrzna()` się skończy, funkcja zwrócona nadal „pamięta” `tekst`.
 
+Przykład użycia:
+
+```python
+f = zewnetrzna()
+f()
+```
+
+Wynik:
+
+```python
+Python
+```
+
 ---
 
 ## Najprostszy przykład closure
@@ -96,6 +109,13 @@ Tutaj:
 
 - `razy2` pamięta `n = 2`,
 - `razy3` pamięta `n = 3`.
+
+Wynik:
+
+```python
+10
+15
+```
 
 ---
 
@@ -140,6 +160,20 @@ czesc = przywitanie("Czesc")
 dzien_dobry = przywitanie("Dzien dobry")
 ```
 
+Przykład użycia:
+
+```python
+czesc("Ania")
+dzien_dobry("Jan")
+```
+
+Wynik:
+
+```python
+Czesc Ania
+Dzien dobry Jan
+```
+
 ---
 
 ## Closures a `nonlocal`
@@ -161,6 +195,23 @@ def licznik():
 ```
 
 To bardzo klasyczny przykład.
+
+Przykład użycia:
+
+```python
+licz = licznik()
+print(licz())
+print(licz())
+print(licz())
+```
+
+Wynik:
+
+```python
+1
+2
+3
+```
 
 ---
 
@@ -185,6 +236,12 @@ plus5 = dodajnik(5)
 print(plus5(10))
 ```
 
+Wynik:
+
+```python
+15
+```
+
 ```python
 def licznik():
     x = 0
@@ -197,6 +254,21 @@ def licznik():
     return krok
 ```
 
+Przykład użycia:
+
+```python
+l = licznik()
+print(l())
+print(l())
+```
+
+Wynik:
+
+```python
+1
+2
+```
+
 ---
 
 ## Dobre praktyki
@@ -205,6 +277,12 @@ def licznik():
 - traktuj closure jako „funkcję z pamięcią”,
 - używaj `nonlocal` świadomie,
 - nie komplikuj tam, gdzie klasa byłaby czytelniejsza.
+
+Praktyczna zasada:
+
+closure świetnie nadaje się do małego stanu i prostych konfiguracji.
+
+Jeśli logika i stan robią się duże, często czytelniejsza będzie klasa.
 
 ---
 
@@ -215,6 +293,12 @@ Najważniejsze rzeczy do zapamiętania:
 - closure to funkcja, która pamięta zmienne z zewnętrznego zakresu,
 - bardzo często występuje w dekoratorach,
 - pozwala budować funkcje konfigurowane i funkcje ze stanem.
+
+Najważniejsze do zapamiętania:
+
+- nie każda funkcja zagnieżdżona jest closure,
+- closure naprawdę zaczyna być ciekawe wtedy, gdy funkcja nadal używa zapamiętanych danych po wyjściu z funkcji zewnętrznej,
+- `nonlocal` służy do zmiany takiego zapamiętanego stanu.
 
 ---
 

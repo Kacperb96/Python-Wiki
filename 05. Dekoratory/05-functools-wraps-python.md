@@ -72,6 +72,8 @@ wrapper
 
 zamiast właściwej nazwy.
 
+To oznacza, że po dekorowaniu Python "widzi" wrapper zamiast oryginalnej funkcji.
+
 ---
 
 ## Jak działa `wraps`
@@ -99,6 +101,25 @@ def dekorator(f):
 ```
 
 To najczęściej właśnie tak powinien wyglądać dekorator.
+
+Przykład:
+
+```python
+@dekorator
+def hello():
+    """Przykladowy docstring."""
+    print("Hello")
+
+print(hello.__name__)
+print(hello.__doc__)
+```
+
+Wynik:
+
+```python
+hello
+Przykladowy docstring.
+```
 
 ---
 
@@ -134,6 +155,8 @@ To pomaga, gdy:
 - generujesz dokumentację,
 - używasz frameworków,
 - debugujesz.
+
+Dzięki `wraps` możesz też dostać się do oryginalnej funkcji przez `__wrapped__`.
 
 ---
 
@@ -175,6 +198,23 @@ def hello():
     print("Hello")
 ```
 
+Przykład użycia:
+
+```python
+print(hello.__name__)
+print(hello.__doc__)
+hello()
+```
+
+Wynik:
+
+```python
+hello
+Przykladowa funkcja.
+Wywolanie: hello
+Hello
+```
+
 ---
 
 ## Dobre praktyki
@@ -182,6 +222,10 @@ def hello():
 - prawie zawsze używaj `wraps` w dekoratorach funkcyjnych,
 - traktuj to jako domyślny nawyk,
 - szczególnie pilnuj tego w kodzie bibliotecznym i frameworkowym.
+
+Praktyczna zasada:
+
+jeśli piszesz własny dekorator funkcji, brak `@wraps` powinien być raczej wyjątkiem niż normą.
 
 ---
 
@@ -192,6 +236,12 @@ Najważniejsze rzeczy do zapamiętania:
 - `functools.wraps` zachowuje metadane funkcji,
 - jest bardzo ważny w poprawnych dekoratorach,
 - bez niego wrapper „przykrywa” tożsamość oryginalnej funkcji.
+
+Najważniejsze do zapamiętania:
+
+- `wraps` nie zmienia logiki dekoratora,
+- on dba o to, żeby udekorowana funkcja nadal wyglądała jak oryginał,
+- to szczególnie ważne dla debugowania, dokumentacji i frameworków.
 
 ---
 

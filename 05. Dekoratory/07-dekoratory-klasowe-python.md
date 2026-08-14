@@ -90,6 +90,20 @@ def hello():
     print("Hello")
 ```
 
+Przykład użycia:
+
+```python
+hello()
+```
+
+Wynik:
+
+```python
+Przed
+Hello
+Po
+```
+
 ---
 
 ## `__call__` w dekoratorze klasowym
@@ -109,6 +123,8 @@ hello()
 ```
 
 wywoła `__call__`.
+
+Czyli instancja klasy przejmuje rolę funkcji, którą można normalnie uruchomić.
 
 ---
 
@@ -140,6 +156,26 @@ class LiczWywolania:
         return self.f(*args, **kwargs)
 ```
 
+Przykład użycia:
+
+```python
+@LiczWywolania
+def hello():
+    print("Hello")
+
+hello()
+hello()
+```
+
+Wynik:
+
+```python
+Wywolanie: 1
+Hello
+Wywolanie: 2
+Hello
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -169,6 +205,19 @@ def dodaj(a, b):
     return a + b
 ```
 
+Przykład użycia:
+
+```python
+print(dodaj(2, 3))
+```
+
+Wynik:
+
+```python
+Wywoluje dodaj
+5
+```
+
 ---
 
 ## Dobre praktyki
@@ -176,6 +225,12 @@ def dodaj(a, b):
 - najpierw dobrze zrozum dekoratory funkcyjne,
 - używaj dekoratora klasowego wtedy, gdy naprawdę potrzebujesz stanu,
 - pilnuj czytelności.
+
+Praktyczna zasada:
+
+jeśli dekorator ma tylko prosty wrapper, funkcja zwykle wystarczy.
+
+Jeśli ma pamiętać stan między wywołaniami, klasa bywa bardzo dobrym wyborem.
 
 ---
 
@@ -186,6 +241,12 @@ Najważniejsze rzeczy do zapamiętania:
 - dekorator może być klasą,
 - wtedy zwykle korzysta z `__call__`,
 - dekoratory klasowe przydają się, gdy chcesz przechowywać stan lub bardziej rozbudowaną logikę.
+
+Najważniejsze do zapamiętania:
+
+- `@Dekorator` może tworzyć instancję klasy zamiast wywoływać funkcję-dekorator,
+- `__call__` robi tu dokładnie tę robotę, którą w dekoratorze funkcyjnym robi `wrapper`,
+- największą zaletą klasy jest wygodne przechowywanie stanu.
 
 ---
 

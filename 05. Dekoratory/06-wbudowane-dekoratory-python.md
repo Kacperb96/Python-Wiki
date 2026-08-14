@@ -59,6 +59,12 @@ print(k.saldo)
 
 bez nawiasów.
 
+Wynik:
+
+```python
+100
+```
+
 Można też dodać setter:
 
 ```python
@@ -93,6 +99,12 @@ Użycie:
 Matematyka.dodaj(2, 3)
 ```
 
+Wynik:
+
+```python
+5
+```
+
 ---
 
 ## `@classmethod`
@@ -113,6 +125,18 @@ class Osoba:
 ```
 
 `classmethod` często służy też jako alternatywny konstruktor.
+
+Przykład użycia:
+
+```python
+print(Osoba.pokaz_gatunek())
+```
+
+Wynik:
+
+```python
+czlowiek
+```
 
 ---
 
@@ -139,6 +163,18 @@ def fib(n):
 ```
 
 To bardzo przyspiesza powtarzalne obliczenia.
+
+Przykład:
+
+```python
+print(fib(10))
+```
+
+Wynik:
+
+```python
+55
+```
 
 ---
 
@@ -206,6 +242,21 @@ class Temperatura:
         return cls(0)
 ```
 
+Przykład użycia:
+
+```python
+t = Temperatura.zera()
+print(t.celsjusz)
+print(Temperatura.c_na_f(0))
+```
+
+Wynik:
+
+```python
+0
+32.0
+```
+
 ```python
 from functools import lru_cache
 
@@ -214,6 +265,18 @@ def silnia(n):
     if n <= 1:
         return 1
     return n * silnia(n - 1)
+```
+
+Przykład użycia:
+
+```python
+print(silnia(5))
+```
+
+Wynik:
+
+```python
+120
 ```
 
 ---
@@ -225,6 +288,12 @@ def silnia(n):
 - `@staticmethod` stosuj wtedy, gdy metoda logicznie należy do klasy,
 - `@lru_cache` używaj do funkcji deterministycznych.
 
+Praktyczna zasada:
+
+jeśli metoda nie potrzebuje ani `self`, ani `cls`, rozważ `@staticmethod`.
+
+Jeśli potrzebuje klasy, wybierz `@classmethod`.
+
 ---
 
 ## Podsumowanie
@@ -235,6 +304,12 @@ Najważniejsze rzeczy do zapamiętania:
 - `@staticmethod` nie dostaje ani `self`, ani `cls`,
 - `@classmethod` dostaje klasę,
 - `@lru_cache` cache’uje wyniki funkcji.
+
+Najważniejsze do zapamiętania:
+
+- `@property` zmienia sposób użycia metody, ale nie robi z niej zwykłego pola,
+- `@staticmethod` i `@classmethod` rozwiązują różne problemy,
+- `@lru_cache` ma sens głównie dla funkcji czystych i powtarzalnych.
 
 ---
 

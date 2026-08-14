@@ -67,6 +67,24 @@ def dekorator(f):
 
 Jeśli udekorujesz funkcję, dostaniesz nową wersję tej funkcji.
 
+Przykład użycia:
+
+```python
+def hello():
+    print("Hello")
+
+hello = dekorator(hello)
+hello()
+```
+
+Wynik:
+
+```python
+Przed
+Hello
+Po
+```
+
 ---
 
 ## Po co używa się dekoratorów
@@ -123,6 +141,12 @@ f()
 
 To bardzo ważny fundament dekoratorów.
 
+Wynik:
+
+```python
+Czesc
+```
+
 ---
 
 ## Closures
@@ -142,6 +166,19 @@ def zewnetrzna():
 ```
 
 To właśnie closure pozwala dekoratorowi „owinąć” funkcję i nadal mieć do niej dostęp.
+
+Przykład użycia:
+
+```python
+f = zewnetrzna()
+f()
+```
+
+Wynik:
+
+```python
+Python
+```
 
 ---
 
@@ -166,6 +203,14 @@ hello = dekorator(hello)
 hello()
 ```
 
+Wynik:
+
+```python
+Start
+Hello
+Koniec
+```
+
 ---
 
 ## Składnia `@`
@@ -188,6 +233,18 @@ def hello():
 
 To robi dokładnie to samo.
 
+Czyli:
+
+```python
+@dekorator
+```
+
+to tylko krótszy zapis dla:
+
+```python
+hello = dekorator(hello)
+```
+
 ---
 
 ## Dekoratory z argumentami
@@ -207,6 +264,12 @@ Wtedy potrzebujesz dodatkowego poziomu funkcji:
 - funkcja przyjmuje argument dekoratora,
 - zwraca właściwy dekorator,
 - dekorator zwraca wrapper.
+
+To warto czytać tak:
+
+1. konfiguracja,
+2. dekorowanie funkcji,
+3. wykonanie wrappera przy wywołaniu.
 
 ---
 
@@ -240,6 +303,25 @@ def dekorator(f):
     return wrapper
 ```
 
+Przykład użycia:
+
+```python
+@dekorator
+def hello():
+    """Przykladowa funkcja."""
+    print("Hello")
+
+print(hello.__name__)
+print(hello.__doc__)
+```
+
+Wynik:
+
+```python
+hello
+Przykladowa funkcja.
+```
+
 ---
 
 ## Wbudowane dekoratory
@@ -252,6 +334,13 @@ Najważniejsze przykłady:
 - `@functools.lru_cache`
 
 To dekoratory, z którymi spotkasz się bardzo często.
+
+Najczęściej:
+
+- `@property` zmienia metodę w kontrolowany atrybut,
+- `@staticmethod` daje metodę bez `self`,
+- `@classmethod` daje metodę pracującą na klasie,
+- `@lru_cache` zapamiętuje wyniki funkcji.
 
 ---
 
@@ -266,6 +355,12 @@ Przykłady:
 - pytest: markery, fixture’y.
 
 Tam dekorator często nie tylko „owija funkcję”, ale też ją rejestruje albo opisuje dla frameworka.
+
+To ogromnie ważna różnica:
+
+własny dekorator często zmienia wykonanie funkcji,
+
+a frameworkowy dekorator bardzo często dodatkowo zapisuje ją w jakimś systemie.
 
 ---
 
@@ -298,6 +393,105 @@ Gdy:
 - brak `functools.wraps`,
 - trudność z dekoratorami z argumentami.
 
+### 6. Brak zrozumienia kolejności wielu dekoratorów
+
+Przy kilku dekoratorach łatwo zgubić, który działa pierwszy przy dekorowaniu, a który przy wywołaniu.
+
+### 7. Próba uczenia się dekoratorów bez zrozumienia funkcji jako obiektów
+
+Wtedy cały temat wygląda jak zbiór sztuczek, a nie logiczny mechanizm.
+
+---
+
+## Praktyczne przykłady
+
+### Logowanie wywołania
+
+```python
+from functools import wraps
+
+def loguj(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        print("Wywolanie:", f.__name__)
+        return f(*args, **kwargs)
+    return wrapper
+
+@loguj
+def dodaj(a, b):
+    return a + b
+
+print(dodaj(2, 3))
+```
+
+Wynik:
+
+```python
+Wywolanie: dodaj
+5
+```
+
+### Powtarzanie funkcji
+
+```python
+def powtorz(n):
+    def dekorator(f):
+        def wrapper(*args, **kwargs):
+            for _ in range(n):
+                f(*args, **kwargs)
+        return wrapper
+    return dekorator
+
+@powtorz(3)
+def hello():
+    print("Hello")
+
+hello()
+```
+
+Wynik:
+
+```python
+Hello
+Hello
+Hello
+```
+
+### Kolejność dekoratorów
+
+```python
+def d1(f):
+    def wrapper():
+        print("d1 przed")
+        f()
+        print("d1 po")
+    return wrapper
+
+def d2(f):
+    def wrapper():
+        print("d2 przed")
+        f()
+        print("d2 po")
+    return wrapper
+
+@d1
+@d2
+def hello():
+    print("Hello")
+
+hello()
+```
+
+Wynik:
+
+```python
+d1 przed
+d2 przed
+Hello
+d2 po
+d1 po
+```
+
 ---
 
 ## Dobre praktyki
@@ -307,6 +501,16 @@ Gdy:
 - nie komplikuj dekoratora bez potrzeby,
 - testuj dekoratory osobno,
 - rozdzielaj dekoratory o różnych odpowiedzialnościach.
+
+Praktyczna zasada:
+
+jeśli nie umiesz rozpisać dekoratora ręcznie jako:
+
+```python
+funkcja = dekorator(funkcja)
+```
+
+to znaczy, że warto jeszcze cofnąć się o krok i uprościć przykład.
 
 ---
 
@@ -320,3 +524,9 @@ Najważniejsze rzeczy do zapamiętania:
 - składnia `@` to tylko skrót,
 - `functools.wraps` to bardzo ważna dobra praktyka,
 - dekoratory są bardzo często używane także w frameworkach.
+
+Najważniejsze do zapamiętania:
+
+- dekoratory nie są magią, tylko połączeniem funkcji jako obiektów, closures i wrappera,
+- najpierw warto umieć prosty dekorator, potem dekorator z argumentami, a dopiero później bardziej zaawansowane odmiany,
+- jeśli rozumiesz ręczne `f = dekorator(f)`, to rozumiesz serce całego tematu.
