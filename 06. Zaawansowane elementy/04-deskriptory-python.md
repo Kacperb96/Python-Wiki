@@ -121,6 +121,22 @@ class TylkoDoOdczytu:
         return 42
 ```
 
+Przykład użycia:
+
+```python
+class Test:
+    wartosc = TylkoDoOdczytu()
+
+t = Test()
+print(t.wartosc)
+```
+
+Wynik:
+
+```python
+42
+```
+
 ---
 
 ## Deskryptor walidujący dane
@@ -142,6 +158,25 @@ class DodatniaLiczba:
 ```
 
 To już bardzo praktyczna wersja.
+
+Przykład użycia:
+
+```python
+class Produkt:
+    cena = DodatniaLiczba()
+
+    def __init__(self, cena):
+        self.cena = cena
+
+p = Produkt(100)
+print(p.cena)
+```
+
+Wynik:
+
+```python
+100
+```
 
 ---
 
@@ -194,6 +229,16 @@ Na poziomie początkująco-średnim najważniejsze jest to:
 
 deskryptor może przejąć kontrolę nad atrybutem zamiast zwykłego odczytu ze słownika obiektu.
 
+To jest jeden z powodów, dla których temat wydaje się trudny:
+
+pod prostym zapisem:
+
+```python
+obiekt.pole
+```
+
+może kryć się dużo więcej niż zwykły odczyt wartości.
+
 ---
 
 ## Typowe błędy początkujących
@@ -229,6 +274,31 @@ class Produkt:
         self.cena = cena
 ```
 
+Przykład użycia:
+
+```python
+p = Produkt(50)
+print(p.cena)
+```
+
+Wynik:
+
+```python
+50
+```
+
+Jeśli spróbujesz:
+
+```python
+p.cena = -10
+```
+
+to dostaniesz:
+
+```python
+ValueError
+```
+
 ---
 
 ## Dobre praktyki
@@ -237,6 +307,12 @@ class Produkt:
 - używaj ich, gdy naprawdę potrzebujesz centralnej kontroli atrybutów,
 - do prostych przypadków zwykle wystarczy `property`,
 - rozumiej, że to mechanizm stojący pod spodem wielu narzędzi.
+
+Praktyczna zasada:
+
+jeśli chcesz kontrolować jedno pole w jednej klasie, `@property` często będzie czytelniejsze.
+
+Jeśli chcesz ten sam mechanizm walidacji lub dostępu współdzielić między wieloma klasami i polami, deskryptor robi się dużo ciekawszy.
 
 ---
 
@@ -248,6 +324,12 @@ Najważniejsze rzeczy do zapamiętania:
 - opiera się na `__get__`, `__set__`, `__delete__`,
 - `property` jest przykładem deskryptora,
 - deskryptory są ważne dla bardziej zaawansowanego modelu obiektowego Pythona.
+
+Najważniejsze do zapamiętania:
+
+- deskryptor to nie „dziwna klasa pomocnicza”, tylko oficjalny mechanizm modelu atrybutów w Pythonie,
+- dzięki niemu zwykły zapis `obiekt.pole` może uruchamiać własną logikę,
+- to temat zaawansowany, ale bardzo rozwijający zrozumienie OOP w Pythonie.
 
 ---
 

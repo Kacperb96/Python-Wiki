@@ -59,6 +59,14 @@ for x in [10, 20, 30]:
     print(x)
 ```
 
+Wynik:
+
+```python
+10
+20
+30
+```
+
 Na pierwszy rzut oka to wygląda prosto.
 
 Ale pod spodem Python używa specjalnego mechanizmu iteratorów.
@@ -122,6 +130,14 @@ it = iter(lista)
 print(next(it))
 print(next(it))
 print(next(it))
+```
+
+Wynik:
+
+```python
+10
+20
+30
 ```
 
 Po ostatnim elemencie:
@@ -196,6 +212,22 @@ print(g)
 ```
 
 zwraca generator, a nie gotową listę.
+
+Przykład użycia:
+
+```python
+print(next(g))
+print(next(g))
+print(next(g))
+```
+
+Wynik:
+
+```python
+1
+2
+3
+```
 
 ---
 
@@ -313,6 +345,16 @@ for x in wynik:
 
 To bardzo elegancki model pracy na strumieniu danych.
 
+Wynik:
+
+```python
+0
+4
+16
+36
+64
+```
+
 ---
 
 ## Pamięć i wydajność
@@ -374,6 +416,13 @@ print(next(it))
 print(next(it))
 ```
 
+Wynik:
+
+```python
+1
+2
+```
+
 ### Generator
 
 ```python
@@ -381,6 +430,21 @@ def odliczanie(n):
     while n > 0:
         yield n
         n -= 1
+```
+
+Przykład użycia:
+
+```python
+for x in odliczanie(3):
+    print(x)
+```
+
+Wynik:
+
+```python
+3
+2
+1
 ```
 
 ### `yield from`
@@ -391,6 +455,18 @@ def a():
     yield 4
 ```
 
+Przykład użycia:
+
+```python
+print(list(a()))
+```
+
+Wynik:
+
+```python
+[1, 2, 3, 4]
+```
+
 ---
 
 ## Dobre praktyki
@@ -399,6 +475,10 @@ def a():
 - pamiętaj, że generator jest jednorazowy,
 - nie komplikuj iteratorów, jeśli zwykła pętla wystarczy,
 - używaj `yield from`, gdy delegujesz iterację dalej.
+
+Praktyczna zasada:
+
+jeśli nie potrzebujesz całego wyniku naraz, generator bardzo często będzie lepszy niż lista.
 
 ---
 
@@ -411,6 +491,12 @@ Najważniejsze rzeczy do zapamiętania:
 - generator to specjalny iterator tworzony przez `yield`,
 - `yield from` upraszcza delegowanie,
 - generatory są świetne do leniwego i oszczędnego przetwarzania danych.
+
+Najważniejsze do zapamiętania:
+
+- iterator pamięta stan przechodzenia po danych,
+- generator jest wygodnym sposobem tworzenia iteratora,
+- po zużyciu generatora nie da się go po prostu „zacząć od nowa” bez utworzenia nowego obiektu.
 
 ---
 

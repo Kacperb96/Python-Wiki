@@ -92,6 +92,21 @@ b = a
 
 `a` i `b` wskazują na ten sam obiekt listy.
 
+Przykład:
+
+```python
+b.append(4)
+print(a)
+print(b)
+```
+
+Wynik:
+
+```python
+[1, 2, 3, 4]
+[1, 2, 3, 4]
+```
+
 ---
 
 ## Referencje a zmienne
@@ -117,6 +132,12 @@ b.append(3)
 ```
 
 Tu zmieniasz ten sam obiekt.
+
+Wynik:
+
+```python
+a == [1, 2, 3]
+```
 
 ---
 
@@ -233,6 +254,12 @@ print(a)
 
 To klasyczny efekt uboczny wynikający z modelu referencji.
 
+Wynik:
+
+```python
+[1, 2, 3]
+```
+
 ---
 
 ## Model pamięci a kopiowanie
@@ -286,6 +313,12 @@ b.append(3)
 print(a)
 ```
 
+Wynik:
+
+```python
+[1, 2, 3]
+```
+
 ### Niemutowalność
 
 ```python
@@ -293,6 +326,12 @@ a = 10
 b = a
 b = 20
 print(a)
+```
+
+Wynik:
+
+```python
+10
 ```
 
 ### `is` i `==`
@@ -305,12 +344,25 @@ print(a == b)
 print(a is b)
 ```
 
+Wynik:
+
+```python
+True
+False
+```
+
 ### `None`
 
 ```python
 x = None
 if x is None:
     print("Brak wartosci")
+```
+
+Wynik:
+
+```python
+Brak wartosci
 ```
 
 ---
@@ -322,6 +374,12 @@ if x is None:
 - używaj `is None` dla `None`,
 - uważaj na mutowalne obiekty współdzielone między nazwami,
 - nie wyciągaj zbyt daleko idących wniosków z detali implementacyjnych, jeśli nie są potrzebne.
+
+Praktyczna zasada:
+
+jeśli pracujesz na liście, słowniku albo innym mutowalnym obiekcie, zawsze miej z tyłu głowy pytanie:
+
+"czy ktoś jeszcze ma referencję do tego samego obiektu?"
 
 ---
 
@@ -335,6 +393,12 @@ Najważniejsze rzeczy do zapamiętania:
 - garbage collector i reference counting odpowiadają za zarządzanie pamięcią,
 - interning stringów istnieje, ale nie powinno się na nim opierać logiki,
 - mutowalność i współdzielenie referencji prowadzą do efektów ubocznych.
+
+Najważniejsze do zapamiętania:
+
+- `a = b` zwykle nie oznacza kopiowania,
+- `is` służy do sprawdzania tożsamości, nie równości wartości,
+- bardzo wiele „dziwnych” zachowań początkujących bierze się właśnie z referencji i mutowalności.
 
 ---
 

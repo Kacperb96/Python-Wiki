@@ -86,6 +86,12 @@ wynik = map(lambda x: x * 2, liczby)
 print(list(wynik))
 ```
 
+Wynik:
+
+```python
+[2, 4, 6, 8]
+```
+
 To można też zapisać czytelniej przez comprehension:
 
 ```python
@@ -104,6 +110,12 @@ Dlatego w Pythonie `map` nie zawsze jest domyślnym wyborem.
 liczby = [1, 2, 3, 4, 5]
 wynik = filter(lambda x: x % 2 == 0, liczby)
 print(list(wynik))
+```
+
+Wynik:
+
+```python
+[2, 4]
 ```
 
 Alternatywa:
@@ -126,6 +138,12 @@ from functools import reduce
 liczby = [1, 2, 3, 4]
 wynik = reduce(lambda a, b: a + b, liczby)
 print(wynik)
+```
+
+Wynik:
+
+```python
+10
 ```
 
 To działa jak składanie elementów krok po kroku.
@@ -161,6 +179,12 @@ print(kwadrat(5))
 ```
 
 To bardzo praktyczne.
+
+Wynik:
+
+```python
+25
+```
 
 ---
 
@@ -228,6 +252,10 @@ Gdy:
 - ignorowanie tego, że `map` i `filter` zwracają iteratory,
 - pisanie kodu „funkcyjnego” kosztem czytelności.
 
+### 5. Traktowanie stylu funkcyjnego jak celu samego w sobie
+
+W Pythonie ważniejsza od „czystości stylu” jest czytelność i sens rozwiązania.
+
 ---
 
 ## Praktyczne przykłady
@@ -239,10 +267,22 @@ liczby = [1, 2, 3]
 print(list(map(lambda x: x * 10, liczby)))
 ```
 
+Wynik:
+
+```python
+[10, 20, 30]
+```
+
 ### `filter`
 
 ```python
 print(list(filter(lambda x: x > 0, [-2, -1, 0, 1, 2])))
+```
+
+Wynik:
+
+```python
+[1, 2]
 ```
 
 ### `reduce`
@@ -250,6 +290,12 @@ print(list(filter(lambda x: x > 0, [-2, -1, 0, 1, 2])))
 ```python
 from functools import reduce
 print(reduce(lambda a, b: a + b, [1, 2, 3, 4]))
+```
+
+Wynik:
+
+```python
+10
 ```
 
 ### `partial`
@@ -262,6 +308,12 @@ def dodaj(a, b):
 
 dodaj5 = partial(dodaj, 5)
 print(dodaj5(10))
+```
+
+Wynik:
+
+```python
+15
 ```
 
 ### `singledispatch`
@@ -278,6 +330,20 @@ def _(x: int):
     print("Liczba:", x)
 ```
 
+Przykład użycia:
+
+```python
+opisz(10)
+opisz("abc")
+```
+
+Wynik:
+
+```python
+Liczba: 10
+Nieznany typ
+```
+
 ---
 
 ## Dobre praktyki
@@ -288,6 +354,10 @@ def _(x: int):
 - używaj `partial`, gdy naprawdę upraszcza kod,
 - `singledispatch` stosuj tam, gdzie daje realną elegancję.
 
+Praktyczna zasada:
+
+jeśli comprehension czy zwykła pętla jest czytelniejsza, to bardzo często właśnie ona jest bardziej pythonowa.
+
 ---
 
 ## Podsumowanie
@@ -297,6 +367,12 @@ Najważniejsze rzeczy do zapamiętania:
 - Python wspiera wiele narzędzi programowania funkcyjnego,
 - najważniejsze to `map`, `filter`, `reduce`, lambdy, `partial`, `singledispatch`,
 - trzeba używać ich świadomie i z naciskiem na czytelność.
+
+Najważniejsze do zapamiętania:
+
+- funkcje wysokiego rzędu to ważny fundament wielu mechanizmów Pythona,
+- `map` i `filter` nie zawsze są lepsze od comprehension,
+- dobry pythonowy kod wybiera narzędzie pod czytelność, a nie pod ideologię stylu.
 
 ---
 

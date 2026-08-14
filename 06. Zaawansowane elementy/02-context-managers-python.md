@@ -121,6 +121,14 @@ with MojContext():
     print("W srodku")
 ```
 
+Wynik:
+
+```python
+Wejscie
+W srodku
+Wyjscie
+```
+
 ---
 
 ## Obsługa wyjątków w `__exit__`
@@ -157,6 +165,21 @@ def moj_context():
 
 To często dużo prostsze niż pisanie całej klasy.
 
+Przykład użycia:
+
+```python
+with moj_context():
+    print("W bloku")
+```
+
+Wynik:
+
+```python
+Wejscie
+W bloku
+Wyjscie
+```
+
 ---
 
 ## `contextlib.suppress`
@@ -173,6 +196,10 @@ with suppress(FileNotFoundError):
 ```
 
 Trzeba używać go rozsądnie.
+
+To znaczy:
+
+jeśli wyjątek `FileNotFoundError` wystąpi, program nie przerwie działania w tym miejscu.
 
 ---
 
@@ -219,6 +246,10 @@ Wszędzie tam, gdzie coś trzeba:
 - nadużywanie `suppress`,
 - stłumianie ważnych wyjątków bez potrzeby.
 
+### 5. Myślenie, że `with` działa tylko dla plików
+
+To dużo szerszy mechanizm do zarządzania zasobami i stanem.
+
 ---
 
 ## Praktyczne przykłady
@@ -235,6 +266,21 @@ class Timer:
         print("Stop")
 ```
 
+Przykład użycia:
+
+```python
+with Timer():
+    print("Robie cos")
+```
+
+Wynik:
+
+```python
+Start
+Robie cos
+Stop
+```
+
 ### Funkcyjny context manager
 
 ```python
@@ -247,6 +293,21 @@ def log():
     print("Stop")
 ```
 
+Przykład użycia:
+
+```python
+with log():
+    print("Praca")
+```
+
+Wynik:
+
+```python
+Start
+Praca
+Stop
+```
+
 ### suppress
 
 ```python
@@ -256,6 +317,13 @@ with suppress(ZeroDivisionError):
     print(1 / 0)
 ```
 
+Wynik:
+
+```python
+```
+
+Nic nie zostanie wypisane, a wyjątek zostanie stłumiony.
+
 ---
 
 ## Dobre praktyki
@@ -264,6 +332,12 @@ with suppress(ZeroDivisionError):
 - jeśli prosty przypadek da się zrobić przez `contextmanager`, często warto,
 - nie nadużywaj tłumienia wyjątków,
 - czytaj `with` jako bezpieczny wzorzec „wejście-praca-wyjście”.
+
+Praktyczna zasada:
+
+myśl o `with` jak o bardzo czytelnym wzorcu:
+
+przygotuj -> użyj -> posprzątaj.
 
 ---
 
@@ -276,6 +350,12 @@ Najważniejsze rzeczy do zapamiętania:
 - `contextlib.contextmanager` upraszcza tworzenie własnych context managerów,
 - `contextlib.suppress` tłumi wybrane wyjątki,
 - to podstawowy mechanizm bezpiecznej pracy z zasobami.
+
+Najważniejsze do zapamiętania:
+
+- `with` to nie ozdobnik składni, tylko mechanizm bezpiecznego zarządzania zasobem,
+- sprzątanie dzieje się także przy błędach,
+- context manager może zarządzać nie tylko plikiem, ale też czasem, stanem, blokadą albo wyjątkami.
 
 ---
 

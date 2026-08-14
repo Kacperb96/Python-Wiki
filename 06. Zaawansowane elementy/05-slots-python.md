@@ -51,6 +51,8 @@ class Punkt:
     __slots__ = ("x", "y")
 ```
 
+To znaczy, że instancje tej klasy mają mieć tylko pola `x` i `y`.
+
 ---
 
 ## Po co istnieje `__slots__`
@@ -136,6 +138,21 @@ class Punkt:
 
 To oznacza, że instancja ma mieć tylko `x` i `y`.
 
+Przykład użycia:
+
+```python
+p = Punkt(1, 2)
+print(p.x)
+print(p.y)
+```
+
+Wynik:
+
+```python
+1
+2
+```
+
 ---
 
 ## Kiedy `__slots__` ma sens
@@ -181,6 +198,19 @@ To oznacza m.in.:
 - mniej elastyczne dynamiczne atrybuty,
 - inną introspekcję,
 - potencjalne problemy, jeśli kod zakłada obecność `__dict__`.
+
+Przykład:
+
+```python
+p = Punkt(1, 2)
+print(hasattr(p, "__dict__"))
+```
+
+Wynik:
+
+```python
+False
+```
 
 ---
 
@@ -229,6 +259,12 @@ To nie zadziała:
 p.z = 3
 ```
 
+Efekt:
+
+```python
+AttributeError
+```
+
 ---
 
 ## Dobre praktyki
@@ -237,6 +273,10 @@ p.z = 3
 - rozważ je tam, gdzie jest dużo małych obiektów,
 - pamiętaj, że to optymalizacja i ograniczenie jednocześnie,
 - nie komplikuj prostych projektów bez realnej korzyści.
+
+Praktyczna zasada:
+
+`__slots__` to narzędzie optymalizacyjne i projektowe, a nie coś, co warto dodawać automatycznie do każdej klasy.
 
 ---
 
@@ -248,6 +288,12 @@ Najważniejsze rzeczy do zapamiętania:
 - może zmniejszyć zużycie pamięci,
 - jest sensowne głównie w określonych scenariuszach,
 - nie zawsze warto go używać.
+
+Najważniejsze do zapamiętania:
+
+- zyskujesz mniejszą elastyczność w zamian za potencjalną oszczędność pamięci,
+- to ma sens głównie przy dużej liczbie prostych obiektów,
+- w małych projektach często ważniejsza jest prostota niż taka optymalizacja.
 
 ---
 
