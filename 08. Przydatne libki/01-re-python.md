@@ -66,6 +66,12 @@ wynik = re.search(r"\S+@\S+\.\S+", tekst)
 print(wynik.group())
 ```
 
+Wynik:
+
+```python
+anna@example.com
+```
+
 ---
 
 ## `search()`, `match()`, `fullmatch()`
@@ -97,11 +103,24 @@ tekst = "Ala ma 2 koty i 3 psy"
 print(re.findall(r"\d+", tekst))
 ```
 
+Wynik:
+
+```python
+['2', '3']
+```
+
 `finditer()` zwraca iterator po dopasowaniach:
 
 ```python
 for m in re.finditer(r"\d+", tekst):
     print(m.group(), m.start())
+```
+
+Wynik:
+
+```python
+2 7
+3 16
 ```
 
 ---
@@ -119,6 +138,14 @@ m = re.fullmatch(r"(\d{4})-(\d{2})-(\d{2})", tekst)
 print(m.group(1))
 print(m.group(2))
 print(m.group(3))
+```
+
+Wynik:
+
+```python
+2026
+07
+25
 ```
 
 ---
@@ -162,6 +189,12 @@ print(nowy)
 
 Przydaje się do maskowania danych i czyszczenia tekstu.
 
+Wynik:
+
+```python
+Telefon: XXX-XXX-XXX
+```
+
 ---
 
 ## Raw stringi
@@ -189,6 +222,10 @@ To dużo czytelniejsze.
 - zbyt skomplikowane regexy na start,
 - brak sprawdzenia, czy dopasowanie istnieje przed `group()`.
 
+### 5. Używanie regexu do wszystkiego
+
+Czasem zwykłe `split()`, `replace()` albo `startswith()` są prostsze i czytelniejsze.
+
 ---
 
 ## Praktyczne przykłady
@@ -202,6 +239,12 @@ tekst = "Produkty: 12 jabłek, 7 gruszek"
 print(re.findall(r"\d+", tekst))
 ```
 
+Wynik:
+
+```python
+['12', '7']
+```
+
 ### Walidacja prostego kodu
 
 ```python
@@ -213,6 +256,12 @@ if re.fullmatch(r"[A-Z]{3}-\d{3}", kod):
     print("OK")
 ```
 
+Wynik:
+
+```python
+OK
+```
+
 ---
 
 ## Dobre praktyki
@@ -222,6 +271,10 @@ if re.fullmatch(r"[A-Z]{3}-\d{3}", kod):
 - zapisuj wzorce jako raw stringi,
 - przy często używanych wzorcach rozważ `re.compile()`.
 
+Praktyczna zasada:
+
+jeśli regex zaczyna być trudniejszy do przeczytania niż problem, który rozwiązuje, zatrzymaj się i uprość podejście.
+
 ---
 
 ## Podsumowanie
@@ -229,6 +282,12 @@ if re.fullmatch(r"[A-Z]{3}-\d{3}", kod):
 `re` to bardzo mocne narzędzie do pracy z tekstem.
 
 Nie zawsze jest najlepszym wyborem, ale tam, gdzie trzeba opisać wzorzec tekstowy, bywa niezastąpione.
+
+Najważniejsze do zapamiętania:
+
+- `search()` szuka w środku tekstu,
+- `fullmatch()` świetnie nadaje się do walidacji,
+- regex jest narzędziem do wzorców tekstowych, a nie obowiązkowym rozwiązaniem każdego problemu z tekstem.
 
 ---
 

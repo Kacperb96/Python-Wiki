@@ -52,6 +52,18 @@ def dodaj(a: int, b: int) -> int:
 
 To nie wymusza typów w czasie działania samo z siebie, ale daje informacje narzędziom i programistom.
 
+Przykład:
+
+```python
+print(dodaj(2, 3))
+```
+
+Wynik:
+
+```python
+5
+```
+
 ---
 
 ## Typy podstawowe
@@ -85,6 +97,18 @@ def przetworz(dane: list[str]) -> dict[str, int]:
 
 To obecnie zwykle czytelniejsza forma niż starsze `List[str]` i `Dict[str, int]`.
 
+Przykład:
+
+```python
+print(przetworz(["Ala", "Python"]))
+```
+
+Wynik:
+
+```python
+{'Ala': 3, 'Python': 6}
+```
+
 ---
 
 ## `Optional` i `Union`
@@ -95,6 +119,8 @@ To obecnie zwykle czytelniejsza forma niż starsze `List[str]` i `Dict[str, int]
 def znajdz() -> str | None:
     return None
 ```
+
+To znaczy, że funkcja może zwrócić tekst albo brak wyniku.
 
 `Union` oznacza kilka możliwych typów.
 
@@ -121,6 +147,18 @@ def uruchom(f: Callable[[int], int], x: int) -> int:
     return f(x)
 ```
 
+Przykład:
+
+```python
+print(uruchom(lambda x: x * 2, 5))
+```
+
+Wynik:
+
+```python
+10
+```
+
 ---
 
 ## `TypeAlias` i `Literal`
@@ -136,6 +174,18 @@ UserId: TypeAlias = int
 
 def ustaw_tryb(tryb: Literal["dev", "prod"]) -> None:
     print(tryb)
+```
+
+Przykład:
+
+```python
+ustaw_tryb("dev")
+```
+
+Wynik:
+
+```python
+dev
 ```
 
 ---
@@ -154,6 +204,19 @@ class User(TypedDict):
 
 To bardzo przydatne przy danych JSON-like.
 
+Przykład użycia:
+
+```python
+user: User = {"name": "Anna", "age": 30}
+print(user["name"])
+```
+
+Wynik:
+
+```python
+Anna
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -162,6 +225,10 @@ To bardzo przydatne przy danych JSON-like.
 - używanie `Any` wszędzie,
 - przesadne komplikowanie typów w prostym kodzie,
 - brak aktualizacji adnotacji po zmianach logiki.
+
+### 5. Traktowanie typowania jako celu samego w sobie
+
+Typy mają pomagać w czytelności i bezpieczeństwie, a nie robić kod bardziej ciężkim niż potrzeba.
 
 ---
 
@@ -174,6 +241,18 @@ def policz_litery(slowa: list[str]) -> dict[str, int]:
     return {slowo: len(slowo) for slowo in slowa}
 ```
 
+Przykład użycia:
+
+```python
+print(policz_litery(["kot", "pies"]))
+```
+
+Wynik:
+
+```python
+{'kot': 3, 'pies': 4}
+```
+
 ### `TypedDict`
 
 ```python
@@ -184,6 +263,8 @@ class Product(TypedDict):
     price: float
 ```
 
+To jest szczególnie wygodne, gdy pracujesz na danych podobnych do JSON-a.
+
 ---
 
 ## Dobre praktyki
@@ -193,6 +274,10 @@ class Product(TypedDict):
 - preferuj nowoczesną składnię typów,
 - używaj `TypedDict` i `dataclass` tam, gdzie poprawia to czytelność danych.
 
+Praktyczna zasada:
+
+zacznij od prostych typów funkcji i zwracanych wartości. Nie próbuj od razu typować wszystkiego w najbardziej zaawansowany sposób.
+
 ---
 
 ## Podsumowanie
@@ -200,6 +285,12 @@ class Product(TypedDict):
 `typing` nie zmienia Pythona w język statyczny, ale znacząco poprawia jakość większego kodu.
 
 Największa wartość to czytelność, lepsze narzędzia i wcześniejsze wykrywanie problemów.
+
+Najważniejsze do zapamiętania:
+
+- adnotacje typów nie są tym samym co walidacja w runtime,
+- dobrze opisane typy pomagają ludziom i narzędziom,
+- `TypedDict`, `Literal` i `Callable` rozwiązują bardzo praktyczne problemy.
 
 ---
 

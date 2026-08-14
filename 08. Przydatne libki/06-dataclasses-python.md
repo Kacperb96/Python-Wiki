@@ -59,6 +59,12 @@ u = User("Anna", 30)
 print(u)
 ```
 
+Wynik:
+
+```python
+User(name='Anna', age=30)
+```
+
 ---
 
 ## Automatycznie generowane metody
@@ -71,6 +77,18 @@ print(u)
 
 To oszczędza dużo powtarzalnej pracy.
 
+Przykład:
+
+```python
+print(User("Anna", 30) == User("Anna", 30))
+```
+
+Wynik:
+
+```python
+True
+```
+
 ---
 
 ## Wartości domyślne
@@ -82,6 +100,18 @@ from dataclasses import dataclass
 class Config:
     debug: bool = False
     port: int = 8000
+```
+
+Przykład użycia:
+
+```python
+print(Config())
+```
+
+Wynik:
+
+```python
+Config(debug=False, port=8000)
 ```
 
 ---
@@ -98,6 +128,8 @@ class User:
     name: str
     tags: list[str] = field(default_factory=list)
 ```
+
+To sprawia, że każda instancja dostaje własną listę `tags`.
 
 ---
 
@@ -138,6 +170,18 @@ class Product:
             raise ValueError("price nie moze byc ujemne")
 ```
 
+Przykład użycia:
+
+```python
+print(Product("Kawa", 12.5))
+```
+
+Wynik:
+
+```python
+Product(name='Kawa', price=12.5)
+```
+
 ---
 
 ## `frozen=True`
@@ -154,6 +198,14 @@ class Point:
 ```
 
 To przydatne przy obiektach konfiguracyjnych i value objects.
+
+Próba zmiany pola:
+
+```python
+# p.x = 10
+```
+
+zakończy się błędem typu `FrozenInstanceError`.
 
 ---
 
@@ -174,6 +226,10 @@ Jeśli klasa ma dużo niestandardowego zachowania, zwykła klasa może być leps
 - brak walidacji danych tam, gdzie jest potrzebna,
 - zapominanie, że `frozen=True` ogranicza modyfikacje pól.
 
+### 5. Używanie `dataclass`, gdy klasa ma głównie złożone zachowanie, a nie dane
+
+Wtedy zwykła klasa bywa lepszym i czytelniejszym wyborem.
+
 ---
 
 ## Praktyczne przykłady
@@ -190,6 +246,18 @@ class User:
     active: bool = True
 ```
 
+Przykład użycia:
+
+```python
+print(User("janek", "janek@example.com"))
+```
+
+Wynik:
+
+```python
+User(username='janek', email='janek@example.com', active=True)
+```
+
 ### Lista tagów
 
 ```python
@@ -201,6 +269,23 @@ class Article:
     tags: list[str] = field(default_factory=list)
 ```
 
+Przykład:
+
+```python
+a1 = Article("Python")
+a2 = Article("Regexy")
+a1.tags.append("kod")
+print(a1.tags)
+print(a2.tags)
+```
+
+Wynik:
+
+```python
+['kod']
+[]
+```
+
 ---
 
 ## Dobre praktyki
@@ -210,6 +295,10 @@ class Article:
 - dodawaj typy pól,
 - używaj `__post_init__` do prostych walidacji i inicjalizacji pośredniej.
 
+Praktyczna zasada:
+
+jeśli Twoja klasa wygląda głównie jak zestaw pól danych z niewielką ilością logiki, `dataclass` bardzo często będzie świetnym wyborem.
+
 ---
 
 ## Podsumowanie
@@ -217,6 +306,12 @@ class Article:
 `dataclasses` znacząco upraszczają kod modeli danych.
 
 To bardzo praktyczne narzędzie, które dobrze łączy się z `typing`.
+
+Najważniejsze do zapamiętania:
+
+- `@dataclass` usuwa dużo boilerplate'u,
+- `default_factory` jest kluczowe dla list i słowników,
+- `__post_init__` pozwala dodać walidację bez pisania pełnego własnego `__init__`.
 
 ---
 
