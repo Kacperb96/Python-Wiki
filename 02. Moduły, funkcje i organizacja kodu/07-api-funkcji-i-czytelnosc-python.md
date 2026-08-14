@@ -122,6 +122,18 @@ def parse_int(text):
         return None
 ```
 
+```python
+print(parse_int("12"))
+print(parse_int("abc"))
+```
+
+Output:
+
+```python
+12
+None
+```
+
 Przykład mniej czytelny:
 
 ```python
@@ -149,11 +161,12 @@ Zła niespodzianka:
 
 ```python
 def policz_wynik(dane):
-    ...
-    zapisz_do_pliku(dane)
+    wynik = sum(dane)
+    print("zapisuje dane")
+    return wynik
 ```
 
-Jeśli nazwa sugeruje tylko obliczanie, zapis do pliku jest ukrytym efektem ubocznym.
+Jeśli nazwa sugeruje tylko obliczanie, dodatkowe działanie jest ukrytym efektem ubocznym.
 
 ---
 
@@ -171,11 +184,31 @@ def dodaj(a, b):
     return a + b
 ```
 
+```python
+print(dodaj(2, 3))
+```
+
+Output:
+
+```python
+5
+```
+
 Funkcja z efektem ubocznym:
 
 ```python
 def zapisz_log(tekst):
     print(tekst)
+```
+
+```python
+zapisz_log("start")
+```
+
+Output:
+
+```python
+start
 ```
 
 Oba typy są potrzebne, ale warto wiedzieć, z którym masz do czynienia.
@@ -260,6 +293,44 @@ Jawne API jest:
 
 ---
 
+## Jak myśleć o kontrakcie funkcji
+
+Każda dobra funkcja ma kontrakt, nawet jeśli nie zapisujesz go formalnie.
+
+Kontrakt odpowiada na pytania:
+
+- co funkcja przyjmuje,
+- co funkcja zwraca,
+- jakie są przypadki brzegowe,
+- czy może rzucić wyjątek,
+- czy ma efekt uboczny.
+
+Przykład:
+
+```python
+def bezpieczne_dzielenie(a, b):
+    if b == 0:
+        return None
+    return a / b
+
+print(bezpieczne_dzielenie(10, 2))
+print(bezpieczne_dzielenie(10, 0))
+```
+
+Output:
+
+```python
+5.0
+None
+```
+
+Tutaj kontrakt jest dość jasny:
+
+- przy zwykłych danych dostajesz liczbę,
+- przy dzieleniu przez zero dostajesz `None`.
+
+---
+
 ## Typowe pułapki początkujących
 
 - zbyt ogólne nazwy,
@@ -280,6 +351,16 @@ def normalize_email(email):
     return email.strip().lower()
 ```
 
+```python
+print(normalize_email("  JAN@EXAMPLE.COM "))
+```
+
+Output:
+
+```python
+jan@example.com
+```
+
 ### Jawne argumenty
 
 ```python
@@ -287,11 +368,31 @@ def create_user(name, email, active=True):
     return {"name": name, "email": email, "active": active}
 ```
 
+```python
+print(create_user("Jan", "jan@example.com"))
+```
+
+Output:
+
+```python
+{'name': 'Jan', 'email': 'jan@example.com', 'active': True}
+```
+
 ### Funkcja czysta
 
 ```python
 def policz_brutto(netto, vat):
     return netto * (1 + vat)
+```
+
+```python
+print(policz_brutto(100, 0.23))
+```
+
+Output:
+
+```python
+123.0
 ```
 
 ### Funkcja z ukrytym problemem
@@ -313,6 +414,19 @@ Taka nazwa prawie nic nie mówi.
 - projektuj zwracaną wartość tak, by była przewidywalna,
 - nie ukrywaj efektów ubocznych,
 - preferuj czytelność nad nadmierną elastyczność.
+
+---
+
+## Podsumowanie
+
+Dobre API funkcji sprawia, że funkcja jest nie tylko poprawna, ale też wygodna w użyciu.
+
+Najważniejsze rzeczy do zapamiętania:
+
+- dobra nazwa dużo tłumaczy,
+- argumenty są częścią interfejsu,
+- zwracana wartość powinna być przewidywalna,
+- funkcja nie powinna zaskakiwać ukrytymi efektami ubocznymi.
 
 ---
 

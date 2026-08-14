@@ -99,9 +99,36 @@ Najlepiej:
 
 ---
 
+## Poziom 7 — zadania przekrojowe
+
+40. Napisz program rejestracji użytkownika, który:
+   - pobiera imię, wiek i miasto,
+   - normalizuje tekst,
+   - sprawdza poprawność wieku,
+   - obsługuje błędne dane przez `try/except`,
+   - pokazuje wynik przez f-string.
+41. Napisz prosty kalkulator konsolowy:
+   - pyta o dwie liczby,
+   - pyta o operator,
+   - używa `if/elif/else`,
+   - obsługuje błędne wejście.
+42. Napisz program analizy hasła:
+   - sprawdza długość,
+   - sprawdza, czy zawiera cyfry,
+   - sprawdza, czy po `strip()` coś zostaje,
+   - wypisuje wynik walidacji.
+43. Napisz program, który pobiera kilka liczb od użytkownika i na końcu wypisuje:
+   - największą,
+   - najmniejszą,
+   - liczbę dodatnich,
+   - informację, czy wszystkie są różne od zera.
+44. Zbuduj prosty formularz konsolowy, w którym użytkownik podaje dane tak długo, aż wpisze poprawny zestaw informacji.
+
+---
+
 ## Zadanie końcowe
 
-40. Zbuduj tekstowe „centrum użytkownika”, które:
+45. Zbuduj tekstowe „centrum użytkownika”, które:
    - pobiera dane użytkownika,
    - waliduje wiek,
    - normalizuje imię i miasto,

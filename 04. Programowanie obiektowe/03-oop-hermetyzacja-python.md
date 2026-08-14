@@ -109,6 +109,14 @@ Można go odczytywać i zmieniać z zewnątrz:
 o = Osoba("Ania")
 print(o.imie)
 o.imie = "Anna"
+print(o.imie)
+```
+
+Wynik:
+
+```python
+Ania
+Anna
 ```
 
 ---
@@ -127,6 +135,23 @@ To konwencja znacząca:
 
 To nie blokuje dostępu technicznie, ale daje ważny sygnał.
 
+Przykład:
+
+```python
+class Konto:
+    def __init__(self):
+        self._saldo = 100
+
+konto = Konto()
+print(konto._saldo)
+```
+
+Wynik:
+
+```python
+100
+```
+
 ---
 
 ## Name mangling i podwójne podkreślenie
@@ -141,6 +166,23 @@ Python stosuje wtedy tzw. name mangling, czyli zmienia wewnętrznie nazwę atryb
 
 To utrudnia przypadkowy dostęp i przypadkowe nadpisanie w klasach pochodnych.
 
+Przykład:
+
+```python
+class Test:
+    def __init__(self):
+        self.__sekret = 123
+
+t = Test()
+print(t._Test__sekret)
+```
+
+Wynik:
+
+```python
+123
+```
+
 ---
 
 ## Czy to naprawdę prywatne
@@ -154,6 +196,12 @@ Dlatego:
 - pojedyncze `_` to konwencja,
 - podwójne `__` to mechanizm utrudniający kolizje i przypadkowe użycie,
 - ale nie jest to "żelazna ściana".
+
+To ważne:
+
+`_x` nie oznacza "Python zabroni dostępu", tylko raczej:
+
+"to element wewnętrzny, nie dotykaj go bez potrzeby".
 
 ---
 
@@ -210,6 +258,12 @@ print(konto.saldo)
 
 ale nadal mieć kontrolę.
 
+Wynik:
+
+```python
+100
+```
+
 ---
 
 ## Walidacja danych przez hermetyzację
@@ -232,6 +286,19 @@ class Osoba:
         if wartosc < 0:
             raise ValueError("Wiek nie moze byc ujemny")
         self._wiek = wartosc
+```
+
+Przykład użycia:
+
+```python
+o = Osoba(20)
+print(o.wiek)
+```
+
+Wynik:
+
+```python
+20
 ```
 
 ---
@@ -300,6 +367,22 @@ class Konto:
         self._saldo = wartosc
 ```
 
+Przykład:
+
+```python
+konto = Konto(100)
+print(konto.saldo)
+konto.saldo = 200
+print(konto.saldo)
+```
+
+Wynik:
+
+```python
+100
+200
+```
+
 ### Wewnętrzne pole
 
 ```python
@@ -316,6 +399,12 @@ class Test:
         self.__sekret = 123
 ```
 
+W praktyce Python zapisze ten atrybut pod nazwą zbliżoną do:
+
+```python
+_Test__sekret
+```
+
 ---
 
 ## Dobre praktyki
@@ -328,6 +417,14 @@ class Test:
 
 ### Ukrywaj to, co naprawdę powinno być ukryte
 
+### Praktyczna zasada
+
+Jeśli zwykły atrybut nie wymaga kontroli, zostaw go publicznym.
+
+Jeśli chcesz pilnować poprawności danych, użyj `@property`.
+
+Jeśli coś jest tylko do użytku wewnętrznego, zwykle wystarczy `_nazwa`.
+
 ---
 
 ## Podsumowanie
@@ -339,6 +436,13 @@ Najważniejsze rzeczy do zapamiętania:
 - `_nazwa` oznacza "wewnętrzne",
 - `__nazwa` uruchamia name mangling,
 - `@property` to bardzo ważne narzędzie do eleganckiej kontroli danych.
+
+Najważniejsze do zapamiętania:
+
+- publiczny atrybut jest normalny i często w zupełności wystarcza,
+- `_nazwa` to sygnał dla programisty, a nie zakaz techniczny,
+- `__nazwa` utrudnia przypadkowy dostęp, ale go nie uniemożliwia,
+- `@property` pozwala połączyć wygodny zapis z walidacją.
 
 ---
 

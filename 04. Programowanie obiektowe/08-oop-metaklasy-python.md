@@ -71,6 +71,11 @@ W Pythonie:
 
 To klucz do zrozumienia całego tematu.
 
+Najkrótsza intuicja:
+
+- `azor` jest obiektem klasy `Pies`,
+- `Pies` też jest obiektem, ale klasy `type`.
+
 ---
 
 ## Klasa też jest obiektem
@@ -147,6 +152,19 @@ Pies = type("Pies", (), {"gatunek": "pies"})
 
 To mniej czytelne niż zwykłe `class`, ale pokazuje, co dzieje się pod spodem.
 
+Przykład:
+
+```python
+Pies = type("Pies", (), {"gatunek": "pies"})
+print(Pies.gatunek)
+```
+
+Wynik:
+
+```python
+pies
+```
+
 ---
 
 ## Po co w ogóle używać metaklas
@@ -201,6 +219,12 @@ class Test(metaclass=Meta):
 ```
 
 spowoduje dodatkowe działanie przy tworzeniu klasy.
+
+Wynik:
+
+```python
+Tworze klase Test
+```
 
 ---
 
@@ -259,6 +283,8 @@ To ważne pytanie projektowe:
 czy naprawdę potrzebujesz metaklasy, czy da się to zrobić prościej?
 
 W wielu przypadkach prościej.
+
+Metaklasy częściej spotkasz w frameworkach i bibliotekach niż w małych własnych skryptach.
 
 ---
 
@@ -320,6 +346,12 @@ class Test(metaclass=Meta):
 print(Test.opis)
 ```
 
+Wynik:
+
+```python
+Dodano przez metaklase
+```
+
 ### Walidacja klasy
 
 ```python
@@ -329,6 +361,17 @@ class WymagajUruchom(type):
             raise TypeError("Brak metody uruchom")
         return super().__new__(mcls, name, bases, namespace)
 ```
+
+Metaklasa działa tutaj w chwili tworzenia klasy, a nie dopiero przy tworzeniu jej instancji.
+
+### Przykład, kiedy lepiej nie używać metaklasy
+
+Jeśli chcesz tylko dodać jednej klasie prosty atrybut albo lekko ją oznaczyć, zwykle wystarczy:
+
+- zwykła funkcja,
+- dekorator klasy,
+- klasa bazowa,
+- zwykły atrybut wpisany ręcznie.
 
 ---
 
@@ -342,6 +385,10 @@ class WymagajUruchom(type):
 
 ### Zadbaj o czytelność, bo ten temat szybko robi się trudny
 
+### Praktyczna zasada
+
+Jeśli po użyciu metaklasy kod robi się mniej zrozumiały niż problem, który rozwiązuje, to prawdopodobnie jest to zły wybór.
+
 ---
 
 ## Podsumowanie
@@ -354,6 +401,12 @@ Najważniejsze rzeczy do zapamiętania:
 - metaklasy służą do bardziej zaawansowanej kontroli tworzenia klas,
 - w codziennym kodzie są potrzebne rzadko,
 - najpierw warto bardzo dobrze rozumieć zwykłe klasy i OOP.
+
+Najważniejsze do zapamiętania:
+
+- `type` jest domyślną metaklasą większości klas,
+- metaklasa przechwytuje moment definiowania klasy,
+- ten temat jest ważny bardziej do rozumienia Pythona i frameworków niż do codziennych prostych programów.
 
 ---
 

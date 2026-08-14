@@ -76,6 +76,8 @@ class Pies(Zwierze):
     pass
 ```
 
+To ma sens, bo pies naprawdę jest rodzajem zwierzęcia.
+
 ---
 
 ## Czym jest kompozycja
@@ -100,6 +102,10 @@ class Samochod:
     def __init__(self):
         self.silnik = Silnik()
 ```
+
+Tutaj `Samochod` nie jest rodzajem `Silnik`.
+
+On po prostu ma silnik jako swoją część.
 
 ---
 
@@ -203,6 +209,20 @@ class Samochod:
 
 To bardzo naturalna kompozycja.
 
+Przykład użycia:
+
+```python
+auto = Samochod()
+auto.start()
+```
+
+Wynik:
+
+```python
+Silnik uruchomiony
+Samochod rusza
+```
+
 ---
 
 ## Dziedziczenie w praktyce
@@ -220,6 +240,21 @@ class Pies(Zwierze):
 ```
 
 Tu dziedziczenie ma sens.
+
+Przykład użycia:
+
+```python
+pies = Pies()
+pies.jedz()
+pies.szczekaj()
+```
+
+Wynik:
+
+```python
+Jem
+Hau
+```
 
 ---
 
@@ -278,6 +313,21 @@ class Student(Osoba):
         print("Ucze sie")
 ```
 
+Przykład użycia:
+
+```python
+s = Student()
+s.przedstaw_sie()
+s.ucz_sie()
+```
+
+Wynik:
+
+```python
+Jestem osoba
+Ucze sie
+```
+
 ### Dobra kompozycja
 
 ```python
@@ -288,6 +338,19 @@ class Klawiatura:
 class Komputer:
     def __init__(self):
         self.klawiatura = Klawiatura()
+```
+
+Przykład użycia:
+
+```python
+komputer = Komputer()
+komputer.klawiatura.pisz()
+```
+
+Wynik:
+
+```python
+Pisze
 ```
 
 ### Inny przykład kompozycji
@@ -315,6 +378,12 @@ class Firma:
 
 ### Gdy hierarchia zaczyna robić się dziwna, zatrzymaj się i przemyśl model
 
+### Praktyczna zasada
+
+Jeśli możesz uczciwie powiedzieć "A jest rodzajem B", rozważ dziedziczenie.
+
+Jeśli bardziej pasuje zdanie "A ma B" albo "A używa B", zwykle lepsza będzie kompozycja.
+
 ---
 
 ## Podsumowanie
@@ -326,6 +395,14 @@ Najważniejsze rzeczy do zapamiętania:
 - kompozycja często daje większą elastyczność,
 - dziedziczenie warto stosować tylko wtedy, gdy naprawdę pasuje semantycznie,
 - to jedno z najważniejszych pytań projektowych w OOP.
+
+Najważniejszy test:
+
+spróbuj wypowiedzieć relację na głos.
+
+Jeśli brzmi naturalnie jako "jest rodzajem", dziedziczenie może być dobre.
+
+Jeśli brzmi naturalnie jako "ma w sobie" albo "korzysta z", wybierz kompozycję.
 
 ---
 

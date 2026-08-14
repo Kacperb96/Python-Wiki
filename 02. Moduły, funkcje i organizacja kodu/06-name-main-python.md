@@ -170,12 +170,61 @@ To dobre miejsce na prosty test ręczny, ale nie na rozbudowane testy automatycz
 
 ---
 
+## Co się wykona przy imporcie, a co nie
+
+Spójrz na taki plik:
+
+```python
+print("modul sie laduje")
+
+def hello():
+    print("czesc")
+
+if __name__ == "__main__":
+    print("uruchomiono bezposrednio")
+    hello()
+```
+
+### Gdy uruchamiasz plik bezpośrednio
+
+Output:
+
+```python
+modul sie laduje
+uruchomiono bezposrednio
+czesc
+```
+
+### Gdy importujesz moduł
+
+```python
+import hello
+```
+
+Output:
+
+```python
+modul sie laduje
+```
+
+Czyli:
+
+- kod na poziomie globalnym pliku wykona się przy imporcie,
+- blok `if __name__ == "__main__"` nie wykona się przy imporcie.
+
+To bardzo ważne rozróżnienie.
+
+---
+
 ## Typowe pułapki początkujących
 
 - trzymanie całego programu na poziomie globalnym pliku,
 - wykonywanie logiki programu przy samym imporcie,
 - brak rozdziału między funkcjami a kodem startowym,
-- wrzucanie zbyt dużej ilości logiki bezpośrednio do bloku `if __name__ == "__main__":`.
+- wrzucanie zbyt dużej ilości logiki bezpośrednio do bloku `if __name__ == "__main__":`,
+- myślenie, że ten blok zatrzymuje wykonanie całego pliku przy imporcie.
+
+On zatrzymuje tylko kod wewnątrz tego warunku, nie cały plik.
 
 ---
 
@@ -189,6 +238,12 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+Output:
+
+```python
+Program wystartowal
 ```
 
 ### Kod testowy tylko przy uruchomieniu
@@ -217,6 +272,7 @@ Taki plik można importować bez niechcianego uruchamiania programu.
 - trzymaj punkt wejścia w `main()`,
 - używaj `if __name__ == "__main__"` do uruchamiania programu,
 - nie mieszaj definicji funkcji z logiką wykonywaną przy imporcie,
+- staraj się ograniczać kod globalny poza definicjami i prostymi stałymi,
 - używaj tego idiomu konsekwentnie w skryptach i prostych CLI.
 
 ---
@@ -225,7 +281,16 @@ Taki plik można importować bez niechcianego uruchamiania programu.
 
 To prosty mechanizm, ale bardzo ważny dla czystej organizacji kodu.
 
-Jeśli dobrze go używasz, Twoje moduły są bezpieczniejsze i czytelniejsze.
+Jeśli dobrze go używasz, Twoje moduły są:
+
+- bezpieczniejsze,
+- czytelniejsze,
+- łatwiejsze do importowania,
+- bardziej testowalne.
+
+Najważniejsze do zapamiętania:
+
+**kod globalny pliku wykona się przy imporcie, ale blok `if __name__ == "__main__"` już nie.**
 
 ---
 
@@ -247,6 +312,7 @@ if __name__ == "__main__":
 2. Dodaj `if __name__ == "__main__":`.
 3. Sprawdź różnicę między uruchomieniem a importem.
 4. Dodaj prosty ręczny test modułu pod tym blokiem.
+5. Napisz plik, który ma kod globalny i sprawdź, co wykona się przy imporcie.
 
 ---
 

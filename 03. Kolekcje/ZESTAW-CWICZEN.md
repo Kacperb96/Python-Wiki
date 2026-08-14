@@ -146,17 +146,55 @@ Najlepszy tryb pracy:
    - top 10 najczęstszych słów,
    - podział słów po długości.
 
+---
+
+## Poziom 8 — zadania przekrojowe
+
+61. Zbuduj porównanie trzech sposobów reprezentacji tych samych danych:
+   - lista krotek,
+   - lista słowników,
+   - słownik słowników,
+   i opisz plusy oraz minusy każdego podejścia.
+62. Napisz program, który analizuje tekst i korzysta jednocześnie z:
+   - `split()`,
+   - `set`,
+   - `Counter`,
+   - `sorted()`.
+63. Zbuduj prosty system ocen uczniów:
+   - słownik uczniów,
+   - listy ocen,
+   - średnie,
+   - ranking przez `sorted()`,
+   - wykrycie braków danych.
+64. Zrób mini menedżer historii operacji:
+   - przechowuje ostatnie 10 działań w `deque`,
+   - liczy typy działań przez `Counter`,
+   - grupuje działania po kategorii przez `defaultdict(list)`.
+65. Napisz klasę własnej kolekcji, która:
+   - przechowuje rekordy,
+   - wspiera iterację,
+   - wspiera `len()`,
+   - wspiera odczyt po indeksie,
+   - ma czytelne `__repr__()`.
+
 ## Zadanie końcowe
 
-61. Zbuduj mini system analizy logów tekstowych:
+66. Zbuduj mini system analizy logów tekstowych:
    - wczytuje listę wpisów,
    - grupuje po poziomie logu,
    - liczy częstotliwości,
    - przechowuje ostatnie `N` wpisów,
    - korzysta z `Counter`, `defaultdict`, `deque`, comprehension i generatorów.
 
+67. Zbuduj mini system “magazyn danych”, który:
+   - przechowuje produkty w słownikach,
+   - grupuje je po kategorii,
+   - liczy częstotliwość tagów,
+   - wykrywa duplikaty,
+   - używa `set`, `dict`, `Counter`, `defaultdict`, `sorted()` i comprehension.
+
 ## Jak ocenić, czy umiesz ten folder
 
 Jeśli potrafisz bez większego stresu rozwiązać zadania do poziomu 5, to masz już naprawdę porządne podstawy.
 
-Jeśli robisz też poziom 6 i zadanie końcowe, to folder `03` masz opanowany solidnie, a nie tylko “na czuja”.
+Jeśli robisz też poziom 6 i zadania przekrojowe, to folder `03` masz opanowany solidnie, a nie tylko “na czuja”.

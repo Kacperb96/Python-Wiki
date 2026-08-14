@@ -124,6 +124,19 @@ Mówi:
 
 Na początku najważniejsze jest zrozumienie, że oba podejścia istnieją i mają sens w różnych kontekstach.
 
+### Kiedy który jest wygodny
+
+Import bezwzględny:
+
+- bywa czytelniejszy z zewnątrz pakietu,
+- jasno pokazuje ścieżkę.
+
+Import względny:
+
+- bywa wygodny wewnątrz pakietu,
+- skraca zapis,
+- pokazuje, że zależność jest lokalna dla danego pakietu.
+
 ---
 
 ## Po co używać pakietów
@@ -153,6 +166,19 @@ W większych projektach pojawiają się też podpakiety, np.:
 - `repositories/`
 - `api/`
 
+Na przykład:
+
+```text
+app/
+    __init__.py
+    api/
+        __init__.py
+        routes.py
+    services/
+        __init__.py
+        users.py
+```
+
 ---
 
 ## Jak myśleć o podziale na pakiety
@@ -168,6 +194,55 @@ Przykłady:
 
 Nie chodzi o to, żeby robić dużo katalogów na siłę. Chodzi o to, żeby struktura pomagała się odnaleźć.
 
+Złe pytanie:
+
+- "jak zrobić projekt bardziej profesjonalnie?"
+
+Lepsze pytanie:
+
+- "jak podzielić pliki tak, żeby po miesiącu łatwo było znaleźć właściwe miejsce?"
+
+---
+
+## Co daje `__init__.py` w praktyce
+
+Załóżmy taką strukturę:
+
+```text
+app/
+    __init__.py
+    users.py
+```
+
+`users.py`:
+
+```python
+def create_user(name):
+    return {"name": name}
+```
+
+`__init__.py`:
+
+```python
+from .users import create_user
+```
+
+Teraz możesz zrobić:
+
+```python
+from app import create_user
+
+print(create_user("Ania"))
+```
+
+Output:
+
+```python
+{'name': 'Ania'}
+```
+
+Czyli `__init__.py` może uprościć publiczne API pakietu.
+
 ---
 
 ## Typowe pułapki początkujących
@@ -176,7 +251,8 @@ Nie chodzi o to, żeby robić dużo katalogów na siłę. Chodzi o to, żeby str
 - brak `__init__.py` tam, gdzie materiał chce ćwiczyć klasyczny pakiet,
 - nieczytelne importy między modułami,
 - mieszanie kodu startowego i logiki pakietu,
-- zbyt wczesne dzielenie projektu na dziesiątki katalogów bez realnej potrzeby.
+- zbyt wczesne dzielenie projektu na dziesiątki katalogów bez realnej potrzeby,
+- próba uruchamiania przypadkowego pliku z wnętrza pakietu bez zrozumienia ścieżek importu.
 
 ---
 
@@ -218,6 +294,32 @@ to output będzie:
 from .users import create_user
 ```
 
+I wtedy:
+
+```python
+from app import create_user
+
+print(create_user("  kasia "))
+```
+
+Output:
+
+```python
+{'name': 'Kasia'}
+```
+
+### Pakiet z podpakietem
+
+```text
+shop/
+    __init__.py
+    products/
+        __init__.py
+        service.py
+```
+
+To pokazuje, że pakiet może mieć kolejne warstwy organizacji.
+
 ---
 
 ## Dobre praktyki
@@ -226,7 +328,8 @@ from .users import create_user
 - nie rób pakietów tylko po to, żeby były zaawansowane,
 - dbaj o czytelne importy,
 - trzymaj prosty, przewidywalny układ katalogów,
-- rozwijaj strukturę stopniowo wraz z projektem.
+- rozwijaj strukturę stopniowo wraz z projektem,
+- używaj `__init__.py` świadomie, a nie mechanicznie.
 
 ---
 
@@ -235,6 +338,13 @@ from .users import create_user
 Pakiety to naturalny kolejny krok po modułach.
 
 Pozwalają budować projekty, które są czytelne nie tylko w jednym pliku, ale w całej strukturze katalogów.
+
+Najważniejsze rzeczy do zapamiętania:
+
+- moduł to plik,
+- pakiet to katalog z modułami,
+- `__init__.py` może oznaczać pakiet i upraszczać jego API,
+- importy bezwzględne i względne mają różne zastosowania.
 
 ---
 
@@ -250,6 +360,7 @@ app/
 ```python
 from .utils import normalize_name
 from app.users import create_user
+from app import create_user
 ```
 
 ---
@@ -258,6 +369,9 @@ from app.users import create_user
 
 1. Utwórz pakiet `app`.
 2. Dodaj `users.py`, `utils.py`, `__init__.py`.
+3. Zrób import względny wewnątrz pakietu.
+4. Wystaw funkcję przez `__init__.py`.
+5. Utwórz prosty podpakiet i opisz jego rolę.
 3. Zaimportuj funkcję z `utils.py` do `users.py`.
 4. Dodaj import w `__init__.py`, który wystawi jedną funkcję pakietu.
 

@@ -142,6 +142,13 @@ for zwierze in [Pies(), Kot()]:
 
 to klasyczny przykład polimorfizmu.
 
+Wynik:
+
+```python
+Hau
+Miau
+```
+
 ---
 
 ## Polimorfizm przez duck typing
@@ -163,6 +170,20 @@ class Alarm:
 Jeśli funkcja oczekuje tylko metody `dzwiek`, to oba obiekty mogą działać.
 
 To bardzo pythonowe podejście.
+
+Przykład:
+
+```python
+for obiekt in [Pies(), Alarm()]:
+    obiekt.dzwiek()
+```
+
+Wynik:
+
+```python
+Hau
+Beeeep
+```
 
 ---
 
@@ -206,6 +227,10 @@ Ta funkcja nie musi wiedzieć, czy dostała:
 
 Ważne, że obiekt ma metodę `pole`.
 
+To jest sedno praktycznego polimorfizmu:
+
+funkcja oczekuje zachowania, a nie konkretnej klasy.
+
 ---
 
 ## Polimorfizm w metodach
@@ -239,6 +264,14 @@ Podobnie:
 - `in`
 
 działają na różnych obiektach zgodnie z ich implementacją.
+
+Wynik:
+
+```python
+3
+6
+2
+```
 
 ---
 
@@ -302,6 +335,20 @@ def wydaj_dzwiek(obiekt):
     obiekt.dzwiek()
 ```
 
+Przykład użycia:
+
+```python
+wydaj_dzwiek(Pies())
+wydaj_dzwiek(Kot())
+```
+
+Wynik:
+
+```python
+Hau
+Miau
+```
+
 ### Figury
 
 ```python
@@ -321,12 +368,38 @@ class Prostokat:
         return self.a * self.b
 ```
 
+Przykład użycia:
+
+```python
+print(Kwadrat(4).pole())
+print(Prostokat(2, 5).pole())
+```
+
+Wynik:
+
+```python
+16
+10
+```
+
 ### Wspólna funkcja
 
 ```python
 def pokaz_pole(figura):
     print(figura.pole())
 ```
+
+To lepsze niż pisanie czegoś takiego:
+
+```python
+def pokaz_pole(figura):
+    if isinstance(figura, Kwadrat):
+        print(figura.bok ** 2)
+    elif isinstance(figura, Prostokat):
+        print(figura.a * figura.b)
+```
+
+Taki kod jest mniej elastyczny i gorzej się skaluje.
 
 ---
 
@@ -346,6 +419,12 @@ if isinstance(...)
 
 jeśli polimorfizm może rozwiązać problem czyściej.
 
+### Praktyczna zasada
+
+Jeśli kilka klas ma być używanych tak samo, zadbaj o wspólną nazwę metody i spójne zachowanie.
+
+Wtedy reszta kodu będzie prostsza, krótsza i łatwiejsza do rozbudowy.
+
 ---
 
 ## Podsumowanie
@@ -356,6 +435,12 @@ Najważniejsze rzeczy do zapamiętania:
 - może działać przez dziedziczenie albo duck typing,
 - bardzo pomaga upraszczać kod,
 - w Pythonie polimorfizm jest naturalny i bardzo powszechny.
+
+Najważniejsze do zapamiętania:
+
+- kod powinien często pytać "czy obiekt umie to zrobić?", a nie "czy jest tego typu?",
+- wspólny interfejs może wynikać z dziedziczenia albo po prostu z tych samych metod,
+- polimorfizm bardzo ogranicza potrzebę pisania wielu `if isinstance(...)`.
 
 ---
 

@@ -125,6 +125,12 @@ azor.oddychaj()
 
 zadziała, mimo że `Pies` nie definiuje własnej metody `oddychaj`.
 
+Output:
+
+```python
+Oddycham
+```
+
 ---
 
 ## Dziedziczenie metod
@@ -151,6 +157,17 @@ class Pies(Zwierze):
 
 To nazywa się nadpisywanie metody.
 
+```python
+pies = Pies()
+pies.dzwiek()
+```
+
+Output:
+
+```python
+Hau hau
+```
+
 ---
 
 ## Dodawanie nowych metod
@@ -164,6 +181,17 @@ class Pies(Zwierze):
 
     def aportuj(self):
         print("Przynosze pilke")
+```
+
+```python
+pies = Pies()
+pies.aportuj()
+```
+
+Output:
+
+```python
+Przynosze pilke
 ```
 
 ---
@@ -199,6 +227,19 @@ Tutaj:
 - klasa bazowa ustawia `imie`,
 - klasa pochodna dodaje `rasa`.
 
+```python
+azor = Pies("Azor", "owczarek")
+print(azor.imie)
+print(azor.rasa)
+```
+
+Output:
+
+```python
+Azor
+owczarek
+```
+
 ---
 
 ## `super()` w zwykłych metodach
@@ -217,6 +258,18 @@ class Pies(Zwierze):
 ```
 
 To pozwala rozszerzyć zachowanie bazowe.
+
+```python
+pies = Pies()
+pies.przedstaw_sie()
+```
+
+Output:
+
+```python
+Jestem zwierzeciem
+I jestem psem
+```
 
 ---
 
@@ -272,6 +325,11 @@ class C(A, B):
 
 To temat bardziej zaawansowany i trzeba z nim uważać.
 
+Na tym etapie najważniejsze jest zrozumienie, że:
+
+- Python na to pozwala,
+- ale nie warto zaczynać nauki OOP od wielodziedziczenia.
+
 ---
 
 ## MRO - Method Resolution Order
@@ -292,6 +350,8 @@ print(Pies.mro())
 
 To szczególnie ważne przy wielodziedziczeniu.
 
+Wynik jest techniczny, ale pokazuje ścieżkę, po której Python szuka metod.
+
 ---
 
 ## Typowe błędy początkujących
@@ -305,6 +365,10 @@ To szczególnie ważne przy wielodziedziczeniu.
 ### 4. Mylenie "jest rodzajem" z "ma w sobie"
 
 To bardzo ważne projektowo.
+
+### 5. Tworzenie dziedziczenia bez sensownej relacji
+
+Nie każde podobieństwo klas oznacza, że trzeba użyć dziedziczenia.
 
 ---
 
@@ -348,6 +412,18 @@ class Orzel(Ptak):
         print("I latam")
 ```
 
+```python
+orzel = Orzel()
+orzel.ruch()
+```
+
+Output:
+
+```python
+Poruszam sie
+I latam
+```
+
 ---
 
 ## Dobre praktyki
@@ -360,6 +436,10 @@ class Orzel(Ptak):
 
 ### Zastanów się, czy dziedziczenie naprawdę jest najlepszym wyborem
 
+Praktyczna zasada:
+
+jeśli nie umiesz jasno powiedzieć, dlaczego jedna klasa jest rodzajem drugiej, to możliwe, że dziedziczenie nie jest tu najlepszym wyborem.
+
 ---
 
 ## Podsumowanie
@@ -370,6 +450,13 @@ Najważniejsze rzeczy do zapamiętania:
 - klasa pochodna może dziedziczyć, nadpisywać i rozszerzać metody,
 - `super()` pozwala elegancko odwoływać się do klasy bazowej,
 - dziedziczenie jest potężne, ale trzeba używać go świadomie.
+
+Najważniejsze do zapamiętania:
+
+- klasa pochodna może korzystać z metod klasy bazowej,
+- może je nadpisywać,
+- `super()` pomaga rozszerzać zachowanie bez ręcznego kombinowania,
+- nie każde podobieństwo klas oznacza dziedziczenie.
 
 ---
 

@@ -183,6 +183,41 @@ Dobra organizacja to nie maksymalna liczba plików. To sensowny podział.
 
 ---
 
+## Jak wygląda zdrowy mały projekt
+
+Zdrowy mały projekt zwykle ma:
+
+- czytelny punkt wejścia,
+- osobne miejsce na logikę,
+- osobne miejsce na pomocnicze funkcje,
+- prostą strukturę, którą da się ogarnąć jednym spojrzeniem.
+
+Przykład:
+
+```text
+task_manager/
+    README.md
+    app/
+        __init__.py
+        main.py
+        tasks.py
+        storage.py
+        validators.py
+    tests/
+        test_validators.py
+```
+
+Patrzysz i od razu wiesz:
+
+- skąd startuje program,
+- gdzie są dane,
+- gdzie jest walidacja,
+- gdzie są testy.
+
+To właśnie jest dobra organizacja.
+
+---
+
 ## Typowe pułapki początkujących
 
 - jeden plik z całym projektem,
@@ -236,6 +271,29 @@ project/
 ```
 
 gdy projekt jest mikroskopijny.
+
+### Porównanie podejścia
+
+Wersja chaotyczna:
+
+```text
+project/
+    main.py
+```
+
+gdzie `main.py` robi wszystko.
+
+Wersja zdrowsza:
+
+```text
+project/
+    app/
+        main.py
+        storage.py
+        validators.py
+```
+
+Tu od razu łatwiej przewidzieć, gdzie szukać konkretnej logiki.
 
 ---
 
@@ -293,6 +351,7 @@ Najważniejsze:
 3. Zbuduj mały CLI z funkcją `main()`.
 4. Weź prosty projekt w jednym pliku i rozbij go na sensowne moduły.
 5. Pokaż przykład zbyt przesadnie rozdrobnionej struktury i uprość ją.
+6. Zaprojektuj mały projekt `notes_app` z czytelnym podziałem odpowiedzialności.
 
 ---
 
@@ -318,6 +377,22 @@ def is_valid_age(age):
 ```
 
 ### 3. `main.py`
+
+```python
+from app.validators import is_valid_age
+
+def main():
+    print(is_valid_age(18))
+
+if __name__ == "__main__":
+    main()
+```
+
+Output:
+
+```python
+True
+```
 
 ```python
 def main():

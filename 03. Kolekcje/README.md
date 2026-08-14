@@ -65,6 +65,72 @@ Jeśli chcesz mieć solidne podstawy, po tym folderze powinieneś bez zastanowie
 - wyjaśnić, czym jest `ChainMap`,
 - czytać i tworzyć prosty `namedtuple`.
 
+---
+
+## Kiedy używać czego
+
+To jest jedna z najważniejszych umiejętności po tym dziale.
+
+### `list`
+
+Używaj, gdy:
+
+- zależy Ci na kolejności,
+- chcesz mieć duplikaty,
+- chcesz dodawać, usuwać, sortować i przetwarzać elementy.
+
+### `tuple`
+
+Używaj, gdy:
+
+- dane mają stałą strukturę,
+- nie chcesz ich zmieniać,
+- chcesz czytelnie reprezentować jeden rekord danych.
+
+### `dict`
+
+Używaj, gdy:
+
+- dane mają nazwy pól,
+- chcesz szybki dostęp po kluczu,
+- modelujesz rekord, konfigurację albo mapowanie.
+
+### `set`
+
+Używaj, gdy:
+
+- interesują Cię unikalne elementy,
+- chcesz usuwać duplikaty,
+- chcesz robić operacje typu część wspólna, różnica, suma zbiorów.
+
+### `Counter`
+
+Używaj, gdy:
+
+- głównym celem jest liczenie wystąpień.
+
+### `defaultdict`
+
+Używaj, gdy:
+
+- chcesz grupować dane,
+- chcesz budować słownik list, zbiorów albo liczników bez ręcznej inicjalizacji.
+
+### `deque`
+
+Używaj, gdy:
+
+- budujesz kolejkę,
+- budujesz historię ostatnich akcji,
+- często dodajesz i usuwasz z obu końców.
+
+### Generator expression
+
+Używaj, gdy:
+
+- nie potrzebujesz całej listy naraz,
+- chcesz przejść po danych raz i nie trzymać wszystkiego w pamięci.
+
 ## Na co szczególnie uważać
 
 W tym folderze jest kilka tematów, na których początkujący najczęściej się wykładają:
@@ -99,6 +165,22 @@ Na przykład:
 
 Właśnie wtedy materiał naprawdę “wchodzi”.
 
+---
+
+## Typowe porównania, które warto umieć
+
+Po tym folderze powinieneś umieć własnymi słowami wyjaśnić:
+
+- `list` vs `tuple`,
+- `dict` vs `list` rekordów,
+- `set` vs `list` z duplikatami,
+- `sort()` vs `sorted()`,
+- kopia płytka vs głęboka,
+- comprehension vs zwykła pętla,
+- list comprehension vs generator expression,
+- `Counter` vs `defaultdict(int)`,
+- `deque` vs `list` jako kolejka.
+
 ## Jak poznać, że umiesz materiał
 
 Możesz uznać folder `03` za dobrze opanowany, jeśli:
@@ -108,6 +190,19 @@ Możesz uznać folder `03` za dobrze opanowany, jeśli:
 - nie gubisz się przy referencjach, mutowalności i kopiowaniu,
 - wiesz, kiedy używać listy, a kiedy słownika lub zbioru,
 - rozumiesz output przykładów bez zgadywania.
+
+---
+
+## Jak rozpoznać, że temat jeszcze nie siedzi
+
+Warto wrócić do materiału, jeśli:
+
+- niby rozumiesz listy, ale nie wiesz, kiedy lepszy będzie słownik,
+- mylisz przypisanie z kopiowaniem,
+- zaskakuje Cię zachowanie zagnieżdżonych struktur,
+- używasz comprehension nawet tam, gdzie zwykła pętla byłaby czytelniejsza,
+- generator wydaje Ci się “dziwną listą”,
+- nie umiesz uzasadnić, czemu w danym miejscu wybrałeś `set`, `dict` albo `deque`.
 
 ## Co dalej
 

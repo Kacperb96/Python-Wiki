@@ -86,6 +86,20 @@ ania = Osoba("Ania", 17)
 
 Python wywoła `__init__` i ustawi dane obiektu.
 
+To znaczy, że po utworzeniu obiektu:
+
+```python
+print(ania.imie)
+print(ania.wiek)
+```
+
+Output:
+
+```python
+Ania
+17
+```
+
 ---
 
 ## Pierwszy przykład z `__init__`
@@ -128,6 +142,18 @@ a = Osoba("Ania")
 b = Osoba("Bartek")
 ```
 
+```python
+print(a.imie)
+print(b.imie)
+```
+
+Output:
+
+```python
+Ania
+Bartek
+```
+
 ---
 
 ## Atrybuty klasy
@@ -142,6 +168,16 @@ class Pies:
 ```
 
 `gatunek` to atrybut klasy.
+
+```python
+print(Pies.gatunek)
+```
+
+Wynik:
+
+```python
+pies
+```
 
 ---
 
@@ -178,6 +214,17 @@ print(azor.gatunek)
 
 Obiekt też może odczytać atrybut klasy.
 
+```python
+azor = Pies()
+print(azor.gatunek)
+```
+
+Wynik:
+
+```python
+pies
+```
+
 ---
 
 ## Modyfikacja atrybutów
@@ -204,6 +251,30 @@ azor.gatunek = "inne"
 
 to utworzysz atrybut instancji, który zasłoni atrybut klasy dla tego obiektu.
 
+Przykład:
+
+```python
+class Pies:
+    gatunek = "pies"
+
+azor = Pies()
+reksio = Pies()
+
+azor.gatunek = "inne"
+
+print(azor.gatunek)
+print(reksio.gatunek)
+print(Pies.gatunek)
+```
+
+Wynik:
+
+```python
+inne
+pies
+pies
+```
+
 ---
 
 ## Wartości domyślne w `__init__`
@@ -221,6 +292,18 @@ Teraz:
 ```python
 k1 = Konto()
 k2 = Konto(100)
+```
+
+```python
+print(k1.saldo)
+print(k2.saldo)
+```
+
+Wynik:
+
+```python
+0
+100
 ```
 
 ---
@@ -249,6 +332,8 @@ class Zespol:
 
 To ta sama pułapka co przy funkcjach.
 
+Jeśli kilka obiektów współdzieli tę samą mutowalną domyślną wartość, pojawiają się bardzo trudne do zauważenia błędy.
+
 ---
 
 ## Metody instancji a dane obiektu
@@ -262,6 +347,17 @@ class Konto:
 
     def pokaz_saldo(self):
         print(self.saldo)
+```
+
+```python
+konto = Konto(100)
+konto.pokaz_saldo()
+```
+
+Wynik:
+
+```python
+100
 ```
 
 ---
@@ -280,6 +376,8 @@ w `__init__`.
 
 Jego zadaniem jest inicjalizacja obiektu, nie zwracanie wyniku.
 
+Jeśli spróbujesz zwrócić wartość z `__init__`, Python zgłosi błąd.
+
 ---
 
 ## Typowe błędy początkujących
@@ -293,6 +391,18 @@ Jego zadaniem jest inicjalizacja obiektu, nie zwracanie wyniku.
 ### 4. Używanie mutowalnych domyślnych wartości
 
 ### 5. Próba zwracania czegoś z `__init__`
+
+### 6. Zapominanie o `self.` przy przypisaniu
+
+To bardzo częsty błąd:
+
+```python
+class User:
+    def __init__(self, name):
+        name = name
+```
+
+Tutaj atrybut obiektu w ogóle nie został zapisany.
 
 ---
 
@@ -309,6 +419,13 @@ class Osoba:
 ania = Osoba("Ania", 17)
 print(ania.imie)
 print(ania.wiek)
+```
+
+Wynik:
+
+```python
+Ania
+17
 ```
 
 ### Klasa z atrybutem klasy
@@ -331,6 +448,13 @@ print(a.gatunek)
 print(b.gatunek)
 ```
 
+Wynik:
+
+```python
+ptak
+ptak
+```
+
 ---
 
 ## Dobre praktyki
@@ -342,6 +466,10 @@ print(b.gatunek)
 ### Uważaj na mutowalne wartości domyślne
 
 ### Nadawaj atrybutom czytelne nazwy
+
+Praktyczna zasada:
+
+`__init__` ma ustawić obiekt do sensownego stanu startowego, a nie robić pół programu.
 
 ---
 

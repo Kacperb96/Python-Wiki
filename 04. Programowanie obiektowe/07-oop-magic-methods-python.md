@@ -109,6 +109,12 @@ print(Osoba("Ania"))
 
 da czytelny wynik.
 
+Output:
+
+```python
+Osoba: Ania
+```
+
 ---
 
 ## `__repr__`
@@ -124,6 +130,16 @@ class Osoba:
 
     def __repr__(self):
         return f"Osoba(imie={self.imie!r})"
+```
+
+```python
+print(Osoba("Ania"))
+```
+
+Output:
+
+```python
+Osoba(imie='Ania')
 ```
 
 ---
@@ -144,6 +160,11 @@ class Osoba:
 
 Jeśli nie ma `__str__`, Python często używa `__repr__`.
 
+To znaczy:
+
+- `__str__` jest bardziej dla człowieka,
+- `__repr__` bardziej dla programisty i debugowania.
+
 ---
 
 ## `__len__`
@@ -163,6 +184,16 @@ class MojaLista:
 
     def __len__(self):
         return len(self.dane)
+```
+
+```python
+print(len(MojaLista([1, 2, 3])))
+```
+
+Output:
+
+```python
+3
 ```
 
 ---
@@ -188,6 +219,17 @@ class MojaLista:
 
 To wspiera też często slicing.
 
+```python
+lista = MojaLista([10, 20, 30])
+print(lista[1])
+```
+
+Output:
+
+```python
+20
+```
+
 ---
 
 ## `__setitem__`
@@ -207,6 +249,18 @@ class MojaLista:
 
     def __setitem__(self, index, value):
         self.dane[index] = value
+```
+
+```python
+lista = MojaLista([1, 2, 3])
+lista[0] = 99
+print(lista.dane)
+```
+
+Output:
+
+```python
+[99, 2, 3]
 ```
 
 ---
@@ -230,6 +284,19 @@ class MojaLista:
         return item in self.dane
 ```
 
+```python
+lista = MojaLista([1, 2, 3])
+print(2 in lista)
+print(5 in lista)
+```
+
+Output:
+
+```python
+True
+False
+```
+
 ---
 
 ## `__eq__`
@@ -250,6 +317,16 @@ class Punkt:
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
+```
+
+```python
+print(Punkt(1, 2) == Punkt(1, 2))
+```
+
+Output:
+
+```python
+True
 ```
 
 ---
@@ -278,6 +355,17 @@ class Punkt:
         return hash((self.x, self.y))
 ```
 
+```python
+punkty = {Punkt(1, 2), Punkt(1, 2)}
+print(len(punkty))
+```
+
+Output:
+
+```python
+1
+```
+
 ---
 
 ## Jak Python używa magic methods
@@ -292,6 +380,8 @@ Przykłady:
 - `x in obj` -> `__contains__`
 - `a == b` -> `__eq__`
 - `hash(obj)` -> `__hash__`
+
+To właśnie dzięki temu dobrze napisane obiekty zachowują się naturalnie i "po pythonowemu".
 
 ---
 
@@ -325,6 +415,10 @@ Inaczej słowniki i zbiory mogą działać niepoprawnie.
 
 Zwykle Python robi to sam.
 
+### 5. Brak sprawdzenia typu `other` w `__eq__`
+
+To może prowadzić do dziwnych błędów przy porównaniu z innym obiektem.
+
 ---
 
 ## Praktyczne przykłady
@@ -338,6 +432,16 @@ class Ksiazka:
 
     def __str__(self):
         return f"Ksiazka: {self.tytul}"
+```
+
+```python
+print(Ksiazka("Python"))
+```
+
+Output:
+
+```python
+Ksiazka: Python
 ```
 
 ### Własna kolekcja
@@ -354,6 +458,19 @@ class Pudelko:
         return self.dane[index]
 ```
 
+```python
+p = Pudelko(["a", "b", "c"])
+print(len(p))
+print(p[0])
+```
+
+Output:
+
+```python
+3
+a
+```
+
 ### Porównywanie punktów
 
 ```python
@@ -364,6 +481,16 @@ class Punkt:
 
     def __eq__(self, other):
         return isinstance(other, Punkt) and self.x == other.x and self.y == other.y
+```
+
+```python
+print(Punkt(1, 1) == Punkt(1, 1))
+```
+
+Output:
+
+```python
+True
 ```
 
 ---
@@ -378,6 +505,10 @@ class Punkt:
 
 ### Jeśli definiujesz `__eq__`, przemyśl też `__hash__`
 
+Praktyczna zasada:
+
+najpierw zastanów się, jakie zachowanie obiektu byłoby naturalne dla użytkownika klasy, a dopiero potem dobieraj magic methods.
+
 ---
 
 ## Podsumowanie
@@ -387,6 +518,14 @@ Najważniejsze rzeczy do zapamiętania:
 - magic methods to specjalne metody automatycznie używane przez Pythona,
 - dzięki nim własne klasy mogą działać bardziej naturalnie,
 - `__str__`, `__repr__`, `__len__`, `__getitem__`, `__setitem__`, `__contains__`, `__eq__`, `__hash__` należą do najważniejszych.
+
+Najważniejsze do zapamiętania:
+
+- `__str__` i `__repr__` wpływają na wypisywanie,
+- `__len__` daje `len()`,
+- `__getitem__` daje indeksowanie,
+- `__contains__` daje `in`,
+- `__eq__` i `__hash__` wpływają na porównanie i użycie w zbiorach lub słownikach.
 
 ---
 

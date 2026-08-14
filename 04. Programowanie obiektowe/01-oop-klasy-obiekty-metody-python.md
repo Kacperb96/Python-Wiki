@@ -169,6 +169,19 @@ Tutaj:
 - `Pies` to klasa,
 - `szczekaj` to metoda.
 
+Jeśli utworzysz obiekt i wywołasz metodę:
+
+```python
+azor = Pies()
+azor.szczekaj()
+```
+
+to output będzie:
+
+```python
+Hau hau!
+```
+
 ---
 
 ## Tworzenie obiektów
@@ -183,6 +196,12 @@ Teraz można wywołać metodę:
 
 ```python
 azor.szczekaj()
+```
+
+Output:
+
+```python
+Hau hau!
 ```
 
 ---
@@ -202,6 +221,17 @@ class Kalkulator:
 ```
 
 Metody bardzo często korzystają z danych obiektu.
+
+```python
+k = Kalkulator()
+print(k.dodaj(2, 3))
+```
+
+Output:
+
+```python
+5
+```
 
 ---
 
@@ -235,6 +265,18 @@ azor.przedstaw_sie()
 
 Python sam przekazuje `azor` jako `self`.
 
+To znaczy, że:
+
+```python
+azor.przedstaw_sie()
+```
+
+jest w przybliżeniu równoważne:
+
+```python
+Pies.przedstaw_sie(azor)
+```
+
 ---
 
 ## Wywoływanie metod
@@ -256,6 +298,8 @@ Na początek wystarczy pamiętać:
 - w definicji piszesz `self`,
 - przy wywołaniu go nie podajesz ręcznie.
 
+To bardzo częsty błąd początkujących, że próbują wywołać metodę z ręcznie dopisanym `self`.
+
 ---
 
 ## Stan obiektu
@@ -276,6 +320,26 @@ Obiekt osoby może mieć:
 
 To dane należące do konkretnego egzemplarza.
 
+Przykład:
+
+```python
+class Pies:
+    def __init__(self, imie, wiek):
+        self.imie = imie
+        self.wiek = wiek
+
+azor = Pies("Azor", 4)
+print(azor.imie)
+print(azor.wiek)
+```
+
+Output:
+
+```python
+Azor
+4
+```
+
 ---
 
 ## Zachowanie obiektu
@@ -290,6 +354,11 @@ Na przykład:
 - pies może szczekać.
 
 W klasie takie zachowania zapisuje się jako metody.
+
+To bardzo ważne rozróżnienie:
+
+- atrybuty opisują stan,
+- metody opisują zachowanie.
 
 ---
 
@@ -310,6 +379,18 @@ To dwa różne obiekty.
 
 Mogą należeć do tej samej klasy, ale być oddzielnymi egzemplarzami.
 
+```python
+kot1.miaucz()
+kot2.miaucz()
+```
+
+Output:
+
+```python
+Miau
+Miau
+```
+
 ---
 
 ## Dlaczego klasy są przydatne
@@ -321,6 +402,8 @@ Bo pozwalają:
 - modelować rzeczywiste obiekty albo pojęcia,
 - unikać chaosu w większych programach,
 - łatwiej rozbudowywać projekt.
+
+To właśnie moment, w którym kod zaczyna przypominać model problemu, a nie tylko serię niezależnych instrukcji.
 
 ---
 
@@ -342,6 +425,12 @@ To bardzo ważne:
 
 Python pozwala Ci budować własne typy, a nie tylko używać wbudowanych.
 
+Output:
+
+```python
+<class '__main__.Samochod'>
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -360,6 +449,10 @@ Nie musi. Czasem metoda tylko coś robi.
 
 W małych programach tak bywa, ale w większych projektach klasy bardzo pomagają.
 
+### 6. Robienie klasy bez sensownego modelu
+
+Czasem lepsza będzie zwykła funkcja i prosty słownik niż sztuczna klasa.
+
 ---
 
 ## Praktyczne przykłady
@@ -373,6 +466,12 @@ class Lampa:
 
 lampa = Lampa()
 lampa.wlacz()
+```
+
+Output:
+
+```python
+Lampa wlaczona
 ```
 
 ### Klasa z dwiema metodami
@@ -398,6 +497,13 @@ k2 = Konto()
 
 k1.pokaz_typ()
 k2.pokaz_typ()
+```
+
+Output:
+
+```python
+To jest konto
+To jest konto
 ```
 
 ---
@@ -426,6 +532,10 @@ def oblicz_sume(self):
 
 Ale też nie bój się klas, gdy dane i zachowania naturalnie do siebie pasują.
 
+Na początku warto pytać:
+
+"czy ta klasa reprezentuje sensowny obiekt w moim programie?"
+
 ---
 
 ## Podsumowanie
@@ -439,6 +549,13 @@ Najważniejsze rzeczy do zapamiętania:
 - klasy pomagają łączyć dane i zachowanie w jedną całość.
 
 To fundament całego OOP w Pythonie.
+
+Najważniejsze do zapamiętania:
+
+- klasa opisuje,
+- obiekt istnieje,
+- atrybuty przechowują stan,
+- metody opisują zachowanie.
 
 ---
 

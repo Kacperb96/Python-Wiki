@@ -72,6 +72,37 @@ To ważne, bo same materiały bez pisania kodu bardzo szybko "udają zrozumienie
 
 ---
 
+## Na co szczególnie uważać
+
+W tym dziale jest kilka miejsc, w których początkujący bardzo często się potykają:
+
+- mylenie `print()` z realnym zwracaniem wartości,
+- mylenie pustego stringa `""`, zera `0`, pustej listy `[]` i `None`,
+- używanie `== None` zamiast `is None`,
+- używanie `is` tam, gdzie chodzi o porównanie wartości,
+- zakładanie, że `input()` od razu daje liczbę,
+- brak przewidywania błędów przy konwersji typów,
+- pisanie warunków, które przypadkiem odrzucają poprawne wartości, na przykład `0`.
+
+Jeśli te rzeczy rozumiesz, to naprawdę masz fundamenty, a nie tylko pamiętasz składnię.
+
+---
+
+## Mini scenariusze z życia
+
+To są małe sytuacje, w których wiedza z tego folderu naprawdę się przydaje:
+
+- użytkownik wpisuje wiek jako tekst i trzeba go zamienić na `int`,
+- użytkownik zostawia puste pole i trzeba odróżnić pusty tekst od braku danych,
+- lista wyników może być pusta i kod nie może się wysypać,
+- hasło wpisane z przypadkową spacją trzeba znormalizować,
+- program pyta o dane tyle razy, aż dostanie poprawny format,
+- trzeba sprawdzić, czy dwa obiekty mają tę samą wartość, a nie czy są tym samym obiektem.
+
+Jeśli po przeczytaniu rozdziału potrafisz sam wymyślić taki mini scenariusz i go zakodować, to temat zwykle jest naprawdę zrozumiany.
+
+---
+
 ## Po czym poznać, że fundamenty są opanowane
 
 Dobry znak to sytuacja, w której potrafisz bez większego stresu:
@@ -82,6 +113,22 @@ Dobry znak to sytuacja, w której potrafisz bez większego stresu:
 - wyjaśnić różnicę między `==` i `is`,
 - napisać prostą funkcję z `try/except`,
 - rozumieć, czemu jakaś zmienna działa w funkcji, a poza nią nie.
+
+---
+
+## Jak rozpoznać, że czegoś jeszcze nie rozumiesz
+
+To też jest ważny sygnał.
+
+Jeśli przy przykładach często:
+
+- zgadujesz output zamiast go rozumieć,
+- nie umiesz wyjaśnić, czemu `if x:` zadziałało albo nie,
+- mylisz porównanie wartości z tożsamością obiektu,
+- nie wiesz, kiedy kod może rzucić `ValueError` albo `ZeroDivisionError`,
+- nie umiesz samodzielnie napisać małego programu łączącego pętlę, warunek i `try/except`,
+
+to znaczy, że warto jeszcze wrócić do odpowiednich plików i przećwiczyć temat na własnych przykładach.
 
 ---
 
