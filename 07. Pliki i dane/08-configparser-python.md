@@ -74,6 +74,12 @@ config.read("settings.ini", encoding="utf-8")
 print(config["app"]["port"])
 ```
 
+Wynik:
+
+```python
+8000
+```
+
 ---
 
 ## Sekcje i klucze
@@ -92,6 +98,12 @@ W Pythonie:
 host = config["database"]["host"]
 ```
 
+To zwróci tekst, np.:
+
+```python
+localhost
+```
+
 ---
 
 ## Zapis konfiguracji
@@ -106,6 +118,14 @@ with open("settings.ini", "w", encoding="utf-8") as f:
     config.write(f)
 ```
 
+Efekt w pliku może wyglądać tak:
+
+```ini
+[app]
+debug = true
+port = 8000
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -114,6 +134,10 @@ with open("settings.ini", "w", encoding="utf-8") as f:
 - oczekiwanie, że wartości będą automatycznie typami innymi niż string,
 - brak sprawdzania, czy sekcja i klucz istnieją,
 - używanie `configparser` tam, gdzie lepiej pasuje JSON lub env vars.
+
+### 5. Wkładanie sekretów do zwykłego pliku bez zastanowienia
+
+Hasła i tokeny często lepiej trzymać w zmiennych środowiskowych niż w pliku INI.
 
 ---
 
@@ -137,6 +161,12 @@ config.read("app.ini", encoding="utf-8")
 print(config["app"]["name"])
 ```
 
+Wynik:
+
+```python
+Raporty
+```
+
 ---
 
 ## Dobre praktyki
@@ -146,6 +176,10 @@ print(config["app"]["name"])
 - rozważ, czy dany projekt lepiej pasuje do INI, JSON czy env vars,
 - trzymaj konfigurację poza kodem logiki.
 
+Praktyczna zasada:
+
+plik INI jest świetny do prostych ustawień aplikacji, ale nie zawsze jest najlepszym miejscem na dane wrażliwe.
+
 ---
 
 ## Podsumowanie
@@ -153,6 +187,12 @@ print(config["app"]["name"])
 `configparser` to proste i praktyczne narzędzie do konfiguracji w mniejszych projektach Python.
 
 Warto je znać, nawet jeśli w większych systemach częściej pojawią się inne podejścia.
+
+Najważniejsze do zapamiętania:
+
+- `configparser` dobrze działa dla prostych ustawień sekcja/klucz,
+- odczytane wartości często trzeba samemu konwertować,
+- konfiguracja powinna być oddzielona od logiki programu.
 
 ---
 

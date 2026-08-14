@@ -88,6 +88,13 @@ with open("wynik.csv", "w", encoding="utf-8", newline="") as f:
     writer.writerow(["Anna", 30])
 ```
 
+Efekt w pliku:
+
+```text
+name,age
+Anna,30
+```
+
 ---
 
 ## `DictReader`
@@ -105,6 +112,13 @@ with open("dane.csv", "r", encoding="utf-8", newline="") as f:
 
 Każdy wiersz jest słownikiem.
 
+Wynik:
+
+```python
+Anna 30
+Jan 25
+```
+
 ---
 
 ## `DictWriter`
@@ -117,6 +131,13 @@ with open("users.csv", "w", encoding="utf-8", newline="") as f:
     writer = csv.DictWriter(f, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerow({"name": "Anna", "age": 30})
+```
+
+Efekt w pliku:
+
+```text
+name,age
+Anna,30
 ```
 
 ---
@@ -133,6 +154,8 @@ reader = csv.reader(f, delimiter=";")
 
 To częste w danych eksportowanych z różnych systemów.
 
+To ważne, bo wiele plików CSV z Europy używa średnika zamiast przecinka.
+
 ---
 
 ## Typowe błędy początkujących
@@ -141,6 +164,10 @@ To częste w danych eksportowanych z różnych systemów.
 - ręczne dzielenie po przecinku zamiast modułu `csv`,
 - zakładanie, że separator zawsze jest taki sam,
 - zapominanie, że wartości z CSV są stringami.
+
+### 5. Oczekiwanie, że liczby będą od razu typu `int`
+
+Po odczycie z CSV zwykle dostajesz stringi i sam musisz robić konwersję.
 
 ---
 
@@ -154,6 +181,13 @@ import csv
 with open("users.csv", "r", encoding="utf-8", newline="") as f:
     for row in csv.DictReader(f):
         print(row["name"])
+```
+
+Wynik przykładowy:
+
+```python
+Anna
+Jan
 ```
 
 ### Zapis raportu
@@ -172,6 +206,14 @@ with open("raport.csv", "w", encoding="utf-8", newline="") as f:
     writer.writerows(rows)
 ```
 
+Efekt w pliku:
+
+```text
+produkt,cena
+kawa,20
+herbata,15
+```
+
 ---
 
 ## Dobre praktyki
@@ -180,6 +222,10 @@ with open("raport.csv", "w", encoding="utf-8", newline="") as f:
 - używaj `DictReader` i `DictWriter`, gdy plik ma sensowne nagłówki,
 - pamiętaj o konwersji typów po odczycie,
 - jawnie ustawiaj `delimiter`, jeśli format tego wymaga.
+
+Praktyczna zasada:
+
+jeśli plik ma nagłówki, `DictReader` i `DictWriter` bardzo często są wygodniejsze niż praca na listach indeksowanych numerami.
 
 ---
 
@@ -192,6 +238,12 @@ W codziennej pracy szczególnie wygodne są:
 - `DictReader`,
 - `DictWriter`,
 - poprawne otwieranie plików z `newline=""`.
+
+Najważniejsze do zapamiętania:
+
+- CSV to tekst, nie „prawdziwa tabela” z typami,
+- wartości po odczycie zwykle są stringami,
+- `newline=""` i poprawny `delimiter` są bardzo ważne w praktyce.
 
 ---
 

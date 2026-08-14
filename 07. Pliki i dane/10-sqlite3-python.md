@@ -107,6 +107,12 @@ rows = cursor.fetchall()
 print(rows)
 ```
 
+Przykład wyniku:
+
+```python
+[(1, 'Anna')]
+```
+
 ---
 
 ## Parametryzacja zapytań
@@ -120,6 +126,8 @@ cursor.execute("SELECT * FROM users WHERE name = ?", ("Anna",))
 ```
 
 Nie sklejaj SQL ręcznie ze stringów użytkownika.
+
+To jest ważne zarówno dla poprawności, jak i bezpieczeństwa.
 
 ---
 
@@ -137,6 +145,8 @@ Na końcu warto też zamknąć połączenie:
 conn.close()
 ```
 
+To dobry nawyk nawet w małych skryptach.
+
 ---
 
 ## Typowe błędy początkujących
@@ -145,6 +155,10 @@ conn.close()
 - ręczne sklejanie zapytań SQL,
 - brak zamknięcia połączenia,
 - mieszanie logiki aplikacji i SQL bez porządku.
+
+### 5. Oczekiwanie, że dane zapiszą się same bez `commit()`
+
+Bez `commit()` zmiany mogą nie zostać utrwalone w pliku bazy.
 
 ---
 
@@ -169,12 +183,20 @@ cursor.execute("INSERT INTO users (name) VALUES (?)", ("Ola",))
 conn.commit()
 ```
 
+Po takim zapisie rekord będzie już w bazie.
+
 ### Odczyt danych
 
 ```python
 cursor.execute("SELECT id, name FROM users")
 for row in cursor.fetchall():
     print(row)
+```
+
+Wynik przykładowy:
+
+```python
+(1, 'Ola')
 ```
 
 ---
@@ -186,6 +208,10 @@ for row in cursor.fetchall():
 - utrzymuj porządek między warstwą bazy i logiką aplikacji,
 - traktuj SQLite jako świetne narzędzie nauki i małych projektów.
 
+Praktyczna zasada:
+
+jeśli do zapytania trafia dana od użytkownika, użyj parametrów `?`, a nie składania stringa.
+
 ---
 
 ## Podsumowanie
@@ -193,6 +219,13 @@ for row in cursor.fetchall():
 `sqlite3` to bardzo dobry pierwszy krok w stronę pracy z bazami danych w Pythonie.
 
 Daje praktyczne zrozumienie SQL i przygotowuje pod bardziej zaawansowane narzędzia.
+
+Najważniejsze do zapamiętania:
+
+- `connect()` otwiera bazę,
+- `cursor()` wykonuje zapytania,
+- `commit()` zapisuje zmiany,
+- parametryzacja to podstawowy bezpieczny styl pracy z SQL.
 
 ---
 

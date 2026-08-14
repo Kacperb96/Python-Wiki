@@ -70,11 +70,23 @@ tekst = json.dumps(dane)
 print(tekst)
 ```
 
+Wynik:
+
+```python
+{"name": "Anna", "age": 30}
+```
+
 `loads()` robi odwrotnie:
 
 ```python
 obiekt = json.loads(tekst)
 print(obiekt)
+```
+
+Wynik:
+
+```python
+{'name': 'Anna', 'age': 30}
 ```
 
 ---
@@ -98,6 +110,8 @@ Odczyt:
 with open("user.json", "r", encoding="utf-8") as f:
     dane = json.load(f)
 ```
+
+Po odczycie `dane` będzie zwykłym obiektem Pythona, np. słownikiem.
 
 ---
 
@@ -125,6 +139,18 @@ print(json.dumps(dane, indent=2))
 
 To bardzo pomaga przy debugowaniu i plikach konfiguracyjnych.
 
+Wynik:
+
+```python
+{
+  "name": "Anna",
+  "skills": [
+    "Python",
+    "SQL"
+  ]
+}
+```
+
 ---
 
 ## Obsługa znaków narodowych
@@ -140,6 +166,12 @@ dane = {"miasto": "Łódź"}
 print(json.dumps(dane, ensure_ascii=False))
 ```
 
+Wynik:
+
+```python
+{"miasto": "Łódź"}
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -148,6 +180,10 @@ print(json.dumps(dane, ensure_ascii=False))
 - mylenie `load()` z `loads()`,
 - brak `encoding="utf-8"` przy plikach,
 - próba serializacji obiektów niestandardowych bez dodatkowej obsługi.
+
+### 5. Zakładanie, że każdy obiekt Pythona da się od razu zapisać do JSON
+
+Na przykład obiekty własnych klas zwykle wymagają dodatkowej konwersji.
 
 ---
 
@@ -164,6 +200,15 @@ with open("config.json", "w", encoding="utf-8") as f:
     json.dump(config, f, indent=2)
 ```
 
+Efekt w pliku:
+
+```json
+{
+  "debug": true,
+  "port": 8000
+}
+```
+
 ### Odczyt JSON z tekstu
 
 ```python
@@ -174,6 +219,12 @@ dane = json.loads(tekst)
 print(dane["name"])
 ```
 
+Wynik:
+
+```python
+Jan
+```
+
 ---
 
 ## Dobre praktyki
@@ -182,6 +233,13 @@ print(dane["name"])
 - przy polskim tekście ustawiaj `ensure_ascii=False`,
 - waliduj strukturę po wczytaniu, jeśli dane przychodzą z zewnątrz,
 - pamiętaj, że nie każdy obiekt Pythona da się łatwo zapisać do JSON.
+
+Praktyczna zasada:
+
+zawsze myśl osobno:
+
+- czy pracujesz na stringu JSON,
+- czy na pliku JSON.
 
 ---
 
@@ -194,6 +252,12 @@ Warto swobodnie rozróżniać:
 - string vs plik,
 - `dumps` vs `dump`,
 - `loads` vs `load`.
+
+Najważniejsze do zapamiętania:
+
+- `dumps` i `loads` działają na stringach,
+- `dump` i `load` działają na plikach,
+- `indent` i `ensure_ascii=False` bardzo poprawiają praktyczną użyteczność JSON-a.
 
 ---
 

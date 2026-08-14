@@ -61,6 +61,12 @@ with open("obraz.png", "rb") as f:
 
 Wynik będzie typu `bytes`.
 
+Przykład wyniku:
+
+```python
+<class 'bytes'>
+```
+
 ---
 
 ## Zapis pliku binarnego
@@ -71,6 +77,10 @@ dane = b"\x00\x01\x02"
 with open("out.bin", "wb") as f:
     f.write(dane)
 ```
+
+Efekt:
+
+do pliku zostaną zapisane dokładnie trzy bajty.
 
 ---
 
@@ -97,6 +107,14 @@ dane = b"ABC"
 print(dane[0])
 ```
 
+Wynik:
+
+```python
+65
+```
+
+To dlatego, że pojedynczy bajt jest liczbą z zakresu `0-255`.
+
 ---
 
 ## Typowe błędy początkujących
@@ -105,6 +123,10 @@ print(dane[0])
 - mylenie `str` i `bytes`,
 - używanie `encoding` przy trybie binarnym,
 - traktowanie każdego pliku jak tekstu.
+
+### 5. Oczekiwanie, że `print(bytes)` pokaże „ładny tekst”
+
+Surowe bajty zwykle nie są czytelne dla człowieka bez dodatkowej interpretacji.
 
 ---
 
@@ -120,11 +142,21 @@ with open("wyjscie.bin", "wb") as dst:
     dst.write(dane)
 ```
 
+Efekt:
+
+`wyjscie.bin` będzie kopią pliku `wejscie.bin`.
+
 ### Prosty zapis bajtów
 
 ```python
 with open("liczby.bin", "wb") as f:
     f.write(b"\x01\x02\x03")
+```
+
+Po późniejszym odczycie możesz dostać:
+
+```python
+b'\x01\x02\x03'
 ```
 
 ---
@@ -136,6 +168,10 @@ with open("liczby.bin", "wb") as f:
 - nie próbuj interpretować danych jako tekstu bez potrzeby,
 - przy większych plikach rozważ czytanie kawałkami.
 
+Praktyczna zasada:
+
+jeśli dane nie są tekstem dla człowieka, bardzo możliwe, że powinieneś pracować na `bytes`, a nie na `str`.
+
 ---
 
 ## Podsumowanie
@@ -143,6 +179,12 @@ with open("liczby.bin", "wb") as f:
 Pliki binarne to ważna część praktycznej pracy z danymi.
 
 Profesjonalny Python wymaga swobodnego rozróżniania pracy z tekstem i z bajtami.
+
+Najważniejsze do zapamiętania:
+
+- tryb binarny pracuje na `bytes`,
+- w trybie binarnym nie używasz `encoding`,
+- tekst i bajty to dwa różne poziomy reprezentacji danych.
 
 ---
 

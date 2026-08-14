@@ -62,6 +62,12 @@ print(sciezka)
 
 `Path` reprezentuje ścieżkę do pliku lub katalogu.
 
+Wynik:
+
+```python
+dane/plik.txt
+```
+
 ---
 
 ## Tworzenie ścieżek
@@ -80,6 +86,12 @@ home = Path.home()
 print(home)
 ```
 
+Wynik będzie zależał od systemu, np.:
+
+```python
+/home/kacper
+```
+
 ---
 
 ## Łączenie ścieżek
@@ -94,6 +106,12 @@ print(sciezka)
 ```
 
 Operator `/` łączy fragmenty ścieżki w czytelny sposób.
+
+Wynik:
+
+```python
+dane/2026/raport.csv
+```
 
 ---
 
@@ -111,6 +129,14 @@ print(sciezka.is_dir())
 
 To bardzo częste operacje.
 
+Przykładowy wynik dla istniejącego pliku:
+
+```python
+True
+True
+False
+```
+
 ---
 
 ## Odczyt i zapis plików
@@ -123,6 +149,12 @@ plik.write_text("Czesc", encoding="utf-8")
 
 tekst = plik.read_text(encoding="utf-8")
 print(tekst)
+```
+
+Wynik:
+
+```python
+Czesc
 ```
 
 Do bajtów masz:
@@ -145,6 +177,14 @@ for element in folder.iterdir():
 
 To zwraca obiekty `Path`, a nie zwykłe stringi.
 
+Przykładowy wynik:
+
+```python
+README.md
+main.py
+dane
+```
+
 ---
 
 ## `glob()` i `rglob()`
@@ -165,6 +205,11 @@ for plik in Path(".").rglob("*.md"):
     print(plik)
 ```
 
+Różnica:
+
+- `glob("*.py")` szuka tylko w jednym katalogu,
+- `rglob("*.md")` schodzi też do podkatalogów.
+
 ---
 
 ## Tworzenie katalogów
@@ -178,6 +223,8 @@ Path("a/b/c").mkdir(parents=True, exist_ok=True)
 
 `parents=True` tworzy brakujące katalogi po drodze.
 
+To odpowiednik „utwórz cały brakujący łańcuch folderów”.
+
 ---
 
 ## Typowe błędy początkujących
@@ -186,6 +233,10 @@ Path("a/b/c").mkdir(parents=True, exist_ok=True)
 - ręczne sklejanie ścieżek zamiast używania `/`,
 - brak `encoding` przy pracy z tekstem,
 - mylenie `glob()` z `rglob()`.
+
+### 5. Zakładanie, że `pathlib` służy tylko do ścieżek
+
+`Path` potrafi też wygodnie czytać i zapisywać pliki.
 
 ---
 
@@ -200,6 +251,13 @@ for plik in Path(".").glob("*.txt"):
     print(plik.name)
 ```
 
+Wynik przykładowy:
+
+```python
+notatka.txt
+log.txt
+```
+
 ### Zapis raportu
 
 ```python
@@ -212,6 +270,10 @@ plik = folder / "dzienny.txt"
 plik.write_text("Raport gotowy", encoding="utf-8")
 ```
 
+Efekt:
+
+powstanie plik `raporty/dzienny.txt` z podaną treścią.
+
 ---
 
 ## Dobre praktyki
@@ -221,6 +283,10 @@ plik.write_text("Raport gotowy", encoding="utf-8")
 - zawsze jawnie ustawiaj `encoding` dla tekstu,
 - operuj na obiektach `Path` możliwie długo.
 
+Praktyczna zasada:
+
+jeśli pracujesz ze ścieżką, trzymaj ją jako `Path`, a nie jako zwykły string, tak długo jak się da.
+
 ---
 
 ## Podsumowanie
@@ -228,6 +294,12 @@ plik.write_text("Raport gotowy", encoding="utf-8")
 `pathlib` upraszcza pracę z plikami i katalogami.
 
 To jeden z najbardziej praktycznych modułów standardowej biblioteki Pythona i bardzo szybko poprawia czytelność kodu.
+
+Najważniejsze do zapamiętania:
+
+- `Path` daje czytelniejszą pracę ze ścieżkami niż ręczne sklejenia,
+- `/` to podstawowy operator budowania ścieżek,
+- `pathlib` łączy wygodną pracę ze ścieżką i z samym plikiem.
 
 ---
 

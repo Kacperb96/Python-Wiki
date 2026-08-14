@@ -67,6 +67,8 @@ with open("tekst.txt", "r", encoding="utf-8") as f:
 
 To zmniejsza ryzyko problemów między różnymi systemami.
 
+To jest dobry domyślny nawyk przy plikach tekstowych.
+
 ---
 
 ## Najczęstsze problemy z polskimi znakami
@@ -90,10 +92,22 @@ tekst = "zażółć"
 bajty = tekst.encode("utf-8")
 ```
 
+Wynik przykładowy:
+
+```python
+b'za\\xc5\\xbc\\xc3\\xb3\\xc5\\x82\\xc4\\x87'
+```
+
 Bajty na tekst:
 
 ```python
 odzyskany = bajty.decode("utf-8")
+```
+
+Po dekodowaniu z powrotem dostajesz zwykły tekst:
+
+```python
+zażółć
 ```
 
 ---
@@ -116,6 +130,12 @@ with open("miasto.txt", "w", encoding="utf-8") as f:
     f.write("Łódź")
 ```
 
+Po poprawnym odczycie:
+
+```python
+Łódź
+```
+
 ### Konwersja tekstu
 
 ```python
@@ -123,6 +143,13 @@ tekst = "gęś"
 b = tekst.encode("utf-8")
 print(b)
 print(b.decode("utf-8"))
+```
+
+Wynik:
+
+```python
+b'g\\xc4\\x99\\xc5\\x9b'
+gęś
 ```
 
 ---
@@ -134,6 +161,12 @@ print(b.decode("utf-8"))
 - przy integracjach z zewnętrznymi systemami sprawdzaj, jakie kodowanie jest używane,
 - traktuj błędy kodowania jako ważny sygnał, a nie drobiazg.
 
+Praktyczna zasada:
+
+`str` to to, co chcesz czytać jako tekst.
+
+`bytes` to to, co faktycznie idzie po dysku, sieci albo w pliku binarnym.
+
 ---
 
 ## Podsumowanie
@@ -141,6 +174,12 @@ print(b.decode("utf-8"))
 Zrozumienie `utf-8` i różnicy między tekstem a bajtami jest bardzo ważne w profesjonalnej pracy z Pythonem.
 
 To oszczędza mnóstwo trudnych i irytujących problemów.
+
+Najważniejsze do zapamiętania:
+
+- `encode()` zamienia tekst na bajty,
+- `decode()` zamienia bajty na tekst,
+- `utf-8` jest najlepszym praktycznym domyślnym wyborem w większości projektów.
 
 ---
 

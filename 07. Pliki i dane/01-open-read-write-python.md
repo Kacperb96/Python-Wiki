@@ -55,6 +55,12 @@ with open("plik.txt", "r", encoding="utf-8") as f:
     print(tekst)
 ```
 
+Wynik:
+
+```python
+Czesc
+```
+
 ---
 
 ## Tryby otwierania plików
@@ -67,6 +73,13 @@ Najczęstsze:
 - `"x"` utworzenie nowego pliku,
 - `"b"` tryb binarny,
 - `"t"` tryb tekstowy.
+
+Praktycznie najważniejsze do zapamiętania:
+
+- `"r"` czyta istniejący plik,
+- `"w"` tworzy nowy plik albo nadpisuje stary,
+- `"a"` dopisuje na końcu,
+- `"x"` tworzy plik tylko wtedy, gdy jeszcze go nie ma.
 
 ---
 
@@ -95,6 +108,24 @@ for linia in f:
 
 Drugi wariant bywa lepszy przy większych plikach.
 
+Przykład:
+
+jeśli plik ma zawartość:
+
+```text
+Ala
+Ola
+Jan
+```
+
+to pętla wypisze:
+
+```python
+Ala
+Ola
+Jan
+```
+
 ---
 
 ## Dopisanie do pliku
@@ -106,6 +137,19 @@ with open("log.txt", "a", encoding="utf-8") as f:
 
 To nie nadpisuje starej zawartości.
 
+Jeśli plik wcześniej zawierał:
+
+```text
+Start
+```
+
+to po dopisaniu może wyglądać tak:
+
+```text
+Start
+Nowa linia
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -114,6 +158,10 @@ To nie nadpisuje starej zawartości.
 - brak `encoding="utf-8"`,
 - używanie `"w"` tam, gdzie chodziło o dopisanie,
 - czytanie ogromnych plików na raz bez potrzeby.
+
+### 5. Zakładanie, że zapis niczego nie usuwa
+
+Tryb `"w"` nadpisuje plik od zera.
 
 ---
 
@@ -126,12 +174,26 @@ with open("raport.txt", "w", encoding="utf-8") as f:
     f.write("Raport dzienny\n")
 ```
 
+Efekt w pliku:
+
+```text
+Raport dzienny
+```
+
 ### Odczyt linia po linii
 
 ```python
 with open("dane.txt", "r", encoding="utf-8") as f:
     for linia in f:
         print(linia.strip())
+```
+
+Wynik przykładowy:
+
+```python
+pierwsza linia
+druga linia
+trzecia linia
 ```
 
 ---
@@ -143,6 +205,14 @@ with open("dane.txt", "r", encoding="utf-8") as f:
 - wybieraj tryb otwarcia świadomie,
 - dla dużych plików preferuj iterację po liniach.
 
+Praktyczna zasada:
+
+jeśli nie masz konkretnego powodu, domyślnie używaj:
+
+```python
+with open(..., encoding="utf-8")
+```
+
 ---
 
 ## Podsumowanie
@@ -150,6 +220,12 @@ with open("dane.txt", "r", encoding="utf-8") as f:
 `open()` to absolutna podstawa pracy z danymi w Pythonie.
 
 Profesjonalny kod zwykle używa go razem z `with` i jawnym `encoding`.
+
+Najważniejsze do zapamiętania:
+
+- `with` bezpiecznie zamyka plik,
+- tryb otwarcia decyduje, czy czytasz, nadpisujesz czy dopisujesz,
+- przy tekstach warto jawnie podać `encoding="utf-8"`.
 
 ---
 
