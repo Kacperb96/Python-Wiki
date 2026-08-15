@@ -10,15 +10,13 @@
 6. [`UPDATE`](#update)
 7. [`DELETE`](#delete)
 8. [`WHERE`, `ORDER BY`, `LIMIT`](#where-order-by-limit)
-9. [Klucz główny](#klucz-główny)
+9. [Klucz główny i klucz obcy](#klucz-główny-i-klucz-obcy)
 10. [JOIN — po co istnieje](#join--po-co-istnieje)
-11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-12. [Praktyczne przykłady](#praktyczne-przykłady)
-13. [Dobre praktyki](#dobre-praktyki)
-14. [Podsumowanie](#podsumowanie)
-15. [Mini ściąga](#mini-ściąga)
-16. [Ćwiczenia](#ćwiczenia)
-17. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+11. [Przykład z outputem](#przykład-z-outputem)
+12. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+13. [Praktyczna ściąga](#praktyczna-ściąga)
+14. [Ćwiczenia](#ćwiczenia)
+15. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -31,7 +29,8 @@ Bez tego trudno:
 - dobrze rozumieć bazę,
 - debugować zapytania,
 - projektować warstwę danych,
-- rozumieć wydajność.
+- rozumieć wydajność,
+- czytać logi i wygenerowany SQL.
 
 ---
 
@@ -40,6 +39,8 @@ Bez tego trudno:
 Bo większość realnych aplikacji prędzej czy później dotyka bazy danych.
 
 Znajomość SQL daje przewagę nawet wtedy, gdy używasz warstwy abstrakcji.
+
+ORM może pomóc pisać kod, ale nie zastąpi rozumienia, co naprawdę dzieje się po stronie bazy.
 
 ---
 
@@ -51,9 +52,11 @@ Wiersz to pojedynczy rekord.
 
 Kolumna opisuje pole, np.:
 
-- `id`
-- `name`
-- `email`
+- `id`,
+- `name`,
+- `email`.
+
+To najprostszy mentalny model relacyjnej bazy danych.
 
 ---
 
@@ -67,6 +70,14 @@ SELECT id, name FROM users;
 
 To najczęściej używana operacja.
 
+Jeśli chcesz wszystkie kolumny:
+
+```sql
+SELECT * FROM users;
+```
+
+Ale w praktyce często lepiej pobierać tylko to, czego naprawdę potrzebujesz.
+
 ---
 
 ## `INSERT`
@@ -77,6 +88,8 @@ Dodawanie rekordu:
 INSERT INTO users (name, email)
 VALUES ('Anna', 'anna@example.com');
 ```
+
+To tworzy nowy rekord w tabeli `users`.
 
 ---
 
@@ -90,6 +103,10 @@ SET email = 'nowy@example.com'
 WHERE id = 1;
 ```
 
+To bardzo ważne:
+
+`WHERE` decyduje, które rekordy zmieniasz.
+
 ---
 
 ## `DELETE`
@@ -101,37 +118,49 @@ DELETE FROM users
 WHERE id = 1;
 ```
 
+Tak samo jak przy `UPDATE`, brak `WHERE` może mieć bardzo niebezpieczny skutek.
+
 ---
 
 ## `WHERE`, `ORDER BY`, `LIMIT`
 
-Filtrowanie:
+### Filtrowanie
 
 ```sql
 SELECT * FROM users WHERE active = 1;
 ```
 
-Sortowanie:
+### Sortowanie
 
 ```sql
 SELECT * FROM users ORDER BY created_at DESC;
 ```
 
-Ograniczenie:
+### Ograniczenie wyniku
 
 ```sql
 SELECT * FROM users LIMIT 10;
 ```
 
+To bardzo codzienne elementy praktycznej pracy z SQL.
+
 ---
 
-## Klucz główny
+## Klucz główny i klucz obcy
+
+### Klucz główny
 
 `PRIMARY KEY` identyfikuje rekord jednoznacznie.
 
 Najczęściej jest to `id`.
 
-To bardzo ważny element modelu danych.
+### Klucz obcy
+
+`FOREIGN KEY` łączy jedną tabelę z drugą.
+
+Na przykład `orders.user_id` może wskazywać na `users.id`.
+
+To podstawa relacji w bazie.
 
 ---
 
@@ -139,13 +168,42 @@ To bardzo ważny element modelu danych.
 
 `JOIN` łączy dane z kilku tabel.
 
-Na przykład:
+Na przykład masz:
 
-- użytkownicy,
-- zamówienia,
-- produkty.
+- tabelę `users`,
+- tabelę `orders`.
+
+I chcesz zobaczyć zamówienia razem z nazwą użytkownika.
+
+Przykład:
+
+```sql
+SELECT users.name, orders.total
+FROM users
+JOIN orders ON users.id = orders.user_id;
+```
 
 Bez zrozumienia joinów trudno budować realne systemy.
+
+---
+
+## Przykład z outputem
+
+Zapytanie:
+
+```sql
+SELECT id, name FROM users ORDER BY id;
+```
+
+Przykładowy wynik:
+
+```text
+1 | Anna
+2 | Jan
+3 | Marek
+```
+
+To oczywiście uproszczona reprezentacja, ale dobrze pokazuje efekt działania `SELECT`.
 
 ---
 
@@ -154,100 +212,51 @@ Bez zrozumienia joinów trudno budować realne systemy.
 - brak `WHERE` przy `UPDATE` lub `DELETE`,
 - brak rozumienia relacji między tabelami,
 - traktowanie ORM jak zamiennika myślenia o SQL,
-- ignorowanie sortowania i limitowania wyników.
+- ignorowanie sortowania i limitowania wyników,
+- pobieranie wszystkich kolumn i wszystkich rekordów bez potrzeby.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Pobranie jednego użytkownika
+### Najczęstsze operacje
 
 ```sql
-SELECT id, name, email
-FROM users
-WHERE id = 1;
+SELECT ...
+INSERT INTO ...
+UPDATE ...
+DELETE FROM ...
 ```
 
-### Najnowsze rekordy
+### Najczęstsze dodatki
 
-```sql
-SELECT *
-FROM orders
-ORDER BY created_at DESC
-LIMIT 5;
-```
+- `WHERE`,
+- `ORDER BY`,
+- `LIMIT`,
+- `JOIN`.
 
----
+### Ważna zasada
 
-## Dobre praktyki
-
-- ucz się SQL równolegle z Pythonem backendowym,
-- zawsze myśl, co robi `WHERE`,
-- rozumiej, skąd biorą się rekordy po joinie,
-- nie polegaj wyłącznie na ORM bez znajomości podstaw.
-
----
-
-## Podsumowanie
-
-SQL to nie opcjonalny dodatek, tylko ważna kompetencja backendowego Pythonowca.
-
-Nawet podstawowa swoboda w SQL bardzo poprawia jakość pracy z danymi.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- `SELECT` pobiera,
-- `INSERT` dodaje,
-- `UPDATE` zmienia,
-- `DELETE` usuwa,
-- `WHERE` filtruje,
-- `ORDER BY` sortuje,
-- `LIMIT` ogranicza wynik.
+Przed `UPDATE` i `DELETE` zawsze upewnij się, że warunek `WHERE` jest poprawny.
 
 ---
 
 ## Ćwiczenia
 
-1. Napisz `SELECT` pobierający `id` i `name` z tabeli `users`.
-2. Napisz `INSERT` dodający użytkownika.
-3. Napisz `UPDATE` zmieniający email użytkownika.
-4. Napisz `DELETE` usuwający rekord po `id`.
+1. Napisz `SELECT` pobierający dwa pola z tabeli.
+2. Napisz `INSERT` dodający rekord.
+3. Napisz `UPDATE` z `WHERE`.
+4. Napisz `DELETE` z `WHERE`.
 5. Napisz `SELECT` z `ORDER BY` i `LIMIT`.
+6. Wyjaśnij różnicę między kluczem głównym i obcym.
+7. Wyjaśnij, po co istnieje `JOIN`.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. `SELECT`
-
-```sql
-SELECT id, name FROM users;
-```
-
-### 2. `INSERT`
-
-```sql
-INSERT INTO users (name) VALUES ('Ola');
-```
-
-### 3. `UPDATE`
-
-```sql
-UPDATE users SET email = 'ola@example.com' WHERE id = 1;
-```
-
-### 4. `DELETE`
-
-```sql
-DELETE FROM users WHERE id = 1;
-```
-
-### 5. Sortowanie i limit
-
-```sql
-SELECT * FROM users ORDER BY id DESC LIMIT 5;
-```
+- SQL to fundament pracy z bazą danych, nawet jeśli używasz ORM.
+- `SELECT`, `INSERT`, `UPDATE`, `DELETE` to absolutna podstawa.
+- `WHERE`, `ORDER BY`, `LIMIT` i `JOIN` bardzo często pojawiają się w realnym kodzie.
+- Klucz główny identyfikuje rekord, a klucz obcy łączy tabele.
+- Brak zrozumienia SQL bardzo szybko mści się w backendzie.

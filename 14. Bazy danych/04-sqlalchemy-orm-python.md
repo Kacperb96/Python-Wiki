@@ -11,13 +11,11 @@
 7. [CRUD w ORM](#crud-w-orm)
 8. [Relacje](#relacje)
 9. [ORM a SQL](#orm-a-sql)
-10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-11. [Praktyczne przykłady](#praktyczne-przykłady)
-12. [Dobre praktyki](#dobre-praktyki)
-13. [Podsumowanie](#podsumowanie)
-14. [Mini ściąga](#mini-ściąga)
-15. [Ćwiczenia](#ćwiczenia)
-16. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+10. [Przykład mentalny](#przykład-mentalny)
+11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+12. [Praktyczna ściąga](#praktyczna-ściąga)
+13. [Ćwiczenia](#ćwiczenia)
+14. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -46,6 +44,8 @@ To warstwa SQLAlchemy umożliwiająca:
 - zapisywanie i odczytywanie obiektów,
 - modelowanie relacji.
 
+To bardzo wygodne, ale nadal trzeba rozumieć, że pod spodem działa SQL.
+
 ---
 
 ## Po co używać ORM
@@ -54,7 +54,8 @@ ORM pomaga:
 
 - pisać bardziej obiektowy kod,
 - wygodniej modelować domenę,
-- lepiej integrować warstwę danych z logiką aplikacji.
+- lepiej integrować warstwę danych z logiką aplikacji,
+- szybciej budować wiele typowych operacji CRUD.
 
 Ale nie zwalnia z rozumienia SQL.
 
@@ -70,6 +71,8 @@ Przykład mentalny:
 - tabela `users`,
 - instancja `User` jako jeden rekord.
 
+To bardzo wygodny sposób myślenia w warstwie aplikacyjnej.
+
 ---
 
 ## Sesja
@@ -77,6 +80,12 @@ Przykład mentalny:
 Sesja zarządza cyklem życia obiektów i komunikacją z bazą na poziomie ORM.
 
 To bardzo ważny element całego modelu pracy.
+
+Najprościej:
+
+- sesja wie, jakie obiekty zostały zmienione,
+- kiedy trzeba je zapisać,
+- kiedy trzeba zsynchronizować stan z bazą.
 
 ---
 
@@ -91,6 +100,13 @@ Najczęstsze operacje:
 
 ORM upraszcza je przez pracę na obiektach.
 
+Mentalnie:
+
+- tworzysz obiekt,
+- dodajesz go do sesji,
+- zatwierdzasz zmiany,
+- odczytujesz obiekty przez zapytania ORM.
+
 ---
 
 ## Relacje
@@ -102,6 +118,11 @@ Jedna z największych zalet ORM to modelowanie relacji:
 - many-to-many.
 
 To bardzo ważne w realnych aplikacjach biznesowych.
+
+Na przykład:
+
+- `User` ma wiele `Order`,
+- `Order` należy do jednego `User`.
 
 ---
 
@@ -115,7 +136,23 @@ Jeśli nie rozumiesz SQL, łatwo:
 
 - pisać nieefektywne zapytania,
 - źle modelować relacje,
-- mieć problemy wydajnościowe.
+- mieć problemy wydajnościowe,
+- nie rozumieć problemów takich jak N+1.
+
+---
+
+## Przykład mentalny
+
+Masz model `User`.
+
+Tworzysz:
+
+- obiekt `User(name="Anna")`,
+- dodajesz go do sesji,
+- robisz `commit`,
+- rekord trafia do tabeli `users`.
+
+To wygląda obiektowo, ale pod spodem wciąż stoi operacja SQL.
 
 ---
 
@@ -125,54 +162,24 @@ Jeśli nie rozumiesz SQL, łatwo:
 - brak rozumienia sesji,
 - brak rozumienia relacji,
 - ignorowanie wygenerowanego SQL,
-- projektowanie modeli bez myślenia o danych i wydajności.
+- projektowanie modeli bez myślenia o danych i wydajności,
+- wrzucanie zbyt dużo logiki do modeli ORM bez refleksji.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Model użytkownika
+### ORM pomaga, gdy chcesz
 
-Mentalnie:
+- pracować na modelach obiektowych,
+- wygodnie modelować relacje,
+- budować CRUD w bardziej obiektowym stylu.
 
-- klasa `User`,
-- pola `id`, `name`, `email`,
-- zapis przez sesję.
+### Ale pamiętaj
 
-### Relacja
-
-Na przykład:
-
-- `User` ma wiele `Order`,
-- `Order` należy do jednego `User`.
-
----
-
-## Dobre praktyki
-
-- ucz się ORM razem z SQL,
-- rozumiej, czym zarządza sesja,
-- projektuj modele z myślą o domenie i danych,
-- nie ukrywaj całej logiki aplikacji w modelach bez refleksji.
-
----
-
-## Podsumowanie
-
-SQLAlchemy ORM to bardzo ważne narzędzie profesjonalnego backendu Python.
-
-Daje wygodę, ale największą wartość daje wtedy, gdy towarzyszy mu dobra znajomość SQL i modelu danych.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- ORM mapuje klasy na tabele,
-- sesja zarządza pracą z obiektami,
-- relacje są jednym z głównych powodów używania ORM,
-- SQL nadal pozostaje ważny.
+- ORM nie usuwa SQL,
+- ORM nie usuwa potrzeby rozumienia wydajności,
+- sesja i relacje są kluczowe.
 
 ---
 
@@ -180,30 +187,15 @@ Najważniejsze:
 
 1. Wyjaśnij, czym jest ORM.
 2. Wyjaśnij rolę sesji.
-3. Wskaż przykład relacji one-to-many.
-4. Wyjaśnij, czemu ORM nie zwalnia ze znajomości SQL.
-5. Wskaż błąd, który może wyniknąć z traktowania ORM jak magii.
+3. Opisz relację `User -> Orders`.
+4. Wyjaśnij własnymi słowami, czemu ORM nie zwalnia ze znajomości SQL.
+5. Podaj przykład błędu, który może wyniknąć z bezrefleksyjnej pracy z ORM.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. ORM
-
-To mapowanie świata relacyjnej bazy danych na obiekty i klasy Pythona.
-
-### 2. Sesja
-
-Zarządza cyklem życia obiektów i komunikacją z bazą.
-
-### 3. One-to-many
-
-Jeden użytkownik ma wiele zamówień.
-
-### 4. Czemu znać SQL
-
-Bo pod spodem ORM i tak generuje zapytania SQL, które trzeba rozumieć.
-
-### 5. Błąd
-
-Można nieświadomie tworzyć bardzo nieefektywne zapytania i nie rozumieć, skąd biorą się problemy.
+- SQLAlchemy ORM mapuje bazę na obiekty Pythona.
+- Modele i sesja to centralne elementy tego podejścia.
+- Relacje są ogromną zaletą ORM, ale wymagają rozumienia.
+- ORM daje wygodę, ale nie zastępuje myślenia o SQL i wydajności.

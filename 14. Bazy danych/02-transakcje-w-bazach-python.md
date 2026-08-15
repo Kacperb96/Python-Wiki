@@ -8,14 +8,13 @@
 4. [`commit` i `rollback`](#commit-i-rollback)
 5. [Spójność danych](#spójność-danych)
 6. [Typowe sytuacje biznesowe](#typowe-sytuacje-biznesowe)
-7. [Transakcje a ORM](#transakcje-a-orm)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+7. [Przykład z `sqlite3`](#przykład-z-sqlite3)
+8. [Przykład mentalny "wszystko albo nic"](#przykład-mentalny-wszystko-albo-nic)
+9. [Transakcje a ORM](#transakcje-a-orm)
+10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+11. [Praktyczna ściąga](#praktyczna-ściąga)
+12. [Ćwiczenia](#ćwiczenia)
+13. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -23,7 +22,7 @@
 
 Transakcje to jedna z najważniejszych podstaw pracy z bazą danych.
 
-Bez ich zrozumienia łatwo uszkodzić spójność danych nawet wtedy, gdy sam kod "wygląda dobrze".
+Bez ich zrozumienia łatwo uszkodzić spójność danych nawet wtedy, gdy sam kod wygląda poprawnie.
 
 ---
 
@@ -44,11 +43,11 @@ Bo wiele operacji biznesowych składa się z kilku kroków.
 
 Na przykład:
 
-- pobranie środków,
-- zapis przelewu,
-- aktualizacja salda.
+- pobranie środków z konta A,
+- dopisanie środków do konta B,
+- zapis przelewu do historii.
 
-Jeśli jeden krok się uda, a drugi nie, bez transakcji możesz zostawić dane w złym stanie.
+Jeśli jeden krok się uda, a kolejny nie, bez transakcji możesz zostawić dane w złym stanie.
 
 ---
 
@@ -72,6 +71,8 @@ Transakcje chronią spójność systemu.
 
 Bez nich łatwo o sytuacje, w których część danych została zapisana, a część nie.
 
+To szczególnie groźne przy operacjach biznesowych obejmujących kilka tabel albo kilka rekordów.
+
 ---
 
 ## Typowe sytuacje biznesowe
@@ -83,6 +84,48 @@ Transakcje są bardzo ważne przy:
 - rezerwacjach,
 - zmianie stanów magazynowych,
 - wielu powiązanych zapisach.
+
+Właśnie tam zasada "wszystko albo nic" ma największy sens.
+
+---
+
+## Przykład z `sqlite3`
+
+```python
+import sqlite3
+
+conn = sqlite3.connect("shop.db")
+
+try:
+    cursor = conn.cursor()
+    cursor.execute("UPDATE products SET stock = stock - 1 WHERE id = 1")
+    cursor.execute("INSERT INTO orders(user_id, product_id) VALUES (1, 1)")
+    conn.commit()
+except Exception:
+    conn.rollback()
+    raise
+finally:
+    conn.close()
+```
+
+Tu jeśli druga operacja się nie powiedzie, cofnięta zostanie też pierwsza.
+
+---
+
+## Przykład mentalny "wszystko albo nic"
+
+Wyobraź sobie:
+
+1. zmniejszasz stan magazynowy,
+2. próbujesz utworzyć zamówienie,
+3. zapis zamówienia się wywala.
+
+Bez transakcji możesz zostać z:
+
+- mniejszym stanem magazynowym,
+- ale bez samego zamówienia.
+
+To już jest błąd biznesowy, nie tylko techniczny.
 
 ---
 
@@ -96,6 +139,8 @@ Pod spodem nadal trzeba wiedzieć:
 - kiedy wycofujesz operację,
 - jaki jest zakres jednostki pracy.
 
+To, że pracujesz na obiektach, nie znaczy, że spójność danych "robi się sama".
+
 ---
 
 ## Typowe błędy początkujących
@@ -107,48 +152,25 @@ Pod spodem nadal trzeba wiedzieć:
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Przykład biznesowy
+### Najważniejsza zasada
 
-Utworzenie zamówienia i zmniejszenie stanu magazynowego powinny być spójne.
+Transakcja = wszystko albo nic.
 
-Jeśli jedna część się nie powiedzie, całość nie powinna zostać częściowo zapisana.
-
-### `sqlite3`
+### Kluczowe operacje
 
 ```python
 conn.commit()
 conn.rollback()
 ```
 
----
+### Gdzie szczególnie pamiętać
 
-## Dobre praktyki
-
-- myśl transakcyjnie o operacjach biznesowych,
-- grupuj powiązane zapisy w jedną jednostkę,
-- przy błędach przewiduj cofnięcie,
-- rozumiej, gdzie kończy się transakcja.
-
----
-
-## Podsumowanie
-
-Transakcje to fundament bezpiecznej pracy z danymi.
-
-Bez nich nawet poprawny składniowo kod może prowadzić do bardzo złych stanów biznesowych.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- transakcja = wszystko albo nic,
-- `commit` zatwierdza,
-- `rollback` cofa,
-- transakcje chronią spójność danych.
+- płatności,
+- zamówienia,
+- rezerwacje,
+- stany magazynowe.
 
 ---
 
@@ -158,28 +180,14 @@ Najważniejsze:
 2. Wyjaśnij różnicę między `commit` i `rollback`.
 3. Podaj przykład operacji wymagającej transakcji.
 4. Wyjaśnij, czemu kilka zapisów może tworzyć jedną jednostkę biznesową.
-5. Wyjaśnij, czemu ORM nie zwalnia z rozumienia transakcji.
+5. Rozpisz scenariusz, w którym brak transakcji psuje spójność danych.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Transakcja
-
-To grupa operacji, które mają zostać wykonane razem albo wcale.
-
-### 2. `commit` vs `rollback`
-
-`commit` zapisuje zmiany, a `rollback` je cofa.
-
-### 3. Przykład
-
-Założenie zamówienia i zmniejszenie stanu magazynowego.
-
-### 4. Jednostka biznesowa
-
-Bo z punktu widzenia domeny wszystkie te kroki opisują jedną operację użytkownika.
-
-### 5. ORM
-
-Bo pod spodem nadal istnieje baza i mechanika transakcji, którą trzeba świadomie kontrolować.
+- Transakcja chroni spójność danych.
+- `commit` zatwierdza zmiany, a `rollback` je cofa.
+- W operacjach biznesowych często kilka zapisów tworzy jedną całość.
+- ORM nie zwalnia z rozumienia transakcji.
+- Brak myślenia transakcyjnego bardzo szybko prowadzi do realnych błędów biznesowych.

@@ -9,13 +9,11 @@
 5. [Logika biznesowa a dostęp do danych](#logika-biznesowa-a-dostęp-do-danych)
 6. [Testowalność](#testowalność)
 7. [Kiedy ten wzorzec ma sens](#kiedy-ten-wzorzec-ma-sens)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Przykład mentalny](#przykład-mentalny)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -36,13 +34,14 @@ Bo to pomaga:
 - oddzielić logikę biznesową od bazy,
 - ograniczyć chaos zapytań rozrzuconych po projekcie,
 - uprościć testy,
-- poprawić utrzymanie kodu.
+- poprawić utrzymanie kodu,
+- zmniejszyć zależność reszty systemu od szczegółów ORM albo SQL.
 
 ---
 
 ## Czym jest repozytorium
 
-Repozytorium to warstwa lub obiekt odpowiedzialny za dostęp do danych.
+Repozytorium to warstwa albo obiekt odpowiedzialny za dostęp do danych.
 
 Zamiast wszędzie pisać:
 
@@ -62,6 +61,12 @@ Nadal możesz mieć chaotyczny kod, jeśli logika i dostęp do danych są wymies
 
 Repozytorium pomaga to uporządkować.
 
+To ważne:
+
+repozytorium nie jest konkurencją dla ORM.
+
+To raczej sposób zorganizowania użycia ORM w projekcie.
+
 ---
 
 ## Logika biznesowa a dostęp do danych
@@ -72,7 +77,8 @@ Logika biznesowa powinna odpowiadać na pytania typu:
 
 - czy użytkownik może coś zrobić,
 - jak obliczyć wynik,
-- jaka reguła obowiązuje.
+- jaka reguła obowiązuje,
+- co się ma wydarzyć w systemie.
 
 Warstwa danych powinna odpowiadać:
 
@@ -88,6 +94,14 @@ To jedna z największych zalet takiego podziału.
 
 Jeśli logika biznesowa nie zna szczegółów bazy, łatwiej ją testować niezależnie.
 
+Możesz podmienić repozytorium na:
+
+- fake,
+- mock,
+- in-memory implementację.
+
+To bardzo pomaga w sensownym testowaniu aplikacji.
+
 ---
 
 ## Kiedy ten wzorzec ma sens
@@ -99,6 +113,27 @@ Najbardziej:
 - tam, gdzie logika biznesowa jest istotna,
 - tam, gdzie chcesz mieć porządną architekturę.
 
+W bardzo małym projekcie może być zbyt ciężki, jeśli wprowadza abstrakcję bez realnej potrzeby.
+
+---
+
+## Przykład mentalny
+
+Dobry podział wygląda tak:
+
+- endpoint odbiera request,
+- serwis biznesowy podejmuje decyzję,
+- repozytorium pobiera lub zapisuje dane.
+
+Przykłady metod repozytorium:
+
+- `get_user_by_id`,
+- `get_user_by_email`,
+- `save_order`,
+- `list_active_products`.
+
+To jest dużo czytelniejsze niż zapytania rozlane po endpointach.
+
 ---
 
 ## Typowe błędy początkujących
@@ -106,50 +141,24 @@ Najbardziej:
 - wrzucanie zapytań do endpointów,
 - wrzucanie logiki biznesowej do modeli ORM,
 - brak jednej odpowiedzialności klas i modułów,
-- zbyt ciężkie repozytoria robiące wszystko naraz.
+- zbyt ciężkie repozytoria robiące wszystko naraz,
+- tworzenie abstrakcji tak ogólnej, że przestaje mówić coś o domenie.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Mentalny podział
+### Repozytorium pomaga
 
-- endpoint odbiera request,
-- serwis biznesowy podejmuje decyzję,
-- repozytorium pobiera lub zapisuje dane.
+- porządkować dostęp do danych,
+- ukrywać szczegóły ORM i bazy,
+- poprawiać testowalność,
+- wzmacniać architekturę.
 
-### Przykład roli repozytorium
+### Ale pamiętaj
 
-- `get_user_by_id`
-- `save_order`
-- `list_active_products`
-
----
-
-## Dobre praktyki
-
-- oddzielaj warstwę HTTP, biznesową i danych,
-- nie rozlewaj szczegółów bazy po całym projekcie,
-- projektuj repozytoria wokół potrzeb domeny,
-- nie przesadzaj z abstrakcją w bardzo małym projekcie.
-
----
-
-## Podsumowanie
-
-Repozytorium i wydzielona warstwa danych to ważny krok w stronę bardziej profesjonalnej architektury backendu Python.
-
-Nie zawsze muszą być bardzo rozbudowane, ale warto rozumieć ich sens.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- repozytorium porządkuje dostęp do danych,
-- logika biznesowa nie powinna znać wszystkich szczegółów bazy,
-- ten podział poprawia testowalność i utrzymanie kodu.
+- nie każdy mały projekt potrzebuje rozbudowanego wzorca,
+- abstrahuj tyle, ile naprawdę daje wartość.
 
 ---
 
@@ -158,29 +167,14 @@ Najważniejsze:
 1. Wyjaśnij, czym jest repozytorium.
 2. Wyjaśnij, czemu nie warto pisać zapytań bezpośrednio w endpointach.
 3. Podaj przykład metody repozytorium.
-4. Wyjaśnij, jak ten wzorzec poprawia testowalność.
-5. Wskaż przypadek, gdy nie trzeba przesadzać z tą abstrakcją.
+4. Wyjaśnij różnicę między logiką biznesową a warstwą danych.
+5. Wyjaśnij, czemu repozytorium poprawia testowalność.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Repozytorium
-
-To warstwa odpowiedzialna za pobieranie i zapisywanie danych.
-
-### 2. Czemu nie w endpointach
-
-Bo prowadzi to do chaosu i mocnego związania warstwy HTTP z bazą.
-
-### 3. Metoda
-
-Na przykład `get_user_by_email`.
-
-### 4. Testowalność
-
-Bo logikę biznesową można testować bez realnej bazy lub z prostszymi zamiennikami.
-
-### 5. Kiedy nie przesadzać
-
-W bardzo małym projekcie lub jednorazowym narzędziu, gdzie dodatkowa warstwa tylko zaciemni kod.
+- Repozytorium porządkuje dostęp do danych.
+- Logika biznesowa nie powinna znać wszystkich szczegółów bazy.
+- ORM nie zastępuje architektury.
+- Ten podział poprawia czytelność, testowalność i utrzymanie kodu.

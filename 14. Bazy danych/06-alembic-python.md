@@ -9,13 +9,11 @@
 5. [Migracje schematu](#migracje-schematu)
 6. [Wersjonowanie bazy](#wersjonowanie-bazy)
 7. [Praca zespołowa a migracje](#praca-zespołowa-a-migracje)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Przykład mentalny zmiany schematu](#przykład-mentalny-zmiany-schematu)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -32,6 +30,10 @@ Właśnie wtedy pojawia się potrzeba migracji, a w ekosystemie SQLAlchemy bardz
 Alembic to narzędzie do zarządzania migracjami bazy danych.
 
 Pomaga śledzić zmiany schematu w czasie.
+
+Najprościej:
+
+jeśli kod projektu się zmienia i modele się zmieniają, baza też musi zmieniać się w sposób kontrolowany.
 
 ---
 
@@ -52,7 +54,12 @@ Trzeba to robić kontrolowanie, a nie ręcznie "na wyczucie".
 
 Alembic bardzo często działa obok SQLAlchemy.
 
-SQLAlchemy opisuje modele i pracę z bazą, a Alembic pomaga przenosić schema do kolejnych wersji.
+SQLAlchemy opisuje modele i pracę z bazą, a Alembic pomaga przenosić schemat do kolejnych wersji.
+
+To znów ważne rozróżnienie:
+
+- SQLAlchemy opisuje i obsługuje warstwę danych,
+- Alembic zarządza ewolucją schematu.
 
 ---
 
@@ -64,7 +71,10 @@ Przykładowo:
 
 - dodanie tabeli `users`,
 - dodanie kolumny `email`,
-- zmiana indeksu.
+- zmiana indeksu,
+- usunięcie nieużywanej kolumny.
+
+To wszystko powinno być wersjonowane tak samo jak kod aplikacji.
 
 ---
 
@@ -72,13 +82,14 @@ Przykładowo:
 
 To bardzo ważna idea.
 
-Tak jak wersjonujesz kod, tak samo powinieneś wersjonować schema bazy.
+Tak jak wersjonujesz kod, tak samo powinieneś wersjonować schemat bazy.
 
 Dzięki temu da się:
 
 - odtworzyć stan środowiska,
 - wdrożyć zmiany przewidywalnie,
-- pracować zespołowo bez chaosu.
+- pracować zespołowo bez chaosu,
+- uruchomić projekt na nowym środowisku.
 
 ---
 
@@ -88,9 +99,27 @@ Bez migracji zespół bardzo szybko wpada w problemy typu:
 
 - "u mnie działa",
 - "moja baza wygląda inaczej",
-- "na produkcji brakuje kolumny".
+- "na produkcji brakuje kolumny",
+- "na stagingu mamy starszy schemat".
 
 Alembic pomaga uniknąć takiego chaosu.
+
+---
+
+## Przykład mentalny zmiany schematu
+
+Wyobraź sobie, że do tabeli `users` chcesz dodać kolumnę `is_active`.
+
+To nie jest tylko zmiana w modelu Pythona.
+
+To także zmiana struktury samej bazy.
+
+Bez migracji możesz mieć sytuację, w której:
+
+- kod oczekuje nowej kolumny,
+- ale baza jeszcze jej nie ma.
+
+I wtedy aplikacja zaczyna się wysypywać.
 
 ---
 
@@ -98,83 +127,40 @@ Alembic pomaga uniknąć takiego chaosu.
 
 - ręczne zmienianie bazy bez migracji,
 - traktowanie migracji jako zbędnej formalności,
-- brak rozumienia, że schema to część kodu projektu,
-- ignorowanie kolejności i spójności zmian.
+- brak rozumienia, że schemat to część kodu projektu,
+- ignorowanie kolejności i spójności zmian,
+- poprawianie czegoś ręcznie na produkcji bez odtworzenia tego w migracjach.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Przykładowe zmiany
+### Migracje pomagają
 
-- dodanie kolumny `is_active`,
-- nowa tabela `orders`,
-- zmiana typu kolumny.
+- wersjonować schemat,
+- wdrażać zmiany przewidywalnie,
+- utrzymywać zgodność środowisk,
+- pracować zespołowo.
 
-### Gdzie to pomaga
+### Ważny mentalny model
 
-- lokalnie,
-- na stagingu,
-- na produkcji,
-- w onboardingu nowej osoby do projektu.
-
----
-
-## Dobre praktyki
-
-- traktuj migracje jako część kodu,
-- nie zmieniaj schematu ręcznie poza kontrolowanym procesem,
-- utrzymuj porządek w historii migracji,
-- rozumiej, co robi każda zmiana w bazie.
-
----
-
-## Podsumowanie
-
-Alembic to bardzo ważne narzędzie profesjonalnej pracy z bazą danych w Pythonie.
-
-Bez migracji większy projekt backendowy bardzo szybko zaczyna się rozjeżdżać.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- Alembic zarządza migracjami,
-- migracje wersjonują schema bazy,
-- to kluczowe dla wdrożeń i pracy zespołowej.
+Model w kodzie i struktura bazy muszą iść razem.
 
 ---
 
 ## Ćwiczenia
 
 1. Wyjaśnij, czym jest migracja bazy.
-2. Wyjaśnij, po co wersjonować schema.
+2. Wyjaśnij, po co wersjonować schemat.
 3. Podaj przykład zmiany wymagającej migracji.
 4. Wyjaśnij, czemu ręczne zmiany w bazie są ryzykowne.
 5. Wyjaśnij relację Alembic i SQLAlchemy.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Migracja
-
-To kontrolowana zmiana struktury bazy danych zapisana jako część projektu.
-
-### 2. Po co wersjonować
-
-Żeby środowiska miały spójny schema i dało się bezpiecznie wdrażać zmiany.
-
-### 3. Przykład
-
-Dodanie kolumny `email` do tabeli `users`.
-
-### 4. Czemu ręczne zmiany są ryzykowne
-
-Bo łatwo rozjechać środowiska i stracić kontrolę nad historią zmian.
-
-### 5. Relacja
-
-SQLAlchemy opisuje modele i pracę z bazą, a Alembic obsługuje zmiany schematu.
+- Alembic zarządza migracjami schematu bazy.
+- Schemat bazy powinien być wersjonowany tak samo jak kod.
+- Migracje są kluczowe dla wdrożeń i pracy zespołowej.
+- Ręczne zmiany bez migracji bardzo szybko prowadzą do chaosu środowisk.

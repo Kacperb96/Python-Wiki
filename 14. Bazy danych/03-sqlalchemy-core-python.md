@@ -10,14 +10,12 @@
 6. [Tabela i metadane](#tabela-i-metadane)
 7. [INSERT, SELECT, UPDATE, DELETE](#insert-select-update-delete)
 8. [Wykonywanie zapytań](#wykonywanie-zapytań)
-9. [Kiedy Core jest dobrym wyborem](#kiedy-core-jest-dobrym-wyborem)
-10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-11. [Praktyczne przykłady](#praktyczne-przykłady)
-12. [Dobre praktyki](#dobre-praktyki)
-13. [Podsumowanie](#podsumowanie)
-14. [Mini ściąga](#mini-ściąga)
-15. [Ćwiczenia](#ćwiczenia)
-16. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+9. [Przykład mentalny](#przykład-mentalny)
+10. [Kiedy Core jest dobrym wyborem](#kiedy-core-jest-dobrym-wyborem)
+11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+12. [Praktyczna ściąga](#praktyczna-ściąga)
+13. [Ćwiczenia](#ćwiczenia)
+14. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -44,13 +42,13 @@ Nie pracujesz tu głównie na klasach domenowych jak w ORM.
 
 ## Core a ORM
 
-Core:
+### Core
 
 - bliżej SQL,
 - bardziej jawne zapytania,
 - mniej obiektowego mapowania.
 
-ORM:
+### ORM
 
 - bliżej obiektów Pythona,
 - wygodne modele i sesje,
@@ -66,7 +64,8 @@ Bo pomaga:
 
 - lepiej rozumieć SQLAlchemy,
 - pisać bardziej jawne zapytania,
-- budować warstwę danych tam, gdzie ORM byłby zbyt ciężki.
+- budować warstwę danych tam, gdzie ORM byłby zbyt ciężki,
+- zachować bliższy kontakt z SQL.
 
 ---
 
@@ -76,6 +75,12 @@ Bo pomaga:
 
 To jeden z podstawowych elementów SQLAlchemy.
 
+Przykład mentalny:
+
+- wskazujesz, z jaką bazą chcesz rozmawiać,
+- na jakim adresie,
+- przez jaki sterownik.
+
 ---
 
 ## Tabela i metadane
@@ -83,6 +88,8 @@ To jeden z podstawowych elementów SQLAlchemy.
 W Core często definiujesz tabele jawnie.
 
 To daje dużą kontrolę nad strukturą danych i zapytaniami.
+
+Mentalnie pracujesz na obiektach reprezentujących tabelę i jej kolumny.
 
 ---
 
@@ -92,17 +99,38 @@ Core pozwala budować te operacje przez obiekty i wyrażenia zamiast ręcznego s
 
 To zwiększa bezpieczeństwo i czytelność.
 
+Przykładowy mentalny model:
+
+- `insert(users)`
+- `select(users)`
+- `update(users)`
+- `delete(users)`
+
 ---
 
 ## Wykonywanie zapytań
 
 Zwykle:
 
-- tworzysz engine,
-- definiujesz metadane i tabele,
-- otwierasz połączenie,
-- wykonujesz zapytanie,
-- odbierasz wynik.
+1. tworzysz engine,
+2. definiujesz metadane i tabele,
+3. otwierasz połączenie,
+4. wykonujesz zapytanie,
+5. odbierasz wynik.
+
+To bardziej jawny model niż typowa praca przez ORM.
+
+---
+
+## Przykład mentalny
+
+Pracujesz na obiektach reprezentujących:
+
+- tabelę `users`,
+- kolumnę `users.c.name`,
+- zapytanie `select(users)`.
+
+To bardzo wygodne, bo nadal jesteś blisko SQL, ale nie składasz wszystkiego jako surowych stringów.
 
 ---
 
@@ -112,91 +140,49 @@ Na przykład:
 
 - w prostszych warstwach dostępu do danych,
 - przy bardziej złożonych zapytaniach,
-- gdy chcesz być bliżej SQL niż ORM.
+- gdy chcesz być bliżej SQL niż ORM,
+- gdy nie potrzebujesz pełnego modelu obiektowego.
 
 ---
 
 ## Typowe błędy początkujących
 
-- używanie ORM bez zrozumienia Core i SQL,
+- używanie ORM bez rozumienia Core i SQL,
 - brak rozumienia różnicy między tabelą a modelem ORM,
-- traktowanie Core jak dziwnej, niepotrzebnej warstwy.
+- traktowanie Core jak dziwnej, niepotrzebnej warstwy,
+- uciekanie od SQL za wszelką cenę.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Mentalny obraz
+### Core jest dobry, gdy chcesz
 
-Pracujesz na obiektach reprezentujących:
+- jawnych zapytań,
+- większej kontroli,
+- mniejszej abstrakcji niż ORM.
 
-- tabelę `users`,
-- kolumnę `users.c.name`,
-- zapytanie `select(users)`.
+### Core nie oznacza
 
-### Gdzie pasuje
+- ręcznego lepienia wszystkiego stringami SQL.
 
-- raporty,
-- warstwa repozytorium,
-- aplikacje z bardziej jawną kontrolą nad SQL.
-
----
-
-## Dobre praktyki
-
-- ucz się Core razem z podstawami SQL,
-- rozumiej wygenerowane zapytania,
-- nie uciekaj w abstrakcję bez potrzeby,
-- wybieraj poziom narzędzia do potrzeb projektu.
-
----
-
-## Podsumowanie
-
-SQLAlchemy Core to bardzo wartościowa warstwa dla profesjonalnego Pythonowca pracującego z bazą.
-
-Pozwala zachować dobrą równowagę między wygodą biblioteki a zrozumieniem SQL.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- Core pracuje na tabelach i zapytaniach,
-- jest bliżej SQL niż ORM,
-- dobrze pasuje do bardziej jawnej pracy z bazą.
+To nadal wygodne i nowoczesne API do budowania zapytań.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij różnicę między Core a ORM.
-2. Wyjaśnij rolę `engine`.
-3. Wskaż przypadek, w którym Core ma sens.
-4. Wyjaśnij, po co znać Core nawet przy pracy z ORM.
-5. Wskaż, czemu SQL nadal jest ważny przy SQLAlchemy.
+1. Wyjaśnij różnicę między Core i ORM.
+2. Opisz rolę `Engine`.
+3. Wytłumacz, na czym mentalnie pracujesz w SQLAlchemy Core.
+4. Podaj przykład sytuacji, w której Core może być lepszy od ORM.
+5. Wyjaśnij własnymi słowami, czemu znajomość Core pomaga lepiej rozumieć SQLAlchemy.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Core vs ORM
-
-Core jest bliżej SQL i tabel, a ORM bliżej klas i obiektów.
-
-### 2. `engine`
-
-To centralny punkt połączenia i komunikacji z bazą.
-
-### 3. Gdzie ma sens
-
-W warstwie raportowej albo przy bardziej jawnych zapytaniach.
-
-### 4. Po co znać Core
-
-Bo pomaga rozumieć, co naprawdę dzieje się pod spodem.
-
-### 5. Czemu SQL ważny
-
-Bo SQLAlchemy nie zwalnia z rozumienia zapytań i modelu danych.
+- SQLAlchemy Core jest bliżej SQL niż ORM.
+- Daje dużą kontrolę nad tabelami i zapytaniami.
+- Warto znać go nawet wtedy, gdy później głównie używasz ORM.
+- Core pomaga zachować równowagę między wygodą biblioteki a zrozumieniem bazy.
