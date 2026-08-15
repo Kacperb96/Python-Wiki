@@ -1,17 +1,15 @@
 # 08. Przydatne libki
 
-Ten dział zbiera moduły standardowej biblioteki, które bardzo często pojawiają się w prawdziwym kodzie.
+To jest bardzo praktyczny folder.
 
-To nie są „egzotyczne ciekawostki”.
+Nie chodzi tutaj o to, żeby poznać kilka "fajnych modułów" i potem o nich zapomnieć. Chodzi o coś znacznie ważniejszego:
 
-To są rzeczy, które realnie pomagają:
+- rozpoznawanie typowych problemów,
+- wiedzę, że Python już ma gotowe narzędzie,
+- umiejętność wyboru rozwiązania, które jest prostsze i czytelniejsze,
+- odróżnianie sensownego użycia biblioteki od przerostu formy nad treścią.
 
-- szybciej pisać kod,
-- pisać go czytelniej,
-- unikać ręcznego wymyślania koła na nowo,
-- korzystać z gotowych, sprawdzonych narzędzi Pythona.
-
-Po tym dziale powinieneś znać:
+Ten dział zbiera moduły standardowej biblioteki, które bardzo często pojawiają się w realnym kodzie:
 
 - `re`,
 - `itertools`,
@@ -20,21 +18,27 @@ Po tym dziale powinieneś znać:
 - `typing`,
 - `dataclasses`.
 
-## Po co w ogóle ten dział
+## Jaki problem rozwiązuje ten folder
 
-W pewnym momencie nauki same podstawy języka już nie wystarczają.
+Na początku nauki bardzo wiele rzeczy pisze się "ręcznie":
 
-Zaczyna się liczyć to, czy:
+- ręczne liczenie elementów,
+- ręczne grupowanie danych,
+- ręczne parsowanie tekstu,
+- ręczne budowanie prostych modeli danych,
+- ręczne pisanie powtarzalnego kodu klas,
+- ręczne ogarnianie iteratorów.
 
-- umiesz sprawnie przetwarzać tekst,
-- umiesz wygodnie pracować z iteratorami,
-- znasz gotowe struktury danych,
-- umiesz dodawać typowanie,
-- potrafisz szybko modelować dane.
+To jest normalne.
 
-To właśnie robią te moduły.
+Ale potem przychodzi etap, w którym warto wiedzieć:
 
-One bardzo często skracają kod, upraszczają go i czynią bardziej profesjonalnym.
+- kiedy zwykła pętla jest najlepsza,
+- kiedy biblioteka upraszcza kod,
+- kiedy narzędzie jest zbyt sprytne jak na prosty problem,
+- kiedy standardowa biblioteka daje rozwiązanie bardziej idiomatyczne.
+
+Ten folder właśnie tego uczy.
 
 ## Jak czytać ten dział
 
@@ -47,72 +51,157 @@ Najlepiej iść po kolei:
 5. `05-typing-python.md`
 6. `06-dataclasses-python.md`
 
-Ta kolejność ma sens, bo:
+Ta kolejność ma sens, bo przechodzisz od pracy na tekście i danych, przez iteratory i funkcje, do typowania i modelowania danych.
 
-- `re` daje praktyczne narzędzie do tekstu,
-- `itertools` i `functools` pogłębiają styl pracy na danych,
-- `collections` daje bardzo użyteczne struktury,
-- `typing` porządkuje interfejsy kodu,
-- `dataclasses` upraszczają modelowanie obiektów danych.
+## Najważniejsze pytanie w tym folderze
 
-## Na co szczególnie uważać
+Przy każdym module warto pytać nie tylko:
 
-Najczęstsze pułapki w tym dziale:
+- jak tego użyć?
 
-- używanie `re`, gdy prosty `split()` albo `replace()` wystarczy,
-- brak zrozumienia, że wiele narzędzi z `itertools` zwraca iteratory,
-- używanie `reduce()` tam, gdzie zwykłe `sum()` albo pętla są czytelniejsze,
-- nadużywanie `typing` bez realnej korzyści,
-- mylenie `dataclass` z „pełnym OOP”,
-- traktowanie `collections` jak zbędnego dodatku zamiast bardzo praktycznego zestawu.
+ale też:
 
-To jest dział, w którym łatwo zachłysnąć się „sprytnymi sztuczkami”.
+- kiedy to ma sens?
+- kiedy to upraszcza kod?
+- kiedy zwykły `for`, `dict`, `split()` albo zwykła klasa są lepsze?
 
-Dlatego najważniejsza zasada brzmi:
+To jest klucz do dojrzałego korzystania z tych bibliotek.
 
-używaj tych bibliotek po to, żeby kod był prostszy i czytelniejszy, a nie tylko bardziej efektowny.
+## Szybka mapa decyzji
 
-## Po czym poznać, że temat zaczyna siedzieć
+### `re`
+
+Używaj, gdy:
+
+- trzeba rozpoznać wzorzec,
+- wyciągasz dane z tekstu,
+- walidujesz format,
+- zwykłe `split()` i `replace()` przestają wystarczać.
+
+Nie używaj, gdy:
+
+- wystarczy `in`, `startswith()`, `endswith()`, `split()`, `replace()`.
+
+### `itertools`
+
+Używaj, gdy:
+
+- chcesz leniwie przetwarzać dane,
+- łączysz wiele iterowalnych źródeł,
+- generujesz kombinacje, permutacje lub pary,
+- chcesz budować pipeline iteratorów.
+
+Nie używaj, gdy:
+
+- prosty `for` jest czytelniejszy,
+- i tak natychmiast zamieniasz wszystko na listę bez potrzeby.
+
+### `functools`
+
+Używaj, gdy:
+
+- chcesz dodać cache,
+- poprawnie piszesz dekorator,
+- wiążesz część argumentów funkcji,
+- chcesz uporządkować pracę z funkcjami wyższego rzędu.
+
+Nie używaj, gdy:
+
+- rozwiązanie przez `partial()` albo `reduce()` robi się mniej czytelne niż zwykła funkcja.
+
+### `collections`
+
+Używaj, gdy:
+
+- liczysz elementy,
+- grupujesz rekordy,
+- potrzebujesz kolejki,
+- łączysz kilka warstw konfiguracji,
+- chcesz lekkiej struktury danych.
+
+Nie używaj, gdy:
+
+- zwykły `dict` albo `list` są prostsze i całkowicie wystarczające.
+
+### `typing`
+
+Używaj, gdy:
+
+- chcesz lepiej opisać kontrakt funkcji,
+- pracujesz z większym kodem,
+- chcesz szybciej wykrywać błędy narzędziami,
+- budujesz kod dla siebie z przyszłości albo dla innych ludzi.
+
+Nie używaj, gdy:
+
+- typy stają się gęstsze od samej logiki,
+- dodajesz złożone adnotacje bez żadnej realnej korzyści.
+
+### `dataclasses`
+
+Używaj, gdy:
+
+- klasa głównie przechowuje dane,
+- chcesz automatyczne `__init__`, `__repr__`, `__eq__`,
+- modelujesz rekordy, DTO, config, value object.
+
+Nie używaj, gdy:
+
+- klasa ma rozbudowane zachowanie i mało danych,
+- potrzebujesz bardziej niestandardowej logiki niż prostego modelu danych.
+
+## Jak ćwiczyć najlepiej
+
+Najlepszy styl nauki dla tego folderu wygląda tak:
+
+1. napisz rozwiązanie ręcznie,
+2. napisz drugie rozwiązanie z biblioteką,
+3. porównaj długość, czytelność i elastyczność,
+4. odpowiedz, które wybrałbyś do prawdziwego projektu.
+
+To ważne, bo te moduły nie służą do popisywania się składnią. One mają upraszczać życie.
+
+## Mini projekty, które ten folder powinien Ci umożliwić
+
+Po przerobieniu tego działu powinieneś umieć zrobić małe rzeczy typu:
+
+- parser logów z `re`, `dataclass`, `typing` i `Counter`,
+- prostą analizę danych tekstowych z `defaultdict` i `itertools`,
+- mini warstwę konfiguracji z `ChainMap` i `TypedDict`,
+- model danych z `dataclass` i walidacją w `__post_init__`,
+- dekorator z `wraps` i cache przez `lru_cache`.
+
+## Po czym poznasz, że temat naprawdę siedzi
 
 Dobry znak, jeśli potrafisz:
 
-- użyć `re` do prostego wyciągnięcia danych z tekstu,
-- rozpoznać, kiedy `itertools` upraszcza iterację,
-- użyć `partial`, `wraps` albo `lru_cache` bez zgadywania,
-- wybrać `Counter`, `defaultdict` albo `deque` zamiast ręcznej prowizorki,
-- dopisać sensowne typy do funkcji,
-- utworzyć `dataclass` z domyślnymi polami i walidacją w `__post_init__`.
+- wskazać, kiedy regex ma sens, a kiedy jest przesadą,
+- wyjaśnić, kiedy `itertools` daje realny zysk nad zwykłą pętlą,
+- użyć `Counter`, `defaultdict` i `deque` bez zastanawiania się nad prowizorką,
+- dodać sensowne typowanie bez zamieniania kodu w ścianę adnotacji,
+- odróżnić `dataclass` od zwykłej klasy i wiedzieć, kiedy która jest lepsza,
+- połączyć kilka tych bibliotek w jednym małym projekcie.
 
-## Jak najlepiej ćwiczyć
+## Główne ryzyko tego folderu
 
-W tym dziale bardzo pomaga styl:
+Największym błędem nie jest brak znajomości składni.
 
-1. napisz prostą wersję ręcznie,
-2. zobacz, jak ten sam problem rozwiązuje biblioteka,
-3. porównaj czytelność i długość kodu,
-4. zapamiętaj, kiedy dane narzędzie naprawdę daje wartość.
+Największym błędem jest używanie tych narzędzi bez wyczucia.
 
-To szczególnie dobrze działa przy:
+Czyli na przykład:
 
-- `collections`,
-- `itertools`,
-- `functools`,
-- `dataclasses`.
+- regex do najprostszego `split()`,
+- `reduce()` zamiast czytelnego `sum()`,
+- `itertools` tam, gdzie prosta lista wystarczy,
+- `typing` robione tylko dla ozdoby,
+- `dataclass` wciskane tam, gdzie klasa ma głównie zachowanie, nie dane.
 
-## Uczciwa ocena startowa tego folderu
+## Podsumowanie
 
-Na ten moment ten dział ma dobry wybór tematów i sensowną strukturę, ale jeszcze nie ma poziomu dopracowania folderów `06` i `07`.
+To jest folder o świadomym wyborze narzędzi.
 
-Najbardziej brakuje tu:
+Jeśli go dobrze opanujesz, zaczniesz nie tylko pisać kod, który działa, ale też częściej rozpoznawać:
 
-- mocniejszego `README`,
-- większego zestawu ćwiczeń,
-- większej liczby przykładów z outputem,
-- bardziej praktycznych scenariuszy użycia tych bibliotek.
-
-To jest dobry fundament, ale jeszcze nie końcowy poziom.
-
-Co dalej:
-
-- po dopracowaniu tego działu można przejść do `09. Narzędzia`,
-- albo do `10. Testowanie`, jeśli chcesz wzmacniać bardziej profesjonalny warsztat.
+- że Python już ma gotowe rozwiązanie,
+- że nie trzeba wszystkiego pisać ręcznie,
+- i że dobra biblioteka standardowa potrafi mocno uprościć projekt.

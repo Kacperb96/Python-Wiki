@@ -1,63 +1,67 @@
 # `itertools` w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co używać `itertools`](#po-co-używać-itertools)
-3. [Iteratory i leniwe przetwarzanie](#iteratory-i-leniwe-przetwarzanie)
-4. [`count()`](#count)
-5. [`cycle()`](#cycle)
-6. [`repeat()`](#repeat)
-7. [`chain()`](#chain)
-8. [`islice()`](#islice)
-9. [`product()`, `permutations()`, `combinations()`](#product-permutations-combinations)
-10. [`groupby()`](#groupby)
-11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-12. [Praktyczne przykłady](#praktyczne-przykłady)
-13. [Dobre praktyki](#dobre-praktyki)
-14. [Podsumowanie](#podsumowanie)
-15. [Mini ściąga](#mini-ściąga)
-16. [Ćwiczenia](#ćwiczenia)
-17. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
 ## Wprowadzenie
 
 `itertools` to moduł do pracy z iteratorami.
 
-Pozwala pisać wydajny, zwięzły kod do:
+Pozwala pisać zwięzły i wydajny kod do:
 
 - łączenia sekwencji,
 - generowania kombinacji,
-- cięcia iteratorów,
-- budowania potoków danych.
+- budowania pipeline'ów danych,
+- pracy leniwej bez tworzenia zbędnych list.
 
----
+## Kiedy `itertools` ma sens
 
-## Po co używać `itertools`
+`itertools` przydaje się szczególnie, gdy:
 
-`itertools` przydaje się, gdy chcesz:
+- dane są przetwarzane etapami,
+- nie chcesz ładować wszystkiego do pamięci,
+- chcesz połączyć kilka iterowalnych źródeł,
+- potrzebujesz kombinacji, permutacji lub iloczynu kartezjańskiego,
+- pracujesz na strumieniu danych.
 
-- przetwarzać dane leniwie,
-- uniknąć budowania niepotrzebnych list,
-- korzystać z gotowych wzorców iteracyjnych.
+## Kiedy zwykły `for` jest lepszy
 
----
+Jeśli zadanie jest bardzo proste, to zwykła pętla często wygrywa czytelnością.
+
+To ważna zasada: `itertools` nie ma robić wrażenia, tylko upraszczać.
 
 ## Iteratory i leniwe przetwarzanie
 
-Wiele narzędzi z `itertools` zwraca iteratory.
+Wiele narzędzi z `itertools` zwraca iterator, czyli elementy powstają dopiero wtedy, gdy są potrzebne.
 
-To znaczy, że elementy powstają dopiero wtedy, gdy są potrzebne.
+To bywa korzystne pamięciowo.
 
-To często oszczędza pamięć.
+## `chain()`
 
----
+Łączy kilka iterowalnych źródeł.
+
+```python
+from itertools import chain
+
+print(list(chain([1, 2], [3, 4], [5])))
+```
+
+Output:
+
+```python
+[1, 2, 3, 4, 5]
+```
+
+### Kiedy wybrać `chain()` zamiast `+`
+
+Użyj `chain()`, gdy:
+
+- źródeł jest dużo,
+- są iteratorami,
+- chcesz przetwarzać dane leniwie.
+
+Jeśli masz dwie krótkie listy i chcesz po prostu nową listę, zwykłe `a + b` też może być całkiem dobre.
 
 ## `count()`
 
-Nieskończony licznik:
+Nieskończony licznik.
 
 ```python
 from itertools import count
@@ -68,11 +72,18 @@ for x in count(10, 2):
         break
 ```
 
----
+Output:
+
+```python
+10
+12
+14
+16
+```
 
 ## `cycle()`
 
-Zapętla elementy:
+Zapętla elementy w kółko.
 
 ```python
 from itertools import cycle
@@ -81,11 +92,19 @@ for i, x in zip(range(5), cycle(["A", "B"])):
     print(x)
 ```
 
----
+Output:
+
+```python
+A
+B
+A
+B
+A
+```
 
 ## `repeat()`
 
-Powtarza wartość:
+Powtarza tę samą wartość.
 
 ```python
 from itertools import repeat
@@ -93,23 +112,15 @@ from itertools import repeat
 print(list(repeat("ok", 3)))
 ```
 
----
-
-## `chain()`
-
-Łączy iterowalne źródła:
+Output:
 
 ```python
-from itertools import chain
-
-print(list(chain([1, 2], [3, 4], [5])))
+['ok', 'ok', 'ok']
 ```
-
----
 
 ## `islice()`
 
-Wycina fragment iteratora:
+Wycina fragment iteratora.
 
 ```python
 from itertools import islice
@@ -117,11 +128,17 @@ from itertools import islice
 print(list(islice(range(100), 5, 10)))
 ```
 
----
+Output:
+
+```python
+[5, 6, 7, 8, 9]
+```
+
+### Kiedy `islice()` ma sens
+
+Gdy pracujesz z iteratorami i nie chcesz zamieniać ich całych na listę tylko po to, żeby pobrać fragment.
 
 ## `product()`, `permutations()`, `combinations()`
-
-To jedne z najpraktyczniejszych funkcji kombinatorycznych.
 
 ```python
 from itertools import product, permutations, combinations
@@ -131,7 +148,7 @@ print(list(permutations([1, 2, 3], 2)))
 print(list(combinations([1, 2, 3], 2)))
 ```
 
----
+To bardzo praktyczne narzędzia do generowania wariantów.
 
 ## `groupby()`
 
@@ -140,132 +157,93 @@ Grupuje kolejne elementy o tym samym kluczu.
 ```python
 from itertools import groupby
 
-dane = [1, 1, 2, 2, 2, 3]
-for klucz, grupa in groupby(dane):
-    print(klucz, list(grupa))
+data = [1, 1, 2, 2, 2, 3]
+for key, group in groupby(data):
+    print(key, list(group))
 ```
 
-Ważne: działa na kolejnych elementach, nie robi automatycznego grupowania jak SQL.
-
----
-
-## Typowe błędy początkujących
-
-- oczekiwanie, że iteratory można wielokrotnie konsumować bez odtwarzania,
-- nieświadomość, że `groupby()` wymaga odpowiedniego uporządkowania danych,
-- zamiana wszystkiego na listę bez potrzeby,
-- używanie `itertools` tam, gdzie prosty `for` jest czytelniejszy.
-
----
-
-## Praktyczne przykłady
-
-### Wszystkie pary
+Output:
 
 ```python
-from itertools import product
-
-for a, b in product([1, 2, 3], ["x", "y"]):
-    print(a, b)
+1 [1, 1]
+2 [2, 2, 2]
+3 [3]
 ```
 
-### Pierwsze 5 elementów iteratora
+### Ważne
 
-```python
-from itertools import islice, count
+`groupby()` działa na kolejnych elementach, a nie jak SQL-owe globalne grupowanie.
 
-print(list(islice(count(100), 5)))
-```
+Często przed użyciem trzeba dane posortować.
 
----
+## `itertools` vs zwykła pętla
 
-## Dobre praktyki
-
-- używaj `itertools`, gdy daje realne uproszczenie,
-- pamiętaj o leniwej naturze iteratorów,
-- przy `groupby()` sortuj dane, jeśli chcesz grupować po kluczu globalnie,
-- nie komplikuj prostych zadań na siłę.
-
----
-
-## Podsumowanie
-
-`itertools` to bardzo mocny zestaw narzędzi do pracy z iteratorami.
-
-W praktyce szczególnie często przydają się:
-
-- `chain()`,
-- `islice()`,
-- `product()`,
-- `combinations()`.
-
----
-
-## Mini ściąga
-
-```python
-from itertools import chain, islice, product
-```
-
-Najważniejsze:
-
-- `chain()` łączy,
-- `islice()` wycina,
-- `count()` liczy w nieskończoność,
-- `product()` robi iloczyn kartezjański,
-- `groupby()` grupuje kolejne elementy.
-
----
-
-## Ćwiczenia
-
-1. Połącz trzy listy w jeden iterator.
-2. Pobierz pierwsze 10 liczb z `count()`.
-3. Wygeneruj wszystkie pary z dwóch list.
-4. Znajdź wszystkie kombinacje 2-elementowe.
-5. Pogrupuj kolejne jednakowe liczby w liście.
-
----
-
-## Przykładowe rozwiązania
-
-### 1. Łączenie
+### Wersja z `chain()`
 
 ```python
 from itertools import chain
 
-print(list(chain([1], [2, 3], [4])))
+for x in chain([1, 2], [3, 4], [5]):
+    print(x)
 ```
 
-### 2. Pierwsze 10 liczb
+### Wersja zwykła
 
 ```python
-from itertools import count, islice
-
-print(list(islice(count(1), 10)))
+for seq in ([1, 2], [3, 4], [5]):
+    for x in seq:
+        print(x)
 ```
 
-### 3. Pary
+Obie są poprawne. `chain()` bywa czytelniejsze, jeśli naprawdę składasz wiele źródeł. Zwykły `for` bywa lepszy, jeśli chcesz maksymalnej oczywistości.
 
-```python
-from itertools import product
+## Typowe błędy początkujących
 
-print(list(product([1, 2], ["a", "b"])))
-```
+- nieświadomość, że obiekty z `itertools` są iteratorami,
+- wielokrotne zużywanie iteratora i zdziwienie, że „już nic nie ma”,
+- używanie `groupby()` bez sortowania,
+- zamienianie wszystkiego na `list()` bez potrzeby,
+- używanie `itertools` tam, gdzie zwykła pętla byłaby prostsza.
 
-### 4. Kombinacje
+## Mini scenariusz praktyczny
 
-```python
-from itertools import combinations
+Masz trzy źródła wpisów logów i chcesz je przejść jednym strumieniem.
 
-print(list(combinations([1, 2, 3], 2)))
-```
+Tu `chain()` ma bardzo sensowny use case.
 
-### 5. Grupowanie
+Masz też nieskończone źródło numerów albo chcesz pobrać tylko fragment iteratora. Tu `count()` i `islice()` robią świetną robotę.
 
-```python
-from itertools import groupby
+## Dobre praktyki
 
-for k, g in groupby([1, 1, 2, 3, 3]):
-    print(k, list(g))
-```
+- używaj `itertools`, gdy upraszcza kod albo oszczędza pamięć,
+- nie komplikuj prostych zadań na siłę,
+- pamiętaj, że iteratory są konsumowane,
+- przy `groupby()` myśl o kolejności danych,
+- wybieraj czytelność ponad „spryt”.
+
+## Szybka ściąga
+
+Najczęściej przydatne:
+
+- `chain()` — łączy iterowalne źródła,
+- `islice()` — wycina fragment iteratora,
+- `count()` — nieskończony licznik,
+- `product()` — iloczyn kartezjański,
+- `combinations()` — kombinacje,
+- `groupby()` — grupowanie kolejnych elementów.
+
+## Ćwiczenia
+
+1. Połącz trzy listy przez `chain()`.
+2. Pobierz pierwsze 5 elementów z `count()`.
+3. Wygeneruj wszystkie pary z dwóch list.
+4. Pokaż działanie `groupby()` przed i po sortowaniu.
+5. Napisz to samo zadanie raz z `itertools`, a raz zwykłą pętlą.
+
+## Najważniejsze do zapamiętania
+
+- `itertools` daje gotowe wzorce iteracyjne.
+- Największą siłą jest leniwe przetwarzanie i gotowe kombinatoryczne narzędzia.
+- `groupby()` grupuje kolejne elementy, nie wszystko globalnie.
+- Nie każde zadanie wymaga `itertools`.
+- Dobry użytek z `itertools` upraszcza kod, a nie go komplikuje.

@@ -1,27 +1,5 @@
 # `typing` w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co używać `typing`](#po-co-używać-typing)
-3. [Adnotacje typów](#adnotacje-typów)
-4. [Typy podstawowe](#typy-podstawowe)
-5. [`list[str]`, `dict[str, int]` i nowoczesna składnia](#liststr-dictstr-int-i-nowoczesna-składnia)
-6. [`Optional` i `Union`](#optional-i-union)
-7. [`Any`](#any)
-8. [`Callable`](#callable)
-9. [`TypeAlias` i `Literal`](#typealias-i-literal)
-10. [`TypedDict`](#typeddict)
-11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-12. [Praktyczne przykłady](#praktyczne-przykłady)
-13. [Dobre praktyki](#dobre-praktyki)
-14. [Podsumowanie](#podsumowanie)
-15. [Mini ściąga](#mini-ściąga)
-16. [Ćwiczenia](#ćwiczenia)
-17. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
 ## Wprowadzenie
 
 `typing` wspiera statyczne typowanie w Pythonie.
@@ -31,164 +9,128 @@ Python nadal pozostaje językiem dynamicznym, ale adnotacje typów pomagają:
 - czytać kod,
 - łapać błędy wcześniej,
 - lepiej wspierać IDE,
-- ułatwiać utrzymanie większych projektów.
-
----
+- łatwiej rozwijać większy projekt.
 
 ## Po co używać `typing`
 
-Typy poprawiają komunikację między ludźmi i narzędziami.
+Typy są bardzo przydatne jako kontrakt.
 
-Kod z dobrymi adnotacjami zwykle łatwiej zrozumieć i bezpieczniej rozwijać.
+Dają odpowiedź na pytania:
 
----
+- co funkcja przyjmuje,
+- co funkcja zwraca,
+- jakiej struktury oczekuje kod,
+- kiedy `None` jest możliwe,
+- jaki callback ma być przekazany.
+
+## Kiedy `typing` ma sens
+
+Szczególnie wtedy, gdy:
+
+- projekt rośnie,
+- masz więcej funkcji i modułów,
+- pracujesz z innymi ludźmi,
+- wracasz do kodu po czasie,
+- zależy Ci na wsparciu narzędzi jak mypy.
+
+## Kiedy nie przesadzać
+
+Typy mają pomagać, a nie dominować nad kodem.
+
+Jeśli adnotacje robią się bardziej skomplikowane niż sama logika, trzeba się zatrzymać i zapytać, czy to naprawdę daje wartość.
 
 ## Adnotacje typów
 
 ```python
-def dodaj(a: int, b: int) -> int:
+def add(a: int, b: int) -> int:
     return a + b
+
+print(add(2, 3))
 ```
 
-To nie wymusza typów w czasie działania samo z siebie, ale daje informacje narzędziom i programistom.
-
-Przykład:
-
-```python
-print(dodaj(2, 3))
-```
-
-Wynik:
+Output:
 
 ```python
 5
 ```
 
----
-
 ## Typy podstawowe
 
 Najczęstsze:
 
-- `int`
-- `str`
-- `float`
-- `bool`
-- `list`
-- `dict`
-
-Przykład:
+- `int`,
+- `str`,
+- `float`,
+- `bool`,
+- `list`,
+- `dict`.
 
 ```python
-imie: str = "Anna"
-wiek: int = 30
+name: str = "Anna"
+age: int = 30
 ```
 
----
-
-## `list[str]`, `dict[str, int]` i nowoczesna składnia
+## `list[str]`, `dict[str, int]`
 
 Nowoczesny zapis:
 
 ```python
-def przetworz(dane: list[str]) -> dict[str, int]:
-    return {x: len(x) for x in dane}
+def process(data: list[str]) -> dict[str, int]:
+    return {x: len(x) for x in data}
+
+print(process(["Ala", "Python"]))
 ```
 
-To obecnie zwykle czytelniejsza forma niż starsze `List[str]` i `Dict[str, int]`.
-
-Przykład:
-
-```python
-print(przetworz(["Ala", "Python"]))
-```
-
-Wynik:
+Output:
 
 ```python
 {'Ala': 3, 'Python': 6}
 ```
 
----
-
 ## `Optional` i `Union`
 
-`Optional[str]` oznacza zwykle `str | None`.
+W nowoczesnym Pythonie często używa się składni z `|`.
 
 ```python
-def znajdz() -> str | None:
+def find_user(user_id: int) -> str | None:
+    if user_id == 1:
+        return "Anna"
     return None
 ```
 
 To znaczy, że funkcja może zwrócić tekst albo brak wyniku.
 
-`Union` oznacza kilka możliwych typów.
-
-W nowoczesnym Pythonie często używa się składni z `|`.
-
----
-
-## `Any`
-
-`Any` oznacza brak konkretnej kontroli typu.
-
-Jest przydatne czasem, ale nadużywane osłabia sens typowania.
-
----
-
 ## `Callable`
 
-Do opisu funkcji przekazywanych jako argument:
+Do opisu funkcji przekazywanych jako argument.
 
 ```python
 from typing import Callable
 
-def uruchom(f: Callable[[int], int], x: int) -> int:
+def run(f: Callable[[int], int], x: int) -> int:
     return f(x)
+
+print(run(lambda x: x * 2, 5))
 ```
 
-Przykład:
-
-```python
-print(uruchom(lambda x: x * 2, 5))
-```
-
-Wynik:
+Output:
 
 ```python
 10
 ```
 
----
-
-## `TypeAlias` i `Literal`
-
-`TypeAlias` pomaga nazwać złożony typ.
-
-`Literal` pozwala ograniczyć wartości do konkretnych wariantów.
+## `Literal` i `TypeAlias`
 
 ```python
 from typing import Literal, TypeAlias
 
-UserId: TypeAlias = int
+Mode: TypeAlias = Literal["dev", "prod"]
 
-def ustaw_tryb(tryb: Literal["dev", "prod"]) -> None:
-    print(tryb)
+def set_mode(mode: Mode) -> None:
+    print(mode)
 ```
 
-Przykład:
-
-```python
-ustaw_tryb("dev")
-```
-
-Wynik:
-
-```python
-dev
-```
-
----
+To jest świetne, gdy dopuszczasz tylko kilka konkretnych wariantów.
 
 ## `TypedDict`
 
@@ -200,165 +142,93 @@ from typing import TypedDict
 class User(TypedDict):
     name: str
     age: int
-```
 
-To bardzo przydatne przy danych JSON-like.
-
-Przykład użycia:
-
-```python
 user: User = {"name": "Anna", "age": 30}
 print(user["name"])
 ```
 
-Wynik:
+Output:
 
 ```python
 Anna
 ```
 
----
+To bardzo przydatne przy danych JSON-like.
+
+## `typing` vs brak typów
+
+### Gdy typy wygrywają
+
+- funkcje używane w wielu miejscach,
+- moduły narzędziowe,
+- dane wejściowe o znanej strukturze,
+- callbacki,
+- większe projekty.
+
+### Gdy nie warto przesadzać
+
+- bardzo krótki jednorazowy skrypt,
+- sytuacja, gdzie adnotacje są gęstsze niż sama logika,
+- eksperyment albo throwaway code.
+
+Nie znaczy to, że w małym kodzie typy są złe. Po prostu nie zawsze trzeba iść w pełny formalizm.
+
+## `typing` a runtime
+
+To ważne: same adnotacje typów nie wymuszają typów podczas działania programu.
+
+One pomagają:
+
+- człowiekowi,
+- IDE,
+- statycznym analizatorom.
+
+Jeśli chcesz walidacji runtime, zwykle potrzebujesz dodatkowych narzędzi albo jawnych checków.
 
 ## Typowe błędy początkujących
 
-- mylenie adnotacji typów z walidacją runtime,
-- używanie `Any` wszędzie,
-- przesadne komplikowanie typów w prostym kodzie,
-- brak aktualizacji adnotacji po zmianach logiki.
+- mylenie typowania z walidacją runtime,
+- nadużywanie `Any`,
+- brak oznaczenia `None`, gdy funkcja realnie może go zwrócić,
+- tworzenie bardzo skomplikowanych typów bez korzyści,
+- kopiowanie adnotacji bez rozumienia ich celu.
 
-### 5. Traktowanie typowania jako celu samego w sobie
+## Mini scenariusz praktyczny
 
-Typy mają pomagać w czytelności i bezpieczeństwie, a nie robić kod bardziej ciężkim niż potrzeba.
+Masz parser danych użytkownika i kilka funkcji, które pracują na słownikach, callbackach i opcjonalnych wynikach.
 
----
-
-## Praktyczne przykłady
-
-### Funkcja z listą napisów
-
-```python
-def policz_litery(slowa: list[str]) -> dict[str, int]:
-    return {slowo: len(slowo) for slowo in slowa}
-```
-
-Przykład użycia:
-
-```python
-print(policz_litery(["kot", "pies"]))
-```
-
-Wynik:
-
-```python
-{'kot': 3, 'pies': 4}
-```
-
-### `TypedDict`
-
-```python
-from typing import TypedDict
-
-class Product(TypedDict):
-    name: str
-    price: float
-```
-
-To jest szczególnie wygodne, gdy pracujesz na danych podobnych do JSON-a.
-
----
+Tu `typing` potrafi znacząco poprawić czytelność i ograniczyć liczbę pomyłek przy rozwijaniu kodu.
 
 ## Dobre praktyki
 
-- typuj publiczne API funkcji i klas,
-- nie komplikuj adnotacji bardziej niż to potrzebne,
-- preferuj nowoczesną składnię typów,
-- używaj `TypedDict` i `dataclass` tam, gdzie poprawia to czytelność danych.
+- zaczynaj od prostych i czytelnych typów,
+- typuj publiczne funkcje i ważne modele danych,
+- używaj `TypedDict`, gdy pracujesz z przewidywalnym słownikiem,
+- nie traktuj `Any` jako ucieczki od myślenia,
+- pamiętaj, że typowanie ma pomagać w utrzymaniu kodu.
 
-Praktyczna zasada:
+## Szybka ściąga
 
-zacznij od prostych typów funkcji i zwracanych wartości. Nie próbuj od razu typować wszystkiego w najbardziej zaawansowany sposób.
+Najczęściej przydatne:
 
----
-
-## Podsumowanie
-
-`typing` nie zmienia Pythona w język statyczny, ale znacząco poprawia jakość większego kodu.
-
-Największa wartość to czytelność, lepsze narzędzia i wcześniejsze wykrywanie problemów.
-
-Najważniejsze do zapamiętania:
-
-- adnotacje typów nie są tym samym co walidacja w runtime,
-- dobrze opisane typy pomagają ludziom i narzędziom,
-- `TypedDict`, `Literal` i `Callable` rozwiązują bardzo praktyczne problemy.
-
----
-
-## Mini ściąga
-
-```python
-def hello(name: str) -> str:
-    return f"Hi {name}"
-```
-
-Najważniejsze:
-
-- `a: int` opisuje typ,
-- `-> str` opisuje typ zwracany,
-- `str | None` oznacza opcjonalność,
-- `Callable` opisuje funkcję,
-- `TypedDict` opisuje strukturę słownika.
-
----
+- `list[str]`, `dict[str, int]`,
+- `str | None`,
+- `Callable`,
+- `Literal`,
+- `TypedDict`.
 
 ## Ćwiczenia
 
-1. Dodaj typy do funkcji sumującej dwie liczby.
-2. Opisz funkcję przyjmującą listę napisów.
-3. Zwróć typ opcjonalny `str | None`.
-4. Zdefiniuj `TypedDict` dla użytkownika.
-5. Użyj `Literal` dla trybu pracy aplikacji.
+1. Dodaj typy do kilku prostych funkcji.
+2. Zrób funkcję zwracającą `str | None`.
+3. Użyj `Callable` w funkcji przyjmującej callback.
+4. Utwórz `TypedDict` dla prostego JSON-a.
+5. Opisz przypadek, gdzie typy pomagają bardziej niż komentarz tekstowy.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. Dodawanie
-
-```python
-def dodaj(a: int, b: int) -> int:
-    return a + b
-```
-
-### 2. Lista napisów
-
-```python
-def polacz(slowa: list[str]) -> str:
-    return " ".join(slowa)
-```
-
-### 3. Opcjonalny wynik
-
-```python
-def znajdz_user(user_id: int) -> str | None:
-    return None
-```
-
-### 4. `TypedDict`
-
-```python
-from typing import TypedDict
-
-class User(TypedDict):
-    name: str
-    age: int
-```
-
-### 5. `Literal`
-
-```python
-from typing import Literal
-
-def ustaw_tryb(tryb: Literal["dev", "prod"]) -> None:
-    print(tryb)
-```
+- `typing` poprawia komunikację i czytelność kodu.
+- Typy są szczególnie wartościowe w większym i dłużej żyjącym kodzie.
+- Adnotacje nie zastępują walidacji runtime.
+- Nie warto przesadzać ze złożonością typów bez realnej potrzeby.
+- Dobre typy pomagają myśleć o interfejsie funkcji i danych.

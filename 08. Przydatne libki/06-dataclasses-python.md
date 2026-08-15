@@ -1,45 +1,34 @@
 # `dataclasses` w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co używać `dataclasses`](#po-co-używać-dataclasses)
-3. [Najprostsza dataclass](#najprostsza-dataclass)
-4. [Automatycznie generowane metody](#automatycznie-generowane-metody)
-5. [Wartości domyślne](#wartości-domyślne)
-6. [`field()`](#field)
-7. [`default_factory`](#default_factory)
-8. [`__post_init__`](#post_init)
-9. [`frozen=True`](#frozentrue)
-10. [Dataclass a zwykła klasa](#dataclass-a-zwykła-klasa)
-11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-12. [Praktyczne przykłady](#praktyczne-przykłady)
-13. [Dobre praktyki](#dobre-praktyki)
-14. [Podsumowanie](#podsumowanie)
-15. [Mini ściąga](#mini-ściąga)
-16. [Ćwiczenia](#ćwiczenia)
-17. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
 ## Wprowadzenie
 
 `dataclasses` upraszczają tworzenie klas, które głównie przechowują dane.
 
 Zamiast ręcznie pisać dużo powtarzalnego kodu, możesz użyć dekoratora `@dataclass`.
 
----
+To jedno z najbardziej praktycznych narzędzi nowoczesnego Pythona do modelowania prostych obiektów danych.
 
-## Po co używać `dataclasses`
+## Kiedy `dataclass` ma sens
 
-`dataclass` jest przydatna, gdy:
+`dataclass` jest świetna, gdy:
 
 - klasa ma głównie pola danych,
-- chcesz mieć czytelny konstruktor,
-- zależy ci na automatycznym `repr`,
-- chcesz prostszy i krótszy kod.
+- chcesz prosty konstruktor,
+- chcesz automatyczny `repr`,
+- chcesz porównywanie obiektów po wartościach,
+- modelujesz DTO, config, rekord, value object.
 
----
+## Kiedy zwykła klasa albo `dict` są lepsze
+
+### Zwykła klasa
+
+Lepsza, gdy klasa ma dużo własnego zachowania i mało danych.
+
+### `dict`
+
+Może wystarczyć, gdy dane są jednorazowe, bardzo luźne i nie potrzebujesz wyraźnego modelu.
+
+`dataclass` ma sens wtedy, gdy chcesz nazwać strukturę danych i nadać jej porządną formę.
 
 ## Najprostsza dataclass
 
@@ -50,22 +39,16 @@ from dataclasses import dataclass
 class User:
     name: str
     age: int
-```
 
-Teraz możesz zrobić:
-
-```python
 u = User("Anna", 30)
 print(u)
 ```
 
-Wynik:
+Output:
 
 ```python
 User(name='Anna', age=30)
 ```
-
----
 
 ## Automatycznie generowane metody
 
@@ -75,21 +58,15 @@ User(name='Anna', age=30)
 - `__repr__`,
 - `__eq__`.
 
-To oszczędza dużo powtarzalnej pracy.
-
-Przykład:
-
 ```python
 print(User("Anna", 30) == User("Anna", 30))
 ```
 
-Wynik:
+Output:
 
 ```python
 True
 ```
-
----
 
 ## Wartości domyślne
 
@@ -100,25 +77,19 @@ from dataclasses import dataclass
 class Config:
     debug: bool = False
     port: int = 8000
-```
 
-Przykład użycia:
-
-```python
 print(Config())
 ```
 
-Wynik:
+Output:
 
 ```python
 Config(debug=False, port=8000)
 ```
 
----
+## `field()` i `default_factory`
 
-## `field()`
-
-`field()` daje więcej kontroli nad polem.
+To bardzo ważne przy mutowalnych wartościach domyślnych.
 
 ```python
 from dataclasses import dataclass, field
@@ -129,33 +100,11 @@ class User:
     tags: list[str] = field(default_factory=list)
 ```
 
-To sprawia, że każda instancja dostaje własną listę `tags`.
-
----
-
-## `default_factory`
-
-To bardzo ważne przy mutowalnych wartościach domyślnych.
-
-Zamiast:
-
-```python
-tags = []
-```
-
-używaj:
-
-```python
-field(default_factory=list)
-```
-
-To zapobiega współdzieleniu tej samej listy między instancjami.
-
----
+Każda instancja dostaje własną listę `tags`.
 
 ## `__post_init__`
 
-Jeśli po utworzeniu obiektu chcesz zrobić dodatkową logikę:
+Służy do dodatkowej logiki po utworzeniu obiektu.
 
 ```python
 from dataclasses import dataclass
@@ -168,21 +117,15 @@ class Product:
     def __post_init__(self):
         if self.price < 0:
             raise ValueError("price nie moze byc ujemne")
-```
 
-Przykład użycia:
-
-```python
 print(Product("Kawa", 12.5))
 ```
 
-Wynik:
+Output:
 
 ```python
 Product(name='Kawa', price=12.5)
 ```
-
----
 
 ## `frozen=True`
 
@@ -197,157 +140,43 @@ class Point:
     y: int
 ```
 
-To przydatne przy obiektach konfiguracyjnych i value objects.
+To przydatne np. dla obiektów konfiguracyjnych albo value objects.
 
-Próba zmiany pola:
+## `dataclass` vs zwykła klasa
 
-```python
-# p.x = 10
-```
+### Gdy `dataclass` wygrywa
 
-zakończy się błędem typu `FrozenInstanceError`.
+- model użytkownika,
+- rekord zamówienia,
+- wynik parsera,
+- prosty config,
+- obiekt danych z lekką walidacją.
 
----
+### Gdy zwykła klasa wygrywa
 
-## Dataclass a zwykła klasa
+- obiekt z bogatym zachowaniem,
+- klasa zarządzająca procesem,
+- serwis, który ma dużo metod i zależności.
 
-Dataclass nie zastępuje każdej klasy.
+### Gdy `dict` wystarczy
 
-Najlepiej pasuje tam, gdzie dominują dane.
+- bardzo prosty tymczasowy payload,
+- krótki eksperyment,
+- jednorazowa struktura bez potrzeby modelowania.
 
-Jeśli klasa ma dużo niestandardowego zachowania, zwykła klasa może być lepsza.
+## `dataclass` a czytelność
 
----
+Duża zaleta `dataclass` polega na tym, że od razu widać model danych.
 
-## Typowe błędy początkujących
+Porównaj:
 
-- używanie mutowalnych wartości domyślnych bez `default_factory`,
-- traktowanie dataclass jak magicznego rozwiązania do wszystkiego,
-- brak walidacji danych tam, gdzie jest potrzebna,
-- zapominanie, że `frozen=True` ogranicza modyfikacje pól.
-
-### 5. Używanie `dataclass`, gdy klasa ma głównie złożone zachowanie, a nie dane
-
-Wtedy zwykła klasa bywa lepszym i czytelniejszym wyborem.
-
----
-
-## Praktyczne przykłady
-
-### Model użytkownika
+### Luźny `dict`
 
 ```python
-from dataclasses import dataclass
-
-@dataclass
-class User:
-    username: str
-    email: str
-    active: bool = True
+user = {"name": "Anna", "age": 30}
 ```
 
-Przykład użycia:
-
-```python
-print(User("janek", "janek@example.com"))
-```
-
-Wynik:
-
-```python
-User(username='janek', email='janek@example.com', active=True)
-```
-
-### Lista tagów
-
-```python
-from dataclasses import dataclass, field
-
-@dataclass
-class Article:
-    title: str
-    tags: list[str] = field(default_factory=list)
-```
-
-Przykład:
-
-```python
-a1 = Article("Python")
-a2 = Article("Regexy")
-a1.tags.append("kod")
-print(a1.tags)
-print(a2.tags)
-```
-
-Wynik:
-
-```python
-['kod']
-[]
-```
-
----
-
-## Dobre praktyki
-
-- używaj `dataclass`, gdy klasa głównie przechowuje dane,
-- dla mutowalnych domyślnych wartości używaj `default_factory`,
-- dodawaj typy pól,
-- używaj `__post_init__` do prostych walidacji i inicjalizacji pośredniej.
-
-Praktyczna zasada:
-
-jeśli Twoja klasa wygląda głównie jak zestaw pól danych z niewielką ilością logiki, `dataclass` bardzo często będzie świetnym wyborem.
-
----
-
-## Podsumowanie
-
-`dataclasses` znacząco upraszczają kod modeli danych.
-
-To bardzo praktyczne narzędzie, które dobrze łączy się z `typing`.
-
-Najważniejsze do zapamiętania:
-
-- `@dataclass` usuwa dużo boilerplate'u,
-- `default_factory` jest kluczowe dla list i słowników,
-- `__post_init__` pozwala dodać walidację bez pisania pełnego własnego `__init__`.
-
----
-
-## Mini ściąga
-
-```python
-from dataclasses import dataclass, field
-
-@dataclass
-class User:
-    name: str
-    tags: list[str] = field(default_factory=list)
-```
-
-Najważniejsze:
-
-- `@dataclass` generuje boilerplate,
-- pola definiujesz jak zwykłe atrybuty,
-- `field(default_factory=...)` jest ważne dla list i dictów,
-- `__post_init__` pozwala dodać logikę po inicjalizacji.
-
----
-
-## Ćwiczenia
-
-1. Utwórz dataclass `User` z polami `name` i `age`.
-2. Dodaj pole z wartością domyślną.
-3. Dodaj listę tagów przez `default_factory`.
-4. Dodaj walidację ceny przez `__post_init__`.
-5. Utwórz niemutowalną dataclass punktu.
-
----
-
-## Przykładowe rozwiązania
-
-### 1. `User`
+### Jawny model
 
 ```python
 from dataclasses import dataclass
@@ -358,47 +187,51 @@ class User:
     age: int
 ```
 
-### 2. Wartość domyślna
+Drugi wariant zwykle lepiej komunikuje intencję w większym kodzie.
 
-```python
-from dataclasses import dataclass
+## Typowe błędy początkujących
 
-@dataclass
-class Config:
-    debug: bool = False
-```
+- używanie mutowalnej wartości domyślnej bez `default_factory`,
+- wciskanie `dataclass` do klas, które mają głównie zachowanie,
+- brak walidacji w `__post_init__`, gdy dane tego wymagają,
+- mylenie `dataclass` z pełnym OOP lub z ORM-em,
+- używanie `dict` wszędzie, nawet gdy model danych już się prosi o nazwany typ.
 
-### 3. Tagi
+## Mini scenariusz praktyczny
 
-```python
-from dataclasses import dataclass, field
+Masz parser logów albo moduł zamówień. Każdy wpis ma kilka pól: datę, poziom, komunikat, użytkownika.
 
-@dataclass
-class Note:
-    tags: list[str] = field(default_factory=list)
-```
+`dataclass` świetnie nadaje się do reprezentowania takiego rekordu. Jest czytelniej niż na słownikach i lżej niż w rozbudowanym OOP.
 
-### 4. Walidacja
+## Dobre praktyki
 
-```python
-from dataclasses import dataclass
+- używaj `dataclass` dla obiektów danych,
+- stosuj `default_factory` dla list i słowników,
+- używaj `__post_init__`, gdy potrzebna jest lekka walidacja,
+- nie wciskaj `dataclass` do każdej klasy,
+- wybieraj model, który najlepiej komunikuje intencję.
 
-@dataclass
-class Product:
-    price: float
+## Szybka ściąga
 
-    def __post_init__(self):
-        if self.price < 0:
-            raise ValueError("zla cena")
-```
+Najczęściej przydatne:
 
-### 5. Punkt
+- `@dataclass`,
+- `field(default_factory=...)`,
+- `__post_init__`,
+- `frozen=True`.
 
-```python
-from dataclasses import dataclass
+## Ćwiczenia
 
-@dataclass(frozen=True)
-class Point:
-    x: int
-    y: int
-```
+1. Zrób `User` jako `dataclass`.
+2. Dodaj listę tagów przez `default_factory`.
+3. Dodaj walidację ceny w `__post_init__`.
+4. Porównaj `dict`, zwykłą klasę i `dataclass` dla tego samego modelu.
+5. Opisz 3 sytuacje, gdzie `dataclass` ma sens i 2, gdzie nie ma.
+
+## Najważniejsze do zapamiętania
+
+- `dataclass` upraszcza modelowanie klas przechowujących dane.
+- Daje ogromnie dużo za małą ilość kodu.
+- `default_factory` jest ważne przy mutowalnych polach.
+- `dataclass` nie zastępuje każdej klasy i nie jest rozwiązaniem na wszystko.
+- Najlepiej sprawdza się tam, gdzie dane są ważniejsze niż zachowanie.

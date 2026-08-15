@@ -1,43 +1,28 @@
 # `functools` w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co używać `functools`](#po-co-używać-functools)
-3. [`partial`](#partial)
-4. [`reduce`](#reduce)
-5. [Dekoratory z `wraps`](#dekoratory-z-wraps)
-6. [`lru_cache`](#lru_cache)
-7. [`cached_property`](#cached_property)
-8. [`cmp_to_key`](#cmp_to_key)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
 ## Wprowadzenie
 
-`functools` zawiera narzędzia wspierające pracę z funkcjami i dekoratorami.
+`functools` zawiera narzędzia wspierające pracę z funkcjami, dekoratorami i cache.
 
-Nie każdy element tego modułu jest używany codziennie, ale kilka z nich jest bardzo praktycznych.
+Nie wszystko z tego modułu jest używane codziennie, ale kilka elementów jest bardzo praktycznych:
 
----
+- `partial`,
+- `wraps`,
+- `lru_cache`,
+- `cached_property`.
 
-## Po co używać `functools`
+## Kiedy `functools` ma sens
 
-Najczęstsze zastosowania:
+Używaj go, gdy:
 
-- częściowe wiązanie argumentów,
-- cache wyników funkcji,
-- poprawne pisanie dekoratorów,
-- redukcja sekwencji do jednej wartości.
+- chcesz dodać cache do czystej funkcji,
+- piszesz dekorator i chcesz zachować metadane funkcji,
+- tworzysz wygodniejszą funkcję z częścią argumentów ustawioną z góry,
+- pracujesz w stylu funkcyjnym albo z callbackami.
 
----
+## Kiedy prostszy kod wygrywa
+
+Jeśli `partial()` albo `reduce()` robią kod mniej czytelnym niż zwykła funkcja lub pętla, to wybierz prostszy wariant.
 
 ## `partial`
 
@@ -53,7 +38,26 @@ kwadrat = partial(potega, y=2)
 print(kwadrat(5))
 ```
 
----
+Output:
+
+```python
+25
+```
+
+### Kiedy `partial()` ma sens
+
+- gdy konfigurujesz callback,
+- gdy chcesz stworzyć czytelniejszą, wyspecjalizowaną funkcję,
+- gdy unikasz powtarzania tych samych argumentów.
+
+### Kiedy lepsza jest zwykła funkcja
+
+```python
+def kwadrat(x):
+    return x ** 2
+```
+
+To bywa prostsze i czytelniejsze niż `partial()` w małych przypadkach.
 
 ## `reduce`
 
@@ -62,32 +66,42 @@ Redukuje sekwencję do jednej wartości.
 ```python
 from functools import reduce
 
-wynik = reduce(lambda a, b: a + b, [1, 2, 3, 4])
-print(wynik)
+result = reduce(lambda a, b: a + b, [1, 2, 3, 4])
+print(result)
 ```
 
-W praktyce często czytelniejsze bywa zwykłe `sum()`, ale warto znać ideę.
+Output:
 
----
+```python
+10
+```
 
-## Dekoratory z `wraps`
+### Ale uwaga
+
+W praktyce często czytelniejsze będzie:
+
+```python
+print(sum([1, 2, 3, 4]))
+```
+
+`reduce()` warto znać, ale nie trzeba go nadużywać.
+
+## `wraps`
 
 Jeśli piszesz dekorator, używaj `wraps`.
 
 ```python
 from functools import wraps
 
-def moj_dekorator(func):
+def loguj(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        print("start")
+        print(f"Wywolanie {func.__name__}")
         return func(*args, **kwargs)
     return wrapper
 ```
 
 To zachowuje metadane funkcji, np. nazwę i docstring.
-
----
 
 ## `lru_cache`
 
@@ -102,176 +116,115 @@ def fib(n):
         return n
     return fib(n - 1) + fib(n - 2)
 
-print(fib(30))
+print(fib(10))
 ```
 
-To potrafi dramatycznie przyspieszyć niektóre obliczenia.
+Output:
 
----
+```python
+55
+```
+
+### Kiedy `lru_cache` ma sens
+
+- gdy funkcja jest czysta,
+- gdy te same argumenty pojawiają się wielokrotnie,
+- gdy obliczenia są kosztowne.
+
+### Kiedy nie używać
+
+- gdy funkcja ma efekty uboczne,
+- gdy wynik zależy od zmieniającego się stanu zewnętrznego,
+- gdy cache może niepotrzebnie zużywać pamięć.
 
 ## `cached_property`
 
-Pozwala obliczyć wartość raz i potem ją zapamiętać na instancji.
+Oblicza wartość raz na instancję i potem ją zapamiętuje.
 
 ```python
 from functools import cached_property
 
-class Raport:
+class Report:
     @cached_property
-    def wynik(self):
-        print("licze")
+    def result(self):
+        print("Licze wynik")
         return 42
+
+r = Report()
+print(r.result)
+print(r.result)
 ```
 
----
+Output:
 
-## `cmp_to_key`
+```python
+Licze wynik
+42
+42
+```
 
-Pomaga zamienić starszy styl porównywania na klucz do sortowania.
+Widzisz, komunikat pojawia się tylko raz.
 
-Jest mniej codzienny, ale spotykany w starszym kodzie i specjalnych przypadkach.
+## `functools` vs prostszy Python
 
----
+### Gdy biblioteka wygrywa
+
+- cache dla kosztownej funkcji,
+- dekorator z `wraps`,
+- `cached_property` dla drogiego obliczenia w obiekcie.
+
+### Gdy prostszy kod wygrywa
+
+- `sum()` zamiast `reduce()` dla zwykłego sumowania,
+- normalna funkcja zamiast przesadnie wymyślnego `partial()`,
+- brak dekoratora, jeśli zwykła funkcja wystarczy.
 
 ## Typowe błędy początkujących
 
-- brak `wraps` w dekoratorach,
-- nadużywanie `reduce`, gdy prostsza funkcja wbudowana wystarcza,
-- używanie `lru_cache` dla funkcji z efektami ubocznymi,
-- brak rozumienia, że cache może zużywać pamięć.
+- brak `wraps` w dekoratorze,
+- używanie `reduce()` tam, gdzie prostsza funkcja wbudowana jest czytelniejsza,
+- dodawanie cache do funkcji z efektami ubocznymi,
+- brak świadomości kosztu pamięci przy cache,
+- traktowanie `functools` jak obowiązkowego stylu zamiast zestawu narzędzi.
 
----
+## Mini scenariusz praktyczny
 
-## Praktyczne przykłady
+Masz funkcję, która parsuje i liczy coś kosztownego dla tych samych danych wejściowych. `lru_cache` może dać ogromny zysk.
 
-### Cache dla drogiego obliczenia
+Masz dekorator logujący. `wraps` powinno być standardem.
 
-```python
-from functools import lru_cache
-
-@lru_cache(maxsize=128)
-def policz(x):
-    print("licze", x)
-    return x * x
-
-print(policz(5))
-print(policz(5))
-```
-
-### Dekorator logujący
-
-```python
-from functools import wraps
-
-def loguj(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        print(f"Wywolanie {func.__name__}")
-        return func(*args, **kwargs)
-    return wrapper
-```
-
----
+Masz prostą funkcję kwadrat. Zwykła definicja może być lepsza niż `partial()`.
 
 ## Dobre praktyki
 
-- `wraps` traktuj jako standard przy dekoratorach,
-- `lru_cache` stosuj do czystych funkcji,
-- `partial` używaj tam, gdzie poprawia czytelność,
-- nie komplikuj prostych przypadków funkcjonalnych na siłę.
+- `wraps` traktuj jako standard w dekoratorach,
+- cache stosuj świadomie,
+- nie używaj `reduce()` tylko po to, żeby wyglądać bardziej funkcyjnie,
+- wybieraj rozwiązanie czytelniejsze dla człowieka,
+- pamiętaj, że moduł ma upraszczać pracę, nie ją zaciemniać.
 
----
+## Szybka ściąga
 
-## Podsumowanie
+Najczęściej przydatne:
 
-`functools` daje kilka bardzo wartościowych narzędzi do bardziej dojrzałego stylu pracy z funkcjami.
-
-Najczęściej naprawdę przydają się:
-
-- `wraps`,
-- `lru_cache`,
-- `partial`.
-
----
-
-## Mini ściąga
-
-```python
-from functools import partial, wraps, lru_cache
-```
-
-Najważniejsze:
-
-- `partial()` ustawia część argumentów,
-- `wraps` zachowuje metadane funkcji,
-- `lru_cache` cache'uje wyniki funkcji,
-- `reduce` redukuje sekwencję do jednej wartości.
-
----
+- `partial()` — wiąże część argumentów,
+- `wraps` — zachowuje metadane dekorowanej funkcji,
+- `lru_cache` — cache'uje wyniki,
+- `cached_property` — liczy raz na instancję,
+- `reduce()` — redukuje sekwencję do jednej wartości.
 
 ## Ćwiczenia
 
-1. Utwórz funkcję `kwadrat` przez `partial`.
-2. Policz sumę listy przez `reduce`.
-3. Napisz prosty dekorator z `wraps`.
-4. Zastosuj `lru_cache` do funkcji Fibonacciego.
-5. Użyj `cached_property` w klasie.
+1. Zrób `kwadrat` przez `partial()` i zwykłą funkcję, a potem porównaj.
+2. Napisz dekorator z `wraps`.
+3. Dodaj `lru_cache` do Fibonacciego.
+4. Napisz klasę z `cached_property`.
+5. Pokaż przykład, gdzie `sum()` jest lepsze niż `reduce()`.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. `partial`
-
-```python
-from functools import partial
-
-def potega(x, y):
-    return x ** y
-
-kwadrat = partial(potega, y=2)
-print(kwadrat(4))
-```
-
-### 2. `reduce`
-
-```python
-from functools import reduce
-
-print(reduce(lambda a, b: a + b, [1, 2, 3]))
-```
-
-### 3. Dekorator
-
-```python
-from functools import wraps
-
-def dekorator(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
-    return wrapper
-```
-
-### 4. Fibonacci
-
-```python
-from functools import lru_cache
-
-@lru_cache(maxsize=None)
-def fib(n):
-    if n < 2:
-        return n
-    return fib(n - 1) + fib(n - 2)
-```
-
-### 5. `cached_property`
-
-```python
-from functools import cached_property
-
-class A:
-    @cached_property
-    def x(self):
-        return 123
-```
+- `functools` daje bardzo praktyczne narzędzia do funkcji i dekoratorów.
+- `wraps` i `lru_cache` to jedne z najważniejszych elementów modułu.
+- `partial()` bywa wygodne, ale nie zawsze jest czytelniejsze niż zwykła funkcja.
+- `reduce()` warto znać, ale często prostszy Python jest lepszy.
+- Używaj `functools` wtedy, gdy realnie upraszcza kod.

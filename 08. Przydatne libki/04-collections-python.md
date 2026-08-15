@@ -1,45 +1,33 @@
 # `collections` w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co używać `collections`](#po-co-używać-collections)
-3. [`Counter`](#counter)
-4. [`defaultdict`](#defaultdict)
-5. [`deque`](#deque)
-6. [`namedtuple`](#namedtuple)
-7. [`OrderedDict`](#ordereddict)
-8. [`ChainMap`](#chainmap)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
 ## Wprowadzenie
 
 `collections` to moduł z wyspecjalizowanymi strukturami danych.
 
-Pomaga pisać kod krócej, czytelniej i bardziej idiomatycznie.
+Pomaga pisać kod:
+
+- krócej,
+- czytelniej,
+- bardziej idiomatycznie,
+- bez ręcznego budowania typowych wzorców.
 
 To jeden z najbardziej praktycznych modułów w codziennej pracy.
 
----
+## Kiedy `collections` ma sens
 
-## Po co używać `collections`
+Używaj go, gdy potrzebujesz:
 
-Zamiast samodzielnie budować typowe wzorce, możesz użyć gotowych narzędzi:
+- liczenia wystąpień,
+- słownika z wartościami domyślnymi,
+- wydajnej kolejki,
+- lekkiego rekordu danych,
+- połączenia kilku warstw konfiguracji.
 
-- liczenie elementów,
-- słowniki z wartościami domyślnymi,
-- wydajne kolejki,
-- lekkie rekordy danych.
+## Kiedy zwykły `dict` albo `list` wystarczą
 
----
+Nie każde zadanie wymaga specjalnej struktury.
+
+Jeśli masz bardzo prosty przypadek, zwykły `dict` albo `list` bywają najlepsze. `collections` ma sens wtedy, gdy realnie usuwa powtarzalny kod albo daje wyraźną przewagę semantyczną.
 
 ## `Counter`
 
@@ -48,21 +36,28 @@ Liczy wystąpienia elementów.
 ```python
 from collections import Counter
 
-licznik = Counter(["a", "b", "a", "c", "a"])
-print(licznik)
-print(licznik["a"])
+counter = Counter(["a", "b", "a", "c", "a"])
+print(counter)
+print(counter["a"])
 ```
 
-To świetne do prostych analiz danych.
-
-Wynik:
+Output:
 
 ```python
 Counter({'a': 3, 'b': 1, 'c': 1})
 3
 ```
 
----
+### Kiedy wybrać `Counter`
+
+- analiza częstości,
+- liczenie słów,
+- liczenie znaków,
+- ranking najczęstszych elementów.
+
+### Kiedy zwykły `dict` wystarczy
+
+Jeśli liczysz dosłownie 2-3 rzeczy w jednorazowym prostym kodzie, ręczne liczenie też może być OK. W praktyce jednak `Counter` często jest po prostu lepszy.
 
 ## `defaultdict`
 
@@ -76,15 +71,28 @@ d["owoce"].append("jablko")
 print(d)
 ```
 
-Nie musisz wcześniej sprawdzać, czy klucz istnieje.
-
-Wynik:
+Output:
 
 ```python
 defaultdict(<class 'list'>, {'owoce': ['jablko']})
 ```
 
----
+### Kiedy wybrać `defaultdict`
+
+- grupowanie rekordów,
+- liczenie wystąpień,
+- budowanie map klucz -> lista wartości.
+
+### Porównanie ze zwykłym `dict`
+
+Zwykły `dict` wymaga częściej kodu w stylu:
+
+```python
+if key not in data:
+    data[key] = []
+```
+
+`defaultdict` usuwa ten boilerplate.
 
 ## `deque`
 
@@ -99,15 +107,22 @@ q.appendleft(0)
 print(q)
 ```
 
-Jest bardzo wydajna przy dodawaniu i usuwaniu z obu końców.
-
-Wynik:
+Output:
 
 ```python
 deque([0, 1, 2, 3, 4])
 ```
 
----
+### Kiedy wybrać `deque`
+
+- kolejka FIFO,
+- stos,
+- operacje z obu końców,
+- przesuwające się okno danych.
+
+### Kiedy zwykła lista jest gorsza
+
+Lista nie jest dobrym wyborem, gdy często usuwasz elementy z początku.
 
 ## `namedtuple`
 
@@ -116,28 +131,39 @@ Lekki rekord z nazwanymi polami.
 ```python
 from collections import namedtuple
 
-Punkt = namedtuple("Punkt", ["x", "y"])
-p = Punkt(2, 3)
+Point = namedtuple("Point", ["x", "y"])
+p = Point(2, 3)
 print(p.x, p.y)
 ```
 
-Wynik:
+Output:
 
 ```python
 2 3
 ```
 
-To starszy, ale nadal spotykany wzorzec.
+### Kiedy ma sens
 
----
+- prosty lekki rekord,
+- starszy kod,
+- sytuacje, gdzie nie potrzebujesz pełnej `dataclass`.
+
+### Kiedy lepsza jest `dataclass`
+
+Jeśli chcesz:
+
+- łatwiejszą rozbudowę,
+- domyślne wartości,
+- `__post_init__`,
+- wyraźniejsze modelowanie danych,
+
+to `dataclass` bywa lepszym wyborem.
 
 ## `OrderedDict`
 
-Historycznie słownik zachowujący kolejność.
+Historycznie był ważniejszy, bo zwykły `dict` nie gwarantował kolejności.
 
-Dziś zwykły `dict` w nowoczesnym Pythonie zachowuje kolejność wstawiania, więc `OrderedDict` jest mniej potrzebny, ale nadal pojawia się w niektórych przypadkach i starszym kodzie.
-
----
+Dziś zwykły `dict` w nowoczesnym Pythonie zachowuje kolejność wstawiania, więc `OrderedDict` jest mniej potrzebny, ale nadal można go spotkać w starszym kodzie i niektórych wyspecjalizowanych przypadkach.
 
 ## `ChainMap`
 
@@ -146,172 +172,94 @@ Pozwala traktować kilka słowników jak jedną logiczną całość.
 ```python
 from collections import ChainMap
 
-a = {"x": 1}
-b = {"y": 2}
+base = {"host": "localhost", "port": 8000}
+override = {"port": 9000}
+config = ChainMap(override, base)
 
-c = ChainMap(a, b)
-print(c["x"])
-print(c["y"])
+print(config["host"])
+print(config["port"])
 ```
 
-Wynik:
+Output:
 
 ```python
-1
-2
+localhost
+9000
 ```
 
----
+### Kiedy wybrać `ChainMap`
+
+- konfiguracja z kilku warstw,
+- domyślne wartości + nadpisania,
+- wiele słowników widzianych jako jedna całość.
+
+### Kiedy wystarczy zwykłe scalanie
+
+Jeśli robisz jednorazowe złączenie dwóch małych słowników, zwykłe `a | b` albo `merged = {**a, **b}` też może wystarczyć.
+
+## `collections` vs ręczny kod
+
+### Gdy biblioteka wygrywa
+
+- `Counter` zamiast ręcznego liczenia,
+- `defaultdict(list)` zamiast ciągłego sprawdzania kluczy,
+- `deque` zamiast listy jako kolejki,
+- `ChainMap` przy kilku warstwach konfiguracji.
+
+### Gdy prosty kod wygrywa
+
+- mały jednorazowy `dict`,
+- prosta lista bez intensywnych operacji z początku,
+- zwykła krotka lub `dict`, jeśli nie potrzebujesz specjalnej semantyki.
 
 ## Typowe błędy początkujących
 
-- ręczne zliczanie tam, gdzie `Counter` zrobi to prościej,
-- używanie zwykłej listy zamiast `deque` jako kolejki,
-- brak świadomości, że `defaultdict` tworzy domyślne wartości automatycznie,
-- nadużywanie `namedtuple` tam, gdzie lepszy jest `dataclass`.
+- ręczne zliczanie tam, gdzie `Counter` jest oczywistszy,
+- używanie listy jako kolejki,
+- nadużywanie specjalnych struktur bez potrzeby,
+- brak świadomości, że `defaultdict` tworzy wartości automatycznie,
+- używanie `namedtuple`, gdy `dataclass` byłaby czytelniejsza.
 
-### 5. Używanie specjalnej struktury bez potrzeby
+## Mini scenariusz praktyczny
 
-Nie każda sytuacja wymaga `Counter` albo `deque`. Czasem zwykły `dict` lub `list` w zupełności wystarczy.
+Masz listę zamówień i chcesz:
 
----
+- policzyć najczęstsze produkty,
+- pogrupować zamówienia po kliencie,
+- mieć kolejkę zadań,
+- połączyć config domyślny z lokalnym.
 
-## Praktyczne przykłady
-
-### Najczęstsze słowa
-
-```python
-from collections import Counter
-
-slowa = "ala ma kota ala ma psa ala".split()
-print(Counter(slowa).most_common(2))
-```
-
-Wynik:
-
-```python
-[('ala', 3), ('ma', 2)]
-```
-
-### Grupowanie wartości
-
-```python
-from collections import defaultdict
-
-grupy = defaultdict(list)
-
-for nazwa, kategoria in [("jablko", "owoce"), ("marchew", "warzywa")]:
-    grupy[kategoria].append(nazwa)
-
-print(grupy)
-```
-
-Wynik:
-
-```python
-defaultdict(<class 'list'>, {'owoce': ['jablko'], 'warzywa': ['marchew']})
-```
-
----
+To jest dokładnie teren, na którym `collections` robi ogromną różnicę względem ręcznego kodu.
 
 ## Dobre praktyki
 
-- wybieraj strukturę danych do problemu,
-- `Counter` używaj do zliczeń,
-- `defaultdict` do grupowania,
-- `deque` do kolejek i buforów,
-- nie komplikuj kodu, jeśli zwykły `dict` lub `list` już wystarczają.
+- dobieraj strukturę do problemu,
+- nie wymyślaj ręcznie tego, co standardowa biblioteka robi lepiej,
+- wybieraj strukturę, która czytelnie komunikuje zamiar,
+- nie używaj specjalnej struktury bez realnej korzyści.
 
-Praktyczna zasada:
+## Szybka ściąga
 
-najpierw zapytaj: „jaki problem rozwiązuję?”, a dopiero potem wybierz strukturę z `collections`.
+Najczęściej przydatne:
 
----
-
-## Podsumowanie
-
-`collections` daje bardzo praktyczne rozszerzenia podstawowych struktur danych.
-
-To moduł, który naprawdę warto znać, bo często pozwala zamienić kilka linijek nieczytelnego kodu w jedną klarowną konstrukcję.
-
-Najważniejsze do zapamiętania:
-
-- `Counter` liczy,
-- `defaultdict` upraszcza grupowanie,
-- `deque` jest świetne do kolejek,
-- `collections` często pozwala pisać krócej i czytelniej niż ręczne konstrukcje.
-
----
-
-## Mini ściąga
-
-```python
-from collections import Counter, defaultdict, deque
-```
-
-Najważniejsze:
-
-- `Counter` liczy,
-- `defaultdict` daje domyślne wartości,
-- `deque` działa dobrze jako kolejka,
-- `namedtuple` tworzy lekki rekord.
-
----
+- `Counter` — liczenie,
+- `defaultdict` — domyślne wartości,
+- `deque` — kolejka/stos,
+- `namedtuple` — lekki rekord,
+- `ChainMap` — widok na kilka słowników.
 
 ## Ćwiczenia
 
-1. Policz litery w napisie przez `Counter`.
-2. Zgrupuj elementy listy według kategorii przez `defaultdict(list)`.
-3. Zaimplementuj prostą kolejkę przez `deque`.
-4. Utwórz `namedtuple` opisujący punkt.
-5. Połącz dwa słowniki logicznie przez `ChainMap`.
+1. Policz słowa przez `Counter` i ręcznie, a potem porównaj.
+2. Zgrupuj rekordy przez `defaultdict(list)`.
+3. Zbuduj kolejkę przez `deque`.
+4. Nałóż konfiguracje przez `ChainMap`.
+5. Porównaj `namedtuple` i `dataclass` na prostym modelu danych.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. Liczenie liter
-
-```python
-from collections import Counter
-
-print(Counter("banan"))
-```
-
-### 2. Grupowanie
-
-```python
-from collections import defaultdict
-
-d = defaultdict(list)
-d["owoce"].append("banan")
-print(d)
-```
-
-### 3. Kolejka
-
-```python
-from collections import deque
-
-q = deque()
-q.append("zadanie1")
-print(q.popleft())
-```
-
-### 4. Punkt
-
-```python
-from collections import namedtuple
-
-Punkt = namedtuple("Punkt", ["x", "y"])
-print(Punkt(1, 2))
-```
-
-### 5. `ChainMap`
-
-```python
-from collections import ChainMap
-
-cm = ChainMap({"x": 1}, {"y": 2})
-print(cm["y"])
-```
+- `collections` daje bardzo praktyczne struktury danych do codziennego kodu.
+- `Counter`, `defaultdict` i `deque` to jedne z najbardziej użytecznych narzędzi modułu.
+- Specjalna struktura ma sens wtedy, gdy usuwa boilerplate lub poprawia semantykę.
+- Nie każde zadanie wymaga `collections`.
+- Dobra struktura danych często upraszcza cały kod bardziej niż „sprytna” logika.
