@@ -44,55 +44,68 @@
 31. Napisz mały przykład z `any()` i `all()`.
 32. Rozwiąż ten sam problem funkcyjnie i imperatywnie, a potem porównaj style.
 
-## Poziom 5 — deskryptory
+## Poziom 5 — `walrus operator`
 
-33. Napisz prosty deskryptor, który loguje odczyt atrybutu.
-34. Napisz deskryptor walidujący, że przypisana liczba jest dodatnia.
-35. Użyj tego deskryptora w klasie `Product`.
-36. Napisz drugi deskryptor walidujący minimalną długość napisu.
-37. Dodaj deskryptor do klasy `User`, aby pilnował poprawności pola `email` lub `name`.
-38. Pokaż, kiedy wywołuje się `__get__`, `__set__` i `__delete__`.
-39. Napisz prosty deskryptor przechowujący dane pod ukrytą nazwą atrybutu.
-40. Wyjaśnij na własnym przykładzie, po co w ogóle używać deskryptora zamiast zwykłego `@property`.
+33. Przepisz prostą pętlę `while` na wersję z `:=`.
+34. Użyj `walrus operator` z `len()` wewnątrz `if`.
+35. Użyj `walrus operator` razem z `re.search()`.
+36. Pokaż przykład sensownego użycia `:=` w przetwarzaniu danych.
+37. Pokaż przykład, w którym `:=` pogarsza czytelność.
+38. Pokaż, że zmienna utworzona przez `:=` pozostaje w bieżącym zakresie.
+39. Porównaj wersję klasyczną i wersję z `:=` dla tego samego problemu.
+40. Opisz 3 sytuacje, w których `walrus operator` ma sens.
 
-## Poziom 6 — `__slots__`
+## Poziom 6 — deskryptory
 
-41. Napisz klasę z `__slots__` i spróbuj przypisać do niej nowy atrybut spoza slotów.
-42. Porównaj klasę zwykłą i klasę z `__slots__` pod kątem tego, jakie atrybuty można dodawać.
-43. Napisz klasę `Point` z `__slots__ = ("x", "y")`.
-44. Sprawdź, czy instancja klasy ze slotami ma `__dict__`.
-45. Dodaj do klasy ze slotami metodę i pokaż, że metody nadal działają normalnie.
-46. Spróbuj połączyć `__slots__` z dziedziczeniem w prostym przykładzie.
+41. Napisz prosty deskryptor, który loguje odczyt atrybutu.
+42. Napisz deskryptor walidujący, że przypisana liczba jest dodatnia.
+43. Użyj tego deskryptora w klasie `Product`.
+44. Napisz drugi deskryptor walidujący minimalną długość napisu.
+45. Dodaj deskryptor do klasy `User`, aby pilnował poprawności pola `email` lub `name`.
+46. Pokaż, kiedy wywołuje się `__get__`, `__set__` i `__delete__`.
+47. Napisz prosty deskryptor przechowujący dane pod ukrytą nazwą atrybutu.
+48. Wyjaśnij na własnym przykładzie, po co w ogóle używać deskryptora zamiast zwykłego `@property`.
 
-## Poziom 7 — pamięć, referencje i model obiektów
+## Poziom 7 — `__slots__`
 
-47. Pokaż na przykładzie, że dwie zmienne mogą wskazywać na tę samą listę.
-48. Zademonstruj różnicę między kopiowaniem referencji a tworzeniem nowej listy.
-49. Pokaż różnicę między `==` i `is` na mutowalnych i niemutowalnych obiektach.
-50. Napisz mały eksperyment pokazujący, że zmiana listy przez jedną referencję jest widoczna przez drugą.
-51. Porównaj pamięciowo listę i generator dla większego zbioru danych.
-52. Pokaż prosty przykład, kiedy generator jest lepszy od listy pod względem pamięci.
-53. Pokaż prosty przykład, kiedy lista jest wygodniejsza niż generator.
-54. Wyjaśnij na własnym przykładzie pojęcie mutowalności.
+49. Napisz klasę z `__slots__` i spróbuj przypisać do niej nowy atrybut spoza slotów.
+50. Porównaj klasę zwykłą i klasę z `__slots__` pod kątem tego, jakie atrybuty można dodawać.
+51. Napisz klasę `Point` z `__slots__ = ("x", "y")`.
+52. Sprawdź, czy instancja klasy ze slotami ma `__dict__`.
+53. Dodaj do klasy ze slotami metodę i pokaż, że metody nadal działają normalnie.
+54. Spróbuj połączyć `__slots__` z dziedziczeniem w prostym przykładzie.
 
-## Poziom 8 — zadania przekrojowe
+## Poziom 8 — pamięć, referencje i model obiektów
 
-55. Zbuduj pipeline danych:
+55. Pokaż na przykładzie, że dwie zmienne mogą wskazywać na tę samą listę.
+56. Zademonstruj różnicę między kopiowaniem referencji a tworzeniem nowej listy.
+57. Pokaż różnicę między `==` i `is` na mutowalnych i niemutowalnych obiektach.
+58. Napisz mały eksperyment pokazujący, że zmiana listy przez jedną referencję jest widoczna przez drugą.
+59. Porównaj pamięciowo listę i generator dla większego zbioru danych.
+60. Pokaż prosty przykład, kiedy generator jest lepszy od listy pod względem pamięci.
+61. Pokaż prosty przykład, kiedy lista jest wygodniejsza niż generator.
+62. Wyjaśnij na własnym przykładzie pojęcie mutowalności.
+
+## Poziom 9 — zadania przekrojowe
+
+63. Zbuduj pipeline danych:
 generator źródłowy, filtr i transformacja.
-56. Do pipeline’u dodaj context manager mierzący czas.
-57. Użyj deskryptora w klasie opisującej rekord przetwarzanych danych.
-58. Napisz mini system logowania wejścia i wyjścia z sekcji krytycznej przez `with`.
-59. Zbuduj iterator klasowy i generator rozwiązujące ten sam problem, a potem porównaj oba podejścia.
-60. Zrób przykład, w którym `map()`, generator i zwykła pętla dają ten sam wynik.
+64. Do pipeline’u dodaj context manager mierzący czas.
+65. Użyj deskryptora w klasie opisującej rekord przetwarzanych danych.
+66. Dodaj w jednym miejscu sensowny `walrus operator`.
+67. Napisz mini system logowania wejścia i wyjścia z sekcji krytycznej przez `with`.
+68. Zbuduj iterator klasowy i generator rozwiązujące ten sam problem, a potem porównaj oba podejścia.
+69. Zrób przykład, w którym `map()`, generator i zwykła pętla dają ten sam wynik.
 
 ## Zadanie końcowe
 
-61. Zbuduj mini pipeline przetwarzania danych:
+70. Zbuduj mini pipeline przetwarzania danych:
 
 - generator źródłowy,
 - filtr,
 - transformacja,
 - context manager mierzący czas,
+- jedno sensowne użycie `:=`,
 - walidacja przez deskryptor w klasie modelującej rekord,
 - porównanie wersji listowej i generatorowej.
 

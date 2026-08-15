@@ -13,6 +13,7 @@ Po przerobieniu tego folderu powinieneś rozumieć:
 - iteratory i generatory,
 - context managery,
 - podstawy programowania funkcyjnego w Pythonie,
+- `walrus operator`,
 - deskryptory,
 - `__slots__`,
 - podstawy modelu pamięci CPythona.
@@ -38,15 +39,17 @@ Najlepiej iść w tej kolejności:
 1. `01-iteratory-i-generatory-python.md`
 2. `02-context-managers-python.md`
 3. `03-programowanie-funkcyjne-python.md`
-4. `04-deskriptory-python.md`
-5. `05-slots-python.md`
-6. `06-cpython-i-model-pamieci-python.md`
+4. `07-walrus-operator-python.md`
+5. `04-deskriptory-python.md`
+6. `05-slots-python.md`
+7. `06-cpython-i-model-pamieci-python.md`
 
 To dobra kolejność, bo:
 
 - iteratory i generatory uczą pracy „po elemencie”,
 - context managery uczą kontrolowania zasobów,
 - programowanie funkcyjne pokazuje inny styl pracy na danych,
+- `walrus operator` pokazuje nowocześniejszy sposób łączenia przypisania z warunkiem,
 - deskryptory i `__slots__` zaglądają głębiej w model obiektów,
 - model pamięci spina wiele wcześniejszych intuicji.
 
@@ -58,6 +61,7 @@ Najczęstsze pułapki w tym dziale:
 - mylenie generatora z listą,
 - brak zrozumienia, że generator zużywa się podczas iteracji,
 - używanie `map()` i `filter()` bez rozumienia, co faktycznie zwracają,
+- wciskanie `:=` wszędzie tylko dlatego, że "da się krócej",
 - traktowanie deskryptorów jak „magii OOP”,
 - używanie `__slots__` bez świadomości ograniczeń,
 - niepewność przy mutowalności, referencjach i współdzieleniu obiektów.
@@ -78,6 +82,7 @@ Dobry znak, jeśli potrafisz:
 - użyć `yield` bez zgadywania,
 - napisać własny `with` przez context manager,
 - rozpoznać, kiedy `map()` albo `filter()` ma sens, a kiedy zwykła pętla jest czytelniejsza,
+- wskazać, kiedy `walrus operator` upraszcza kod, a kiedy robi z niego łamigłówkę,
 - wytłumaczyć, po co istnieją deskryptory,
 - opisać, co robi `__slots__` i czego nie wolno przy nim zakładać,
 - zrozumieć, czemu zmiana listy przez jedną referencję widać przez drugą.
@@ -97,6 +102,7 @@ To szczególnie ważne przy:
 - generatorach,
 - `yield`,
 - `with`,
+- `:=`,
 - deskryptorach,
 - współdzielonych referencjach.
 
