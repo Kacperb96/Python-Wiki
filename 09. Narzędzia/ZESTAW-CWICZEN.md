@@ -114,3 +114,11 @@ Pokaż przy tym, że rozumiesz:
 - jak znaleźć błąd,
 - jak mierzyć wydajność zamiast zgadywać,
 - jak bezpiecznie uruchamiać zewnętrzne procesy.
+
+## Dodatkowe zadania — `argparse`
+
+68. Zbuduj prosty program przyjmujący imię jako argument pozycyjny.
+69. Dodaj opcję `--port` z wartością domyślną.
+70. Dodaj flagę `--debug`.
+71. Dodaj `choices` dla trybu `dev/prod`.
+72. Napisz mini CLI, które liczy linie w pliku.

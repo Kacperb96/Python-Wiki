@@ -122,24 +122,31 @@ Dlatego przy wielu zadaniach warto zrobić oba warianty i odpowiedzieć sobie:
 83. Użyj `insort()` do wstawienia elementu do posortowanej listy.
 84. Opisz, kiedy lepszy będzie `heapq`, a kiedy zwykłe `sorted()`.
 
-## Poziom 10 — zadania przekrojowe
+## Poziom 10 — `fractions`
 
-85. Napisz parser prostych logów:
+85. Dodaj `1/3` i `1/6` przez `Fraction`.
+86. Pokaż, że `Fraction(2, 4)` upraszcza się do `1/2`.
+87. Porównaj `1/3` jako `float` i jako `Fraction`.
+88. Opisz, kiedy lepszy jest `Fraction`, a kiedy `Decimal`.
+
+## Poziom 11 — zadania przekrojowe
+
+89. Napisz parser prostych logów:
 - użyj `re` do wyciągnięcia pól,
 - `dataclass` do modelu danych,
 - `typing` do opisania funkcji.
 
-86. Zgrupuj wpisy po poziomie logowania przez `defaultdict(list)`.
-87. Policz najczęstsze komunikaty przez `Counter`.
-88. Użyj `itertools` do przetworzenia wielu kolekcji wpisów w jeden strumień.
-89. Dodaj cache do kosztownej funkcji analitycznej przez `lru_cache`.
-90. Zbuduj mały system konfiguracji oparty o `ChainMap`, `TypedDict` i `Enum`.
-91. Zbuduj prostą analizę zamówień, gdzie część rozwiązań piszesz ręcznie, a część przez standardową bibliotekę, i porównujesz oba style.
-92. Weź 5 problemów z tego folderu i dla każdego dopisz jedno zdanie: „dlaczego tutaj używam biblioteki zamiast zwykłej pętli/prostego kodu”.
+90. Zgrupuj wpisy po poziomie logowania przez `defaultdict(list)`.
+91. Policz najczęstsze komunikaty przez `Counter`.
+92. Użyj `itertools` do przetworzenia wielu kolekcji wpisów w jeden strumień.
+93. Dodaj cache do kosztownej funkcji analitycznej przez `lru_cache`.
+94. Zbuduj mały system konfiguracji oparty o `ChainMap`, `TypedDict` i `Enum`.
+95. Zbuduj prostą analizę zamówień, gdzie część rozwiązań piszesz ręcznie, a część przez standardową bibliotekę, i porównujesz oba style.
+96. Weź 5 problemów z tego folderu i dla każdego dopisz jedno zdanie: „dlaczego tutaj używam biblioteki zamiast zwykłej pętli/prostego kodu”.
 
 ## Zadanie końcowe
 
-93. Zbuduj mini moduł przetwarzania zamówień lub logów, w którym połączysz co najmniej 4 biblioteki z tego folderu.
+97. Zbuduj mini moduł przetwarzania zamówień lub logów, w którym połączysz co najmniej 4 biblioteki z tego folderu.
 
 Minimalne wymagania:
 

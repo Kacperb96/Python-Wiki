@@ -19,7 +19,9 @@ Po przerobieniu tego folderu powinieneś umieć:
 - rozróżniać tekst i bajty,
 - używać `pathlib` i `os`,
 - pracować z `json`, `csv`, `configparser`, XML,
-- korzystać z `sqlite3`.
+- korzystać z `sqlite3`,
+- pracować z plikami tymczasowymi,
+- rozumieć serializację modeli danych do JSON.
 
 ## Po co w ogóle ten dział
 
@@ -54,6 +56,8 @@ Najlepiej iść po kolei:
 8. `08-configparser-python.md`
 9. `09-xml-etree-python.md`
 10. `10-sqlite3-python.md`
+11. `11-tempfile-python.md`
+12. `12-serializacja-modeli-dataclass-enum-json-python.md`
 
 Ta kolejność ma sens, bo:
 
@@ -61,7 +65,8 @@ Ta kolejność ma sens, bo:
 - potem dochodzi kodowanie,
 - potem ścieżki i system plików,
 - potem formaty danych,
-- a na końcu prosta baza danych.
+- potem prosta baza danych,
+- a na końcu bardziej praktyczne tematy: pliki tymczasowe i serializacja modeli.
 
 ## Na co szczególnie uważać
 

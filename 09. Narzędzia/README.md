@@ -23,7 +23,8 @@ Po tym dziale powinieneś rozumieć:
 - logging,
 - debugowanie,
 - profilowanie,
-- praktyczne użycie `subprocess`.
+- praktyczne użycie `subprocess`,
+- budowanie prostych CLI przez `argparse`.
 
 ## Po co w ogóle ten dział
 
@@ -55,6 +56,7 @@ Najlepiej iść po kolei:
 6. `06-debugowanie-python-pdb-breakpoint.md`
 7. `07-profilowanie-python-timeit-cprofile-line-profiler.md`
 8. `08-subprocess-python.md`
+9. `09-argparse-python.md`
 
 Ta kolejność ma sens, bo:
 
@@ -63,6 +65,7 @@ Ta kolejność ma sens, bo:
 - potem uczysz się porządku w repo,
 - potem dokumentacji,
 - potem narzędzi do obserwacji, naprawy i mierzenia kodu.
+- potem budowania prostych, używalnych narzędzi CLI.
 
 ## Na co szczególnie uważać
 

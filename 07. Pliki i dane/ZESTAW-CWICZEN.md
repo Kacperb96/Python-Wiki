@@ -118,3 +118,12 @@ Pokaż przy tym, że rozumiesz:
 - podstawowe formaty danych,
 - bezpieczne użycie SQLite,
 - obsługę błędów podczas pracy z plikami i danymi.
+
+## Dodatkowe zadania — `tempfile` i serializacja modeli
+
+69. Utwórz plik tymczasowy przez `TemporaryFile()` i odczytaj jego zawartość.
+70. Użyj `NamedTemporaryFile()` i wypisz jego ścieżkę.
+71. Utwórz katalog tymczasowy przez `TemporaryDirectory()` i zapisz tam plik przez `pathlib`.
+72. Zbuduj `dataclass` `User` i zamień ją na słownik przez `asdict()`.
+73. Zbuduj model `Order` z `Enum` statusu i przygotuj JSON-friendly payload.
+74. Odczytaj JSON i zamień string statusu z powrotem na `Enum`.

@@ -35,6 +35,7 @@ Po przerobieniu tego folderu powinieneś rozumieć:
 - kiedy `threading` ma sens,
 - co zmienia GIL,
 - kiedy `multiprocessing` jest lepsze od wątków,
+- jak działa `concurrent.futures`,
 - po co istnieją systemy kolejkowe takie jak RabbitMQ, Celery i Kafka,
 - jak dobrać model współbieżności do typu problemu.
 
@@ -73,6 +74,7 @@ Najlepiej iść po kolei:
 4. [04-wielowatkowosc-threading-python.md](/home/kacper/Desktop/Python_naprawiony/12.%20Asynchroniczno%C5%9B%C4%87%20i%20wielow%C4%85tkowo%C5%9B%C4%87/04-wielowatkowosc-threading-python.md)
 5. [05-wieloprocesowosc-multiprocessing-python.md](/home/kacper/Desktop/Python_naprawiony/12.%20Asynchroniczno%C5%9B%C4%87%20i%20wielow%C4%85tkowo%C5%9B%C4%87/05-wieloprocesowosc-multiprocessing-python.md)
 6. [06-narzedzia-kolejkujace-rabbitmq-celery-kafka-python.md](/home/kacper/Desktop/Python_naprawiony/12.%20Asynchroniczno%C5%9B%C4%87%20i%20wielow%C4%85tkowo%C5%9B%C4%87/06-narzedzia-kolejkujace-rabbitmq-celery-kafka-python.md)
+7. [07-concurrent-futures-python.md](/home/kacper/Desktop/Python_naprawiony/12.%20Asynchroniczno%C5%9B%C4%87%20i%20wielow%C4%85tkowo%C5%9B%C4%87/07-concurrent-futures-python.md)
 
 Ta kolejność ma sens:
 
@@ -81,6 +83,7 @@ Ta kolejność ma sens:
 - potem praktyczne async HTTP,
 - potem przechodzisz do wątków,
 - potem do procesów,
+- potem do prostego, wygodnego interfejsu executorów,
 - a na końcu do kolejek i systemów rozproszonych.
 
 ---

@@ -20,7 +20,8 @@ Ten dział zbiera moduły standardowej biblioteki, które bardzo często pojawia
 - `enum`,
 - `decimal`,
 - `heapq`,
-- `bisect`.
+- `bisect`,
+- `fractions`.
 
 ## Jaki problem rozwiązuje ten folder
 
@@ -57,6 +58,7 @@ Najlepiej iść po kolei:
 7. `07-enum-python.md`
 8. `08-decimal-python.md`
 9. `09-heapq-i-bisect-python.md`
+10. `10-fractions-python.md`
 
 Ta kolejność ma sens, bo przechodzisz od pracy na tekście i danych, przez iteratory i funkcje, do typowania, modelowania danych, nazwanych zestawów wartości i bardziej wyspecjalizowanych narzędzi do liczb oraz uporządkowanych danych.
 
@@ -201,6 +203,20 @@ Nie używaj, gdy:
 - nie pracujesz na danych uporządkowanych albo priorytetowych,
 - specjalistyczna struktura nic realnie nie upraszcza.
 
+### `fractions`
+
+Używaj, gdy:
+
+- chcesz dokładnych ułamków,
+- pracujesz na proporcjach i częściach,
+- wynik ma pozostać wymierny, a nie tylko przybliżony.
+
+Nie używaj, gdy:
+
+- problem jest finansowy i oczekuje dziesiętnej logiki `Decimal`,
+- zwykły `float` jest wystarczający,
+- forma ułamka nie daje żadnej realnej korzyści.
+
 ## Jak ćwiczyć najlepiej
 
 Najlepszy styl nauki dla tego folderu wygląda tak:
@@ -223,7 +239,8 @@ Po przerobieniu tego działu powinieneś umieć zrobić małe rzeczy typu:
 - dekorator z `wraps` i cache przez `lru_cache`,
 - model statusów lub ról oparty o `Enum`,
 - prosty moduł finansowy oparty o `Decimal`,
-- ranking lub kolejkę priorytetową przez `heapq`.
+- ranking lub kolejkę priorytetową przez `heapq`,
+- kalkulator proporcji lub ułamków przez `Fraction`.
 
 ## Po czym poznasz, że temat naprawdę siedzi
 
@@ -237,6 +254,7 @@ Dobry znak, jeśli potrafisz:
 - rozpoznać, kiedy `Enum` daje lepszy model niż luźne stringi,
 - rozpoznać, kiedy `Decimal` jest bezpieczniejszy niż `float`,
 - wiedzieć, kiedy `heapq` albo `bisect` rozwiązują problem lepiej niż ręczne kombinowanie na listach,
+- odróżnić problem na `Fraction` od problemu na `Decimal`,
 - połączyć kilka tych bibliotek w jednym małym projekcie.
 
 ## Główne ryzyko tego folderu

@@ -122,3 +122,11 @@ Najlepiej:
 2. potem pokaż rozwiązania,
 3. dopiero później przechodź do wątków i procesów,
 4. część o kolejkach traktuj już bardziej architektonicznie niż jako czystą składnię.
+
+## Dodatkowe zadania — `concurrent.futures`
+
+50. Użyj `ThreadPoolExecutor` do uruchomienia kilku zadań z `sleep`.
+51. Użyj `executor.map()` do policzenia kwadratów liczb.
+52. Użyj `as_completed()` i pokaż kolejność zakończenia zadań.
+53. Zrób prosty przykład przez `ProcessPoolExecutor`.
+54. Opisz, kiedy wybrać `ThreadPoolExecutor`, a kiedy `ProcessPoolExecutor`.
