@@ -1,4 +1,4 @@
-# Testowanie w Pythonie — podstawy, testy jednostkowe, integracyjne i `pytest`
+# Testowanie w Pythonie — podstawy `pytest`
 
 ## Spis treści
 
@@ -9,63 +9,61 @@
 5. [Testy integracyjne](#testy-integracyjne)
 6. [Różnica między testem jednostkowym a integracyjnym](#różnica-między-testem-jednostkowym-a-integracyjnym)
 7. [Dlaczego `pytest` jest tak popularny](#dlaczego-pytest-jest-tak-popularny)
-8. [Jak wygląda najprostszy test w `pytest`](#jak-wygląda-najprostszy-test-w-pytest)
-9. [Konwencja nazw plików i funkcji testowych](#konwencja-nazw-plików-i-funkcji-testowych)
+8. [Najprostszy test](#najprostszy-test)
+9. [Struktura pliku testowego](#struktura-pliku-testowego)
 10. [Asercje w `pytest`](#asercje-w-pytest)
-11. [Uruchamianie testów](#uruchamianie-testów)
-12. [Struktura katalogu testów](#struktura-katalogu-testów)
-13. [Co powinien testować test jednostkowy](#co-powinien-testować-test-jednostkowy)
-14. [Co powinien testować test integracyjny](#co-powinien-testować-test-integracyjny)
-15. [Najczęstsze błędy początkujących](#najczęstsze-błędy-początkujących)
-16. [Praktyczne przykłady](#praktyczne-przykłady)
-17. [Dobre praktyki](#dobre-praktyki)
-18. [Podsumowanie](#podsumowanie)
-19. [Mini ściąga](#mini-ściąga)
+11. [Testowanie wyjątków](#testowanie-wyjątków)
+12. [Uruchamianie testów](#uruchamianie-testów)
+13. [Przykładowy output `pytest`](#przykładowy-output-pytest)
+14. [Jak czytać błąd testu](#jak-czytać-błąd-testu)
+15. [Organizacja katalogu `tests`](#organizacja-katalogu-tests)
+16. [Co powinien testować dobry test jednostkowy](#co-powinien-testować-dobry-test-jednostkowy)
+17. [Co powinien testować dobry test integracyjny](#co-powinien-testować-dobry-test-integracyjny)
+18. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+19. [Praktyczna ściąga](#praktyczna-ściąga)
 20. [Ćwiczenia](#ćwiczenia)
-21. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+21. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
 ## Wprowadzenie
 
-Testowanie to jeden z najważniejszych elementów programowania.
+Testowanie to sposób sprawdzania, czy kod zachowuje się zgodnie z oczekiwaniem.
 
-Nie chodzi tylko o „sprawdzenie, czy działa”.
+Nie chodzi tylko o to, żeby raz ręcznie uruchomić program i zobaczyć, że działa.
 
-Testy pomagają:
+Chodzi o to, żeby mieć powtarzalny sposób sprawdzania:
 
-- wychwytywać błędy,
-- bezpiecznie rozwijać kod,
-- szybciej refaktoryzować,
-- zyskiwać pewność, że zmiana niczego nie zepsuła.
+- poprawnych przypadków,
+- błędnych przypadków,
+- edge case'ów,
+- zachowania po kolejnych zmianach w kodzie.
 
-W Pythonie najczęściej spotkasz:
-
-- testy jednostkowe,
-- testy integracyjne,
-- framework `pytest`.
+W Pythonie najpopularniejszym narzędziem do tego jest `pytest`.
 
 ---
 
 ## Po co w ogóle pisać testy
 
-Bez testów często działa taki scenariusz:
+Testy pomagają:
 
-1. coś zmieniasz,
-2. naprawiasz jeden problem,
-3. przypadkiem psujesz coś innego,
-4. odkrywasz to dopiero dużo później.
+- szybciej zauważyć błąd,
+- bezpiecznie refaktoryzować,
+- rozwijać projekt bez psucia starej funkcjonalności,
+- lepiej rozumieć wymagane zachowanie kodu,
+- dokumentować, jak funkcja powinna działać.
 
-Testy zmniejszają to ryzyko.
+Bez testów bardzo łatwo wpaść w schemat:
 
-To nie znaczy, że testy gwarantują brak błędów.
-Ale bardzo zwiększają bezpieczeństwo pracy nad kodem.
+1. poprawiasz jeden błąd,
+2. przypadkiem psujesz coś innego,
+3. orientujesz się dopiero później.
 
 ---
 
 ## Czym jest test
 
-Test to fragment kodu, który sprawdza, czy inny kod zachowuje się zgodnie z oczekiwaniem.
+Test to fragment kodu, który sprawdza inny fragment kodu.
 
 Przykład:
 
@@ -73,52 +71,82 @@ Przykład:
 def dodaj(a, b):
     return a + b
 
+
 def test_dodaj():
     assert dodaj(2, 3) == 5
 ```
 
-Tutaj test sprawdza, czy `dodaj(2, 3)` daje `5`.
+Tutaj test mówi:
+
+- wywołaj `dodaj(2, 3)`,
+- sprawdź, czy wynik to `5`.
 
 ---
 
 ## Testy jednostkowe
 
-Test jednostkowy sprawdza mały, pojedynczy fragment programu.
+Test jednostkowy sprawdza mały fragment programu.
 
 Najczęściej:
 
 - jedną funkcję,
 - jedną metodę,
 - jedną małą klasę,
-- jedną regułę logiki.
+- jedną zasadę logiki biznesowej.
 
-To test małej jednostki kodu, zwykle w izolacji.
-
-### Przykład
+Przykład:
 
 ```python
-def czy_pelnoletni(wiek):
+def czy_pelnoletni(wiek: int) -> bool:
     return wiek >= 18
+
 
 def test_czy_pelnoletni():
     assert czy_pelnoletni(20) is True
     assert czy_pelnoletni(15) is False
 ```
 
+To jest mały, szybki test konkretnej reguły.
+
 ---
 
 ## Testy integracyjne
 
-Test integracyjny sprawdza współpracę kilku elementów razem.
+Test integracyjny sprawdza współpracę kilku elementów.
 
-Na przykład:
+Przykłady:
 
-- funkcja + baza danych,
-- endpoint API + logika aplikacji,
-- zapis pliku + odczyt pliku,
-- kilka modułów działających wspólnie.
+- zapis do pliku i odczyt z pliku,
+- endpoint API i warstwa logiki,
+- serwis i baza danych,
+- parser i walidator działające razem.
 
-To już nie jest test „jednej małej rzeczy”, tylko większej całości.
+Przykład prosty:
+
+```python
+import json
+from pathlib import Path
+
+
+def zapisz_dane(sciezka: Path, dane: dict) -> None:
+    sciezka.write_text(json.dumps(dane), encoding="utf-8")
+
+
+def wczytaj_dane(sciezka: Path) -> dict:
+    return json.loads(sciezka.read_text(encoding="utf-8"))
+
+
+def test_zapis_i_odczyt(tmp_path):
+    plik = tmp_path / "dane.json"
+    dane = {"name": "Ania"}
+
+    zapisz_dane(plik, dane)
+
+    wynik = wczytaj_dane(plik)
+    assert wynik == dane
+```
+
+Tu test sprawdza więcej niż jedną funkcję i prawdziwą współpracę elementów.
 
 ---
 
@@ -128,311 +156,352 @@ To już nie jest test „jednej małej rzeczy”, tylko większej całości.
 
 - mały zakres,
 - szybki,
-- zwykle w izolacji,
-- łatwiejszy do znalezienia źródła błędu.
+- zwykle izolowany,
+- łatwiej wskazać źródło błędu.
 
 ### Test integracyjny
 
 - większy zakres,
-- sprawdza współpracę elementów,
-- bywa wolniejszy,
-- lepiej pokazuje, czy system działa jako całość.
+- sprawdza współpracę części systemu,
+- zwykle wolniejszy,
+- lepiej pokazuje zachowanie całości.
 
-Najczęściej potrzebujesz obu rodzajów testów.
+Dobrze mieć oba typy testów.
 
 ---
 
 ## Dlaczego `pytest` jest tak popularny
 
-`pytest` jest bardzo lubiany, bo:
+`pytest` jest bardzo ceniony, bo:
 
 - ma prostą składnię,
-- pozwala pisać testy naturalnie,
-- ma świetny system fixture’ów,
-- dobrze raportuje błędy,
-- ma ogromny ekosystem pluginów.
+- używa zwykłego `assert`,
+- daje czytelne raporty błędów,
+- ma fixture'y,
+- ma parametryzację,
+- ma duży ekosystem pluginów.
 
-To obecnie jeden z najpopularniejszych sposobów testowania w Pythonie.
+To narzędzie jest jednocześnie wygodne dla początkujących i bardzo mocne w większych projektach.
 
 ---
 
-## Jak wygląda najprostszy test w `pytest`
+## Najprostszy test
+
+Plik `math_utils.py`:
 
 ```python
-def dodaj(a, b):
+def dodaj(a: int, b: int) -> int:
     return a + b
+```
 
-def test_dodaj():
+Plik `test_math_utils.py`:
+
+```python
+from math_utils import dodaj
+
+
+def test_dodaj_dwie_liczby():
     assert dodaj(2, 3) == 5
 ```
 
-To już jest pełnoprawny test `pytest`.
+To już jest pełnoprawny test.
 
 ---
 
-## Konwencja nazw plików i funkcji testowych
+## Struktura pliku testowego
 
-Najczęściej:
+Typowa konwencja:
 
-- pliki nazywa się `test_*.py`
-- funkcje testowe też zaczynają się od `test_`
+- pliki testowe zaczynają się od `test_` albo kończą na `_test.py`,
+- funkcje testowe zaczynają się od `test_`.
 
-Przykłady:
+Przykład:
 
-- `test_math.py`
-- `test_users.py`
-- `def test_login(): ...`
+```python
+from math_utils import dodaj, odejmij
 
-Dzięki temu `pytest` łatwo znajduje testy automatycznie.
+
+def test_dodaj_dwie_liczby():
+    assert dodaj(2, 3) == 5
+
+
+def test_odejmij_dwie_liczby():
+    assert odejmij(10, 4) == 6
+```
+
+Dzięki temu `pytest` potrafi automatycznie odnaleźć testy.
 
 ---
 
 ## Asercje w `pytest`
 
-Najprostszy zapis:
+Najczęściej używasz po prostu `assert`.
+
+Przykłady:
 
 ```python
-assert wynik == oczekiwany
+assert 2 + 2 == 4
+assert "Py" in "Python"
+assert [1, 2] == [1, 2]
+assert wynik is None
+assert czy_aktywne is True
 ```
 
-To bardzo wygodne, bo `pytest` potrafi dobrze pokazać różnicę między wynikiem a oczekiwaniem.
+Ogromna zaleta `pytest` jest taka, że przy błędzie pokazuje, co dokładnie się nie zgadza.
 
-### Przykład
+---
+
+## Testowanie wyjątków
+
+Czasem chcesz sprawdzić nie poprawny wynik, ale to, czy kod rzuca właściwy wyjątek.
+
+Przykład:
 
 ```python
-def test_kwadrat():
-    assert 3 * 3 == 9
+import pytest
+
+
+def dziel(a: float, b: float) -> float:
+    return a / b
+
+
+def test_dzielenie_przez_zero_rzuca_blad():
+    with pytest.raises(ZeroDivisionError):
+        dziel(10, 0)
 ```
+
+To bardzo ważny typ testu.
+
+Bo kod trzeba sprawdzać nie tylko dla sytuacji poprawnych, ale też błędnych.
 
 ---
 
 ## Uruchamianie testów
 
-Najczęściej z terminala:
+Najprościej:
 
 ```bash
 pytest
 ```
 
-albo tylko konkretnego pliku:
+Możesz też uruchomić konkretny plik:
 
 ```bash
-pytest test_math.py
+pytest test_math_utils.py
 ```
 
-albo konkretnego testu:
+Albo konkretny test:
 
 ```bash
-pytest test_math.py::test_dodaj
+pytest test_math_utils.py::test_dodaj_dwie_liczby
+```
+
+Tryb krótszego outputu:
+
+```bash
+pytest -q
 ```
 
 ---
 
-## Struktura katalogu testów
+## Przykładowy output `pytest`
 
-Popularne układy:
+Jeśli wszystko przechodzi:
+
+```text
+============================= test session starts =============================
+collected 3 items
+
+test_math_utils.py ...                                                 [100%]
+
+============================== 3 passed in 0.03s ==============================
+```
+
+Co to znaczy:
+
+- zebrano 3 testy,
+- wszystkie przeszły,
+- wykonanie zajęło `0.03s`.
+
+Jeśli jeden test nie przejdzie:
+
+```text
+============================= test session starts =============================
+collected 3 items
+
+test_math_utils.py .F.                                                 [100%]
+
+================================== FAILURES ==================================
+___________________________ test_dodaj_dwie_liczby ____________________________
+
+    def test_dodaj_dwie_liczby():
+>       assert dodaj(2, 3) == 6
+E       assert 5 == 6
+E        +  where 5 = dodaj(2, 3)
+
+=========================== short test summary info ===========================
+FAILED test_math_utils.py::test_dodaj_dwie_liczby - assert 5 == 6
+========================= 1 failed, 2 passed in 0.04s =========================
+```
+
+---
+
+## Jak czytać błąd testu
+
+W raporcie błędu patrz przede wszystkim na:
+
+- nazwę testu,
+- linię, która padła,
+- realne wartości po lewej i prawej stronie asercji,
+- ścieżkę wywołania.
+
+W powyższym przykładzie od razu widać:
+
+- test oczekiwał `6`,
+- funkcja zwróciła `5`,
+- więc błąd jest w teście albo w założeniu testu.
+
+To bardzo ważne:
+
+nie każdy czerwony test znaczy, że kod aplikacji jest błędny.
+Czasem błędny jest sam test.
+
+---
+
+## Organizacja katalogu `tests`
+
+Prosty wariant:
 
 ```text
 projekt/
     app.py
-    test_app.py
-```
-
-albo:
-
-```text
-projekt/
-    app/
+    math_utils.py
     tests/
+        test_math_utils.py
         test_app.py
 ```
 
-Drugi wariant bywa wygodniejszy w większych projektach.
+Bardziej rozbudowany wariant:
+
+```text
+projekt/
+    src/
+        app/
+            __init__.py
+            services.py
+            validators.py
+    tests/
+        unit/
+            test_services.py
+            test_validators.py
+        integration/
+            test_api.py
+```
+
+Dla małych projektów prostsza wersja wystarcza.
 
 ---
 
-## Co powinien testować test jednostkowy
+## Co powinien testować dobry test jednostkowy
 
-Przede wszystkim:
+Dobry test jednostkowy powinien:
 
-- logikę funkcji,
-- przypadki typowe,
-- przypadki graniczne,
-- błędne dane, jeśli funkcja ma je obsługiwać.
+- sprawdzać jedną rzecz,
+- mieć jasną nazwę,
+- być szybki,
+- dawać czytelny sygnał przy błędzie,
+- nie zależeć od internetu, bazy i innych niestabilnych rzeczy, jeśli nie musi.
 
-### Przykłady przypadków
-
-- poprawne dane,
-- zero,
-- pusty string,
-- pusta lista,
-- liczba ujemna,
-- wyjątek.
-
----
-
-## Co powinien testować test integracyjny
-
-Przede wszystkim to, czy elementy programu dobrze współpracują.
-
-Na przykład:
-
-- czy zapis do bazy działa razem z odczytem,
-- czy endpoint HTTP wywołuje poprawną logikę,
-- czy dane przechodzą poprawnie przez kilka warstw programu.
-
----
-
-## Najczęstsze błędy początkujących
-
-### 1. Testowanie wszystkiego ręcznie przez `print()`
-
-To nie jest jeszcze sensowny system testów.
-
-### 2. Pisanie zbyt dużych testów jednostkowych
-
-Test jednostkowy powinien dotyczyć małej rzeczy.
-
-### 3. Brak przypadków brzegowych
-
-### 4. Mieszanie testów jednostkowych i integracyjnych bez rozróżnienia
-
-### 5. Zbyt ogólne nazwy testów
-
-Na przykład:
+Przykład dobrej nazwy:
 
 ```python
-def test1():
+def test_parse_int_zwraca_none_dla_niepoprawnego_tekstu():
     ...
 ```
 
-To nic nie mówi.
+Po samej nazwie wiadomo, co testujesz.
 
 ---
 
-## Praktyczne przykłady
+## Co powinien testować dobry test integracyjny
 
-### Prosta funkcja i test
+Dobry test integracyjny powinien:
+
+- sprawdzać współpracę realnych części systemu,
+- nie być zbyt szeroki bez potrzeby,
+- skupiać się na realnym scenariuszu użytkowym,
+- nadal dawać w miarę czytelny sygnał, co nie działa.
+
+To nie ma być test "wszystkiego naraz".
+
+---
+
+## Typowe błędy początkujących
+
+- testowanie tylko najłatwiejszych przypadków,
+- brak testów wyjątków i wartości granicznych,
+- pisanie testów zależnych od kolejności wykonania,
+- zbyt ogólne nazwy testów,
+- testy z dużą ilością niepotrzebnego setupu,
+- mieszanie kilku tematów w jednym teście,
+- ręczne sprawdzanie programu zamiast budowania automatycznych testów.
+
+---
+
+## Praktyczna ściąga
+
+### Prosty test
 
 ```python
-def dodaj(a, b):
-    return a + b
-
 def test_dodaj():
     assert dodaj(2, 3) == 5
 ```
 
-### Test kilku przypadków
+### Test wyjątku
 
 ```python
-def czy_pusty(tekst):
-    return tekst == ""
-
-def test_czy_pusty():
-    assert czy_pusty("") is True
-    assert czy_pusty("abc") is False
+with pytest.raises(ValueError):
+    parse_int("abc")
 ```
 
-### Prosty test integracyjny ideowo
-
-```python
-def zapisz_i_odczytaj(repo, user):
-    repo.save(user)
-    return repo.get(user.id)
-```
-
-Tu test integracyjny sprawdzałby współpracę kilku elementów razem.
-
----
-
-## Dobre praktyki
-
-### Utrzymuj testy proste i czytelne
-
-### Nadawaj testom opisowe nazwy
-
-Na przykład:
-
-```python
-def test_dodaj_zwraca_sume_dwoch_liczb():
-    ...
-```
-
-### Testuj przypadki typowe i brzegowe
-
-### Nie bój się pisać wielu małych testów
-
-To zwykle lepsze niż jeden ogromny test.
-
-### Rozdzielaj testy jednostkowe i integracyjne
-
-Choćby logicznie, a najlepiej też katalogami lub nazwami.
-
----
-
-## Podsumowanie
-
-Najważniejsze rzeczy do zapamiętania:
-
-- testy jednostkowe sprawdzają małe fragmenty kodu,
-- testy integracyjne sprawdzają współpracę elementów,
-- `pytest` to bardzo popularne i wygodne narzędzie,
-- podstawą testu jest dobra asercja,
-- dobre testy są małe, czytelne i opisowe.
-
----
-
-## Mini ściąga
-
-```python
-def test_nazwa():
-    assert funkcja(...) == ...
-```
+### Uruchomienie wszystkich testów
 
 ```bash
 pytest
-pytest test_app.py
-pytest test_app.py::test_nazwa
+```
+
+### Uruchomienie jednego pliku
+
+```bash
+pytest tests/test_utils.py
+```
+
+### Cichy tryb
+
+```bash
+pytest -q
 ```
 
 ---
 
 ## Ćwiczenia
 
-### Ćwiczenie 1
-
-Napisz funkcję `odejmij(a, b)` i test dla niej.
-
-### Ćwiczenie 2
-
-Napisz funkcję sprawdzającą, czy liczba jest parzysta, i testy dla kilku przypadków.
-
-### Ćwiczenie 3
-
-Przygotuj plik `test_math.py` z kilkoma testami.
+1. Napisz prostą funkcję `odejmij(a, b)` i test dla niej.
+2. Napisz funkcję `czy_dodatnia(n)` i przetestuj trzy przypadki: dodatni, zero, ujemny.
+3. Napisz funkcję `dziel(a, b)` i test sprawdzający wyjątek dla dzielenia przez zero.
+4. Uruchom cały katalog testów przez `pytest`.
+5. Celowo zepsuj jedną asercję i przeanalizuj raport błędu.
+6. Zbuduj prostą strukturę `tests/` dla małego projektu.
+7. Rozdziel dwa testy na jednostkowy i integracyjny.
+8. Zmień nazwy swoich testów tak, by mówiły dokładnie o zachowaniu.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### Ćwiczenie 1
-
-```python
-def odejmij(a, b):
-    return a - b
-
-def test_odejmij():
-    assert odejmij(5, 2) == 3
-```
-
-### Ćwiczenie 2
-
-```python
-def czy_parzysta(x):
-    return x % 2 == 0
-
-def test_czy_parzysta():
-    assert czy_parzysta(2) is True
-    assert czy_parzysta(3) is False
-    assert czy_parzysta(0) is True
-```
+- Test to kod, który sprawdza inny kod.
+- `pytest` używa zwykłego `assert`, ale daje lepsze raporty.
+- Testuj nie tylko poprawne przypadki, ale też błędy i wartości graniczne.
+- Test jednostkowy sprawdza mały fragment logiki.
+- Test integracyjny sprawdza współpracę elementów.
+- Dobry test powinien być czytelny, mały i dawać jasny sygnał przy awarii.

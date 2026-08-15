@@ -1,25 +1,23 @@
-# Testy oparte na właściwościach — `hypothesis` w Pythonie
+# Testy oparte na właściwościach — `hypothesis`
 
 ## Spis treści
 
 1. [Wprowadzenie](#wprowadzenie)
 2. [Czym są testy oparte na właściwościach](#czym-są-testy-oparte-na-właściwościach)
-3. [Jak to się różni od zwykłych testów](#jak-to-się-różni-od-zwykłych-testów)
+3. [Jak różnią się od zwykłych testów](#jak-różnią-się-od-zwykłych-testów)
 4. [Dlaczego `hypothesis` jest ważne](#dlaczego-hypothesis-jest-ważne)
 5. [Strategie danych](#strategie-danych)
 6. [Najprostszy test `hypothesis`](#najprostszy-test-hypothesis)
-7. [Co to jest właściwość](#co-to-jest-właściwość)
+7. [Czym jest dobra właściwość](#czym-jest-dobra-właściwość)
 8. [Przykłady dobrych właściwości](#przykłady-dobrych-właściwości)
 9. [Przykłady słabych właściwości](#przykłady-słabych-właściwości)
 10. [Shrinkowanie danych](#shrinkowanie-danych)
-11. [Typowe zastosowania](#typowe-zastosowania)
-12. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-13. [Praktyczne przykłady](#praktyczne-przykłady)
-14. [Dobre praktyki](#dobre-praktyki)
-15. [Podsumowanie](#podsumowanie)
-16. [Mini ściąga](#mini-ściąga)
-17. [Ćwiczenia](#ćwiczenia)
-18. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+11. [Przykładowy błąd znaleziony przez `hypothesis`](#przykładowy-błąd-znaleziony-przez-hypothesis)
+12. [Kiedy warto używać `hypothesis`](#kiedy-warto-używać-hypothesis)
+13. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+14. [Praktyczna ściąga](#praktyczna-ściąga)
+15. [Ćwiczenia](#ćwiczenia)
+16. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -27,43 +25,50 @@
 
 Zwykłe testy najczęściej działają tak:
 
-- wybierasz kilka konkretnych danych,
-- sprawdzasz wynik.
+- wybierasz kilka konkretnych danych wejściowych,
+- sprawdzasz oczekiwany wynik.
 
-`hypothesis` działa inaczej:
+`hypothesis` działa inaczej.
 
-- opisujesz właściwość,
-- narzędzie samo generuje wiele danych testowych.
+Tutaj opisujesz właściwość, czyli ogólną zasadę, która zawsze powinna być prawdziwa, a narzędzie samo generuje wiele danych testowych.
 
-To bardzo potężne podejście, bo może znaleźć przypadki, o których sam byś nie pomyślał.
+To bardzo mocne podejście, bo może znaleźć przypadki, o których sam byś nie pomyślał.
 
 ---
 
 ## Czym są testy oparte na właściwościach
 
-To testy, w których nie skupiasz się na kilku ręcznie wybranych przykładach, tylko na ogólnej zasadzie, która powinna być prawdziwa.
+To testy, które nie skupiają się na kilku ręcznie wybranych przykładach, tylko na regule ogólnej.
 
-Przykład właściwości:
+Przykład zwykłego testu:
 
-"Po posortowaniu lista powinna mieć tę samą długość co wcześniej."
+```python
+assert sorted([3, 1, 2]) == [1, 2, 3]
+```
 
-albo:
+Przykład myślenia property-based:
 
-"Odwrócenie listy dwa razy powinno dać tę samą listę."
+- posortowana lista powinna mieć tę samą długość,
+- posortowana lista powinna zawierać te same elementy,
+- wynik sortowania powinien być uporządkowany niemalejąco.
 
 ---
 
-## Jak to się różni od zwykłych testów
+## Jak różnią się od zwykłych testów
 
 ### Zwykły test
 
-Sprawdza konkretne przypadki.
+Sprawdza konkretny przypadek.
 
 ### Test property-based
 
-Sprawdza ogólne własności dla wielu automatycznie generowanych danych.
+Sprawdza ogólną własność dla wielu automatycznie generowanych danych.
 
-Oba podejścia są wartościowe i często się uzupełniają.
+Oba podejścia są wartościowe.
+
+One się nie wykluczają.
+
+Najczęściej się uzupełniają.
 
 ---
 
@@ -72,28 +77,34 @@ Oba podejścia są wartościowe i często się uzupełniają.
 Bo:
 
 - generuje dużo przypadków,
-- potrafi znaleźć nietypowe wejścia,
-- zmniejsza ryzyko pominięcia ważnych edge case’ów,
-- umie uprościć dane prowadzące do błędu.
+- szuka nietypowych wejść,
+- zmniejsza ryzyko pominięcia edge case'ów,
+- potrafi uprościć dane prowadzące do błędu,
+- pomaga myśleć o logice programu bardziej ogólnie.
+
+To nie jest narzędzie do wszystkiego, ale bywa bardzo skuteczne.
 
 ---
 
 ## Strategie danych
 
-`hypothesis` generuje dane przez strategie.
+`hypothesis` generuje dane za pomocą strategii.
 
-Najczęściej importuje się:
+Najczęstszy import:
 
 ```python
 from hypothesis import given
 from hypothesis import strategies as st
 ```
 
-Na przykład:
+Przykłady strategii:
 
 - `st.integers()`
 - `st.text()`
-- `st.lists(...)`
+- `st.lists(st.integers())`
+- `st.booleans()`
+
+To właśnie z nich budujesz dane wejściowe dla testu.
 
 ---
 
@@ -103,96 +114,42 @@ Na przykład:
 from hypothesis import given
 from hypothesis import strategies as st
 
+
 @given(st.integers())
 def test_podwojenie_jest_parzyste(x):
     assert (x * 2) % 2 == 0
 ```
 
-Tu `hypothesis` sam wygeneruje wiele liczb.
+Tu `hypothesis` sam wygeneruje wiele różnych liczb całkowitych.
+
+Ty opisujesz tylko zasadę.
 
 ---
 
-## Co to jest właściwość
+## Czym jest dobra właściwość
 
-Właściwość to ogólna zasada, która zawsze powinna być prawdziwa.
+Dobra właściwość jest:
 
-Na przykład:
+- ogólna,
+- prawdziwa dla wszystkich poprawnych danych z danego zakresu,
+- związana z realnym zachowaniem programu,
+- na tyle konkretna, żeby wykryć błąd.
 
-- wynik sortowania ma tę samą długość,
-- odwrócenie dwa razy daje oryginał,
-- suma nie zależy od kolejności dwóch liczb,
-- funkcja nie powinna rzucać błędu dla poprawnych danych.
+Zła właściwość to taka, która brzmi efektownie, ale praktycznie niczego nie sprawdza.
 
 ---
 
 ## Przykłady dobrych właściwości
 
-- `sorted(xs)` ma długość równą `len(xs)`
-- `list(reversed(list(reversed(xs)))) == xs`
-- dla dodatnich `x`, `sqrt(x) ** 2` jest blisko `x`
-
-Właściwość powinna być:
-
-- ogólna,
-- sensowna,
-- powiązana z logiką programu.
-
----
-
-## Przykłady słabych właściwości
-
-Słaba właściwość to taka, która prawie nic nie sprawdza.
-
-Na przykład:
-
-"funkcja zwraca coś"
-
-To za mało.
-
-Chcesz sprawdzać realne zasady działania programu.
-
----
-
-## Shrinkowanie danych
-
-Jedna z największych zalet `hypothesis`.
-
-Jeśli znajdzie błąd, próbuje znaleźć prostszy przypadek wejściowy, który nadal ten błąd powoduje.
-
-To bardzo pomaga w debugowaniu.
-
----
-
-## Typowe zastosowania
-
-- algorytmy,
-- parsery,
-- walidacja danych,
-- operacje na listach i stringach,
-- własne struktury danych,
-- funkcje matematyczne i transformacje danych.
-
----
-
-## Typowe błędy początkujących
-
-- mylenie property-based testing z losowym testowaniem bez sensu,
-- wybieranie złych właściwości,
-- pisanie zbyt słabych asercji,
-- brak zrozumienia, że `hypothesis` nie zastępuje wszystkich zwykłych testów.
-
----
-
-## Praktyczne przykłady
-
-### Odwrócenie dwa razy
+### Odwrócenie listy dwa razy
 
 ```python
 from hypothesis import given
 from hypothesis import strategies as st
 
+
 @given(st.lists(st.integers()))
-def test_reverse_reverse(xs):
+def test_reverse_reverse_daje_oryginal(xs):
     assert list(reversed(list(reversed(xs)))) == xs
 ```
 
@@ -200,79 +157,160 @@ def test_reverse_reverse(xs):
 
 ```python
 @given(st.lists(st.integers()))
-def test_sort_len(xs):
+def test_sortowanie_nie_zmienia_dlugosci(xs):
     assert len(sorted(xs)) == len(xs)
 ```
 
-### Łączenie stringów
+### Dodawanie jest przemienne
 
 ```python
-@given(st.text(), st.text())
-def test_concat_len(a, b):
-    assert len(a + b) == len(a) + len(b)
+@given(st.integers(), st.integers())
+def test_dodawanie_jest_przemienne(a, b):
+    assert a + b == b + a
 ```
 
----
-
-## Dobre praktyki
-
-### Najpierw zrozum właściwość, potem pisz test
-
-### Łącz `hypothesis` ze zwykłymi testami przykładowymi
-
-### Nie próbuj na siłę robić wszystkiego property-based
-
-### Używaj tego tam, gdzie dane wejściowe mają dużo możliwych kombinacji
+To są realne, sensowne zasady.
 
 ---
 
-## Podsumowanie
+## Przykłady słabych właściwości
 
-Najważniejsze rzeczy do zapamiętania:
+Słaba właściwość:
 
-- `hypothesis` generuje dane testowe automatycznie,
-- testujesz właściwości, nie tylko pojedyncze przykłady,
-- to świetne narzędzie do szukania trudnych przypadków brzegowych,
-- szczególnie przydaje się w bardziej ogólnych algorytmach i transformacjach danych.
+- "funkcja coś zwraca",
+- "program się nie wywala",
+- "wynik istnieje".
+
+Takie testy zwykle są za słabe, bo nie sprawdzają zachowania, tylko sam fakt wykonania.
 
 ---
 
-## Mini ściąga
+## Shrinkowanie danych
+
+To jedna z największych zalet `hypothesis`.
+
+Jeśli narzędzie znajdzie przypadek powodujący błąd, próbuje go uprościć do jak najmniejszego kontrprzykładu.
+
+To bardzo pomaga w debugowaniu.
+
+Zamiast dostać ogromną losową strukturę danych, możesz dostać minimalny przypadek, który dalej łamie program.
+
+---
+
+## Przykładowy błąd znaleziony przez `hypothesis`
+
+Załóżmy błędną funkcję:
+
+```python
+def pierwszy_element(xs: list[int]) -> int:
+    return xs[0]
+```
+
+I test:
 
 ```python
 from hypothesis import given
 from hypothesis import strategies as st
 
+
+@given(st.lists(st.integers()))
+def test_pierwszy_element_dziala(xs):
+    assert pierwszy_element(xs) == xs[0]
+```
+
+Ten test jest źle pomyślany, bo lista może być pusta.
+
+`hypothesis` może znaleźć taki kontrprzykład.
+
+Uproszczony przykład raportu:
+
+```text
+Falsifying example: test_pierwszy_element_dziala(xs=[])
+IndexError: list index out of range
+```
+
+To bardzo cenna informacja.
+
+Pokazuje dokładnie, jaki przypadek łamie kod.
+
+---
+
+## Kiedy warto używać `hypothesis`
+
+`hypothesis` szczególnie dobrze sprawdza się wtedy, gdy:
+
+- masz dużo możliwych kombinacji danych,
+- chcesz sprawdzać ogólne własności funkcji,
+- pracujesz na parserach, normalizacji danych, kolekcjach, przekształceniach,
+- podejrzewasz, że ręczne przykłady nie pokrywają edge case'ów.
+
+Nie zawsze jest to pierwszy wybór.
+
+Dla bardzo prostych funkcji zwykłe testy często są wystarczające.
+
+---
+
+## Typowe błędy początkujących
+
+- wybieranie właściwości, które nic nie znaczą,
+- mylenie property-based tests z losowym zgadywaniem,
+- brak zawężenia danych wejściowych, gdy domena powinna być ograniczona,
+- próba użycia `hypothesis` tam, gdzie zwykły test jest prostszy i czytelniejszy,
+- brak zrozumienia, że narzędzie może znaleźć błąd w samym założeniu testu.
+
+---
+
+## Praktyczna ściąga
+
+### Import
+
+```python
+from hypothesis import given
+from hypothesis import strategies as st
+```
+
+### Jedna liczba
+
+```python
 @given(st.integers())
-def test_x(x):
+def test_cos(x):
     ...
 ```
+
+### Lista liczb
+
+```python
+@given(st.lists(st.integers()))
+def test_lista(xs):
+    ...
+```
+
+### Co warto sobie zadać
+
+- Jaka ogólna zasada ma być zawsze prawdziwa?
+- Czy ta właściwość naprawdę coś sprawdza?
+- Czy zakres danych ma sens?
+- Czy zwykły test nie byłby tu prostszy?
 
 ---
 
 ## Ćwiczenia
 
-### Ćwiczenie 1
-
-Napisz test, że podwojenie liczby zawsze daje liczbę parzystą.
-
-### Ćwiczenie 2
-
-Napisz test, że długość po sortowaniu listy się nie zmienia.
-
-### Ćwiczenie 3
-
-Napisz test, że odwrócenie listy dwa razy daje oryginał.
+1. Napisz test property-based dla przemienności dodawania.
+2. Napisz test właściwości: odwrócenie listy dwa razy daje oryginał.
+3. Napisz test właściwości: sortowanie nie zmienia długości listy.
+4. Napisz test dla funkcji normalizującej string i wymyśl do niej sensowną właściwość.
+5. Napisz celowo błędną funkcję i sprawdź, czy `hypothesis` znajdzie kontrprzykład.
+6. Spróbuj opisać własnymi słowami, dlaczego test property-based nie zastępuje wszystkich zwykłych testów.
+7. Wymyśl jedną dobrą i jedną słabą właściwość dla tej samej funkcji.
+8. Przeanalizuj raport błędu z `Falsifying example` i wyjaśnij, co on oznacza.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-```python
-from hypothesis import given
-from hypothesis import strategies as st
-
-@given(st.integers())
-def test_double_even(x):
-    assert (x * 2) % 2 == 0
-```
+- `hypothesis` generuje wiele danych i sprawdza ogólne właściwości.
+- Test property-based nie zastępuje zwykłych testów, tylko je uzupełnia.
+- Dobra właściwość musi być ogólna i naprawdę związana z logiką programu.
+- Jedną z największych zalet jest shrinkowanie kontrprzykładów.
+- To świetne narzędzie do znajdowania edge case'ów, których sam mógłbyś nie wymyślić.

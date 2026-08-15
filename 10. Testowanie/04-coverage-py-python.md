@@ -4,37 +4,32 @@
 
 1. [Wprowadzenie](#wprowadzenie)
 2. [Czym jest pokrycie kodu](#czym-jest-pokrycie-kodu)
-3. [Po co mierzyć pokrycie](#po-co-mierzyć-pokrycie)
-4. [Czego pokrycie nie gwarantuje](#czego-pokrycie-nie-gwarantuje)
-5. [Czym jest `coverage.py`](#czym-jest-coveragepy)
-6. [Podstawowe użycie](#podstawowe-użycie)
-7. [`coverage run`](#coverage-run)
-8. [`coverage report`](#coverage-report)
-9. [`coverage html`](#coverage-html)
-10. [Pokrycie linii a jakość testów](#pokrycie-linii-a-jakość-testów)
-11. [Pokrycie gałęzi](#pokrycie-gałęzi)
-12. [Interpretacja raportu](#interpretacja-raportu)
-13. [Typowe pułapki myślenia o coverage](#typowe-pułapki-myślenia-o-coverage)
-14. [Jak podnosić jakość testów, a nie tylko procent](#jak-podnosić-jakość-testów-a-nie-tylko-procent)
-15. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-16. [Praktyczne przykłady](#praktyczne-przykłady)
-17. [Dobre praktyki](#dobre-praktyki)
-18. [Podsumowanie](#podsumowanie)
-19. [Mini ściąga](#mini-ściąga)
-20. [Ćwiczenia](#ćwiczenia)
-21. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+3. [Po co mierzyć coverage](#po-co-mierzyć-coverage)
+4. [Czego coverage nie gwarantuje](#czego-coverage-nie-gwarantuje)
+5. [Podstawowe użycie `coverage.py`](#podstawowe-użycie-coveragepy)
+6. [`coverage run`](#coverage-run)
+7. [`coverage report`](#coverage-report)
+8. [`coverage html`](#coverage-html)
+9. [Pokrycie linii i pokrycie gałęzi](#pokrycie-linii-i-pokrycie-gałęzi)
+10. [Przykładowy raport i jego interpretacja](#przykładowy-raport-i-jego-interpretacja)
+11. [Jak podnosić jakość testów, a nie tylko procent](#jak-podnosić-jakość-testów-a-nie-tylko-procent)
+12. [Typowe pułapki](#typowe-pułapki)
+13. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+14. [Praktyczna ściąga](#praktyczna-ściąga)
+15. [Ćwiczenia](#ćwiczenia)
+16. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
 ## Wprowadzenie
 
-Samo posiadanie testów jeszcze nie znaczy, że testujesz dobrze.
+Samo to, że masz testy, nie znaczy jeszcze, że testujesz dobrze.
 
 Dlatego często mierzy się:
 
-- ile kodu zostało wykonane przez testy,
-- które miejsca w kodzie nie są w ogóle dotykane,
-- gdzie mogą być luki w testach.
+- jaka część kodu została wykonana podczas testów,
+- które linie w ogóle nie są dotykane,
+- czy testy obejmują różne gałęzie logiki.
 
 Do tego służy między innymi `coverage.py`.
 
@@ -42,70 +37,73 @@ Do tego służy między innymi `coverage.py`.
 
 ## Czym jest pokrycie kodu
 
-Pokrycie kodu to informacja o tym, jaka część kodu została wykonana podczas testów.
+Pokrycie kodu to informacja o tym, jaka część kodu została wykonana przez testy.
 
 Najczęściej mówi się o:
 
 - pokryciu linii,
 - pokryciu gałęzi.
 
----
-
-## Po co mierzyć pokrycie
-
-Bo pomaga zobaczyć:
-
-- które fragmenty kodu nie są testowane,
-- gdzie brakuje testów,
-- czy nowy moduł jest w ogóle obejmowany przez testy.
-
-To dobre narzędzie pomocnicze.
+Jeśli jakaś linia nie została wykonana ani razu, to najpewniej nie masz testu, który do niej dochodzi.
 
 ---
 
-## Czego pokrycie nie gwarantuje
+## Po co mierzyć coverage
+
+Coverage pomaga:
+
+- znaleźć nieprzetestowane miejsca,
+- zobaczyć martwe albo zapomniane ścieżki kodu,
+- lepiej kierować pracą nad testami,
+- pilnować, czy nowy moduł w ogóle jest obejmowany testami.
+
+To bardzo przydatny wskaźnik pomocniczy.
+
+---
+
+## Czego coverage nie gwarantuje
 
 To bardzo ważne:
 
-wysokie pokrycie nie oznacza automatycznie dobrych testów.
+wysoki coverage nie oznacza automatycznie dobrych testów.
 
 Możesz mieć:
 
-- 100% coverage,
+- 100% pokrycia,
 - a mimo to słabe asercje,
-- pominięte ważne scenariusze,
-- błędy logiczne.
+- pominięte edge case'y,
+- pomylone wymagania,
+- źle testowaną logikę.
 
-Coverage to wskaźnik pomocniczy, nie ostateczna prawda.
+Coverage mówi tylko, że kod został wykonany.
 
----
-
-## Czym jest `coverage.py`
-
-To bardzo popularne narzędzie do mierzenia pokrycia kodu w Pythonie.
-
-Najczęściej używa się go razem z testami uruchamianymi przez `pytest`.
+Nie mówi, czy został sensownie sprawdzony.
 
 ---
 
-## Podstawowe użycie
+## Podstawowe użycie `coverage.py`
 
-Typowy przepływ:
+Typowy przepływ wygląda tak:
 
 1. uruchamiasz testy przez `coverage`,
-2. generujesz raport.
+2. generujesz raport,
+3. sprawdzasz, czego brakuje,
+4. dopisujesz testy,
+5. mierzysz ponownie.
 
 ---
 
 ## `coverage run`
 
-Przykład:
+Najczęstsza komenda:
 
 ```bash
 coverage run -m pytest
 ```
 
 To uruchamia testy i zbiera dane o pokryciu.
+
+Jeśli projekt ma już testy, to zwykle jest pierwszy krok.
 
 ---
 
@@ -117,11 +115,25 @@ Raport tekstowy:
 coverage report
 ```
 
-Pokazuje między innymi:
+Przykładowy output:
 
-- liczbę linii,
-- liczbę pokrytych,
-- procent pokrycia.
+```text
+Name                Stmts   Miss  Cover
+---------------------------------------
+app.py                 20      2    90%
+validators.py          15      5    67%
+services.py            30      0   100%
+---------------------------------------
+TOTAL                  65      7    89%
+```
+
+Jak to czytać:
+
+- `Stmts` to liczba instrukcji,
+- `Miss` to liczba niepokrytych,
+- `Cover` to procent pokrycia.
+
+W tym przykładzie najsłabszy jest moduł `validators.py`.
 
 ---
 
@@ -133,203 +145,152 @@ Możesz wygenerować raport HTML:
 coverage html
 ```
 
-To bardzo wygodne, bo można zobaczyć kolorowo:
+Przykładowy output:
 
-- które linie były wykonane,
-- które nie były.
-
----
-
-## Pokrycie linii a jakość testów
-
-Jeśli linia została wykonana, to nie znaczy jeszcze, że była dobrze przetestowana.
-
-Na przykład:
-
-- mogłeś tylko „przejść” przez kod,
-- ale nie sprawdzić poprawnego wyniku.
-
-Dlatego coverage trzeba łączyć z myśleniem o jakości testów.
-
----
-
-## Pokrycie gałęzi
-
-To bardziej szczegółowy poziom.
-
-Jeśli masz:
-
-```python
-if warunek:
-    ...
-else:
-    ...
+```text
+Wrote HTML report to htmlcov/index.html
 ```
 
-to dobre testy powinny przejść:
+To bardzo wygodna forma, bo można kolorami zobaczyć:
 
-- przez `if`,
-- przez `else`.
-
-Samo uruchomienie jednej ścieżki może nie wystarczyć.
+- zielone linie pokryte,
+- czerwone linie niepokryte.
 
 ---
 
-## Interpretacja raportu
+## Pokrycie linii i pokrycie gałęzi
 
-Najważniejsze pytania:
+### Pokrycie linii
 
-- które pliki mają niski coverage,
-- które krytyczne ścieżki są nietestowane,
-- czy brakuje testów dla wyjątków i edge case’ów.
+Mówi, czy dana linia została wykonana.
 
-Nie chodzi o ślepe patrzenie w procent.
+### Pokrycie gałęzi
+
+Mówi, czy zostały wykonane różne warianty przepływu, np. `if` i `else`.
+
+Przykład:
+
+```python
+def okresl_znak(x: int) -> str:
+    if x > 0:
+        return "plus"
+    else:
+        return "minus-lub-zero"
+```
+
+Jeśli testujesz tylko `x = 5`, to:
+
+- linia z `if` jest pokryta,
+- ale gałąź `else` już nie.
+
+Dlatego samo pokrycie linii czasem daje zbyt optymistyczny obraz.
 
 ---
 
-## Typowe pułapki myślenia o coverage
+## Przykładowy raport i jego interpretacja
 
-### 1. „Mam 90%, więc jest świetnie”
+Załóżmy funkcję:
 
-Niekoniecznie.
+```python
+def klasyfikuj_wiek(wiek: int) -> str:
+    if wiek < 0:
+        raise ValueError("Wiek nie moze byc ujemny")
+    if wiek < 18:
+        return "niepelnoletni"
+    return "pelnoletni"
+```
 
-### 2. „Mam niski procent, więc wszystko jest złe”
+Jeśli testujesz tylko `10` i `20`, możesz mieć częściowe pokrycie.
 
-Też nie zawsze.
+Ale bez testu dla `-1` nadal nie sprawdzasz ważnej ścieżki błędu.
 
-### 3. Gonienie za wynikiem zamiast za realną jakością testów
-
-To bardzo częsty problem.
+Właśnie dlatego coverage ma sens dopiero razem z myśleniem o przypadkach.
 
 ---
 
 ## Jak podnosić jakość testów, a nie tylko procent
 
-Warto pytać:
+Lepsze pytania niż "jak dobić do 100%":
 
-- czy testuję przypadki błędów,
-- czy testuję warunki brzegowe,
-- czy testuję wyjątki,
-- czy testuję ważne ścieżki biznesowe,
-- czy asercje są sensowne.
+- które scenariusze są naprawdę ważne biznesowo,
+- które wyjątki nie są sprawdzane,
+- które warunki logiczne mają tylko połowę testów,
+- czy testy sprawdzają wynik, a nie tylko wykonanie kodu,
+- czy brak pokrycia nie wskazuje na słaby design kodu.
+
+Czasem niższy coverage z bardzo sensownymi testami jest lepszy niż sztuczne 100% bez wartości.
+
+---
+
+## Typowe pułapki
+
+- gonienie za procentem zamiast za jakością,
+- pisanie testów tylko po to, żeby wykonać linię,
+- ignorowanie nieprzetestowanych wyjątków,
+- nieuwzględnianie wartości granicznych,
+- traktowanie coverage jako jedynego wskaźnika jakości.
+
+Coverage jest mapą pomocniczą, nie ostatecznym sędzią.
 
 ---
 
 ## Typowe błędy początkujących
 
-- skupienie tylko na procentach,
-- brak rozróżnienia linii i gałęzi,
-- ignorowanie nietestowanych ścieżek wyjątków,
-- pisanie pustych albo mało wartościowych testów tylko po to, by podnieść coverage.
+- myślenie, że 100% coverage oznacza brak błędów,
+- brak analizy raportu moduł po module,
+- patrzenie tylko na wynik `TOTAL`,
+- dopisywanie pustych albo słabych testów tylko dla statystyki,
+- brak sprawdzania gałęzi błędnych i wyjątków.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Uruchomienie
+### Zbierz dane o pokryciu
 
 ```bash
 coverage run -m pytest
+```
+
+### Raport tekstowy
+
+```bash
 coverage report
 ```
 
-### HTML
+### Raport HTML
 
 ```bash
 coverage html
 ```
 
-### Przykład logiczny
+### Najważniejsze pytania
 
-Jeśli funkcja ma:
-
-```python
-if x > 0:
-    return "plus"
-else:
-    return "minus lub zero"
-```
-
-to dobre pokrycie powinno obejmować obie gałęzie.
-
----
-
-## Dobre praktyki
-
-### Traktuj coverage jako narzędzie pomocnicze
-
-### Pilnuj jakości asercji
-
-### Patrz szczególnie na ważne ścieżki logiki i błędy
-
-### Staraj się testować także wyjątki i warunki graniczne
-
-### Używaj raportu HTML, bo jest bardzo czytelny
-
----
-
-## Podsumowanie
-
-Najważniejsze rzeczy do zapamiętania:
-
-- coverage pokazuje, jaka część kodu została wykonana przez testy,
-- `coverage.py` to popularne narzędzie do mierzenia pokrycia,
-- wysoki coverage nie gwarantuje dobrych testów,
-- coverage warto łączyć z myśleniem o jakości scenariuszy testowych.
-
----
-
-## Mini ściąga
-
-```bash
-coverage run -m pytest
-coverage report
-coverage html
-```
-
-### Ważna zasada
-
-coverage to wskaźnik pomocniczy, nie cel sam w sobie.
+- Które moduły są najsłabiej pokryte?
+- Które ważne warunki nie mają testów?
+- Czy testy sprawdzają także ścieżki błędne?
+- Czy coverage ujawnia zbyt trudny do testowania kod?
 
 ---
 
 ## Ćwiczenia
 
-### Ćwiczenie 1
-
-Uruchom testy przez `coverage run -m pytest`.
-
-### Ćwiczenie 2
-
-Wygeneruj raport tekstowy.
-
-### Ćwiczenie 3
-
-Wymyśl funkcję z `if/else` i zastanów się, jakie testy są potrzebne, by pokryć obie gałęzie.
+1. Uruchom `coverage run -m pytest` dla małego projektu.
+2. Wygeneruj `coverage report` i wskaż najsłabszy moduł.
+3. Dopisz testy dla jednej niepokrytej funkcji.
+4. Zmierz coverage ponownie i porównaj wynik.
+5. Dodaj test dla wyjątku i sprawdź, czy raport się poprawił.
+6. Wymyśl przykład, w którym coverage jest wysokie, ale testy nadal są słabe.
+7. Opisz własnymi słowami różnicę między pokryciem linii a pokryciem gałęzi.
+8. Zastanów się, czy brak pokrycia wynika z braku testów, czy z nieczytelnego designu kodu.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### Ćwiczenie 1
-
-```bash
-coverage run -m pytest
-```
-
-### Ćwiczenie 2
-
-```bash
-coverage report
-```
-
-### Ćwiczenie 3
-
-```python
-def znak(x):
-    if x > 0:
-        return "plus"
-    return "zero lub minus"
-```
-
-Potrzebujesz testu dla liczby dodatniej i dla niedodatniej.
+- Coverage pokazuje, jaka część kodu została wykonana przez testy.
+- To bardzo przydatny wskaźnik pomocniczy.
+- Wysoki coverage nie gwarantuje dobrych testów.
+- Najważniejsze są sensowne scenariusze, nie sam procent.
+- Szczególnie pilnuj ścieżek błędnych, wyjątków i wartości granicznych.
+- Coverage ma największą wartość wtedy, gdy łączysz go z realnym myśleniem o jakości testów.

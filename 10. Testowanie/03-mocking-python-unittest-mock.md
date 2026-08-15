@@ -1,29 +1,24 @@
-# Mocking w Pythonie — `unittest.mock`, patchowanie funkcji, klas i obiektów
+# Mocking w Pythonie — `unittest.mock`
 
 ## Spis treści
 
 1. [Wprowadzenie](#wprowadzenie)
 2. [Czym jest mocking](#czym-jest-mocking)
 3. [Po co używa się mocków](#po-co-używa-się-mocków)
-4. [`unittest.mock`](#unittestmock)
-5. [Czym jest `Mock`](#czym-jest-mock)
-6. [Czym jest `MagicMock`](#czym-jest-magicmock)
+4. [`Mock` i `MagicMock`](#mock-i-magicmock)
+5. [`return_value`](#return_value)
+6. [`side_effect`](#side_effect)
 7. [`patch`](#patch)
 8. [Patchowanie funkcji](#patchowanie-funkcji)
 9. [Patchowanie klas](#patchowanie-klas)
 10. [Patchowanie obiektów](#patchowanie-obiektów)
-11. [Patchowanie „we właściwym miejscu”](#patchowanie-we-właściwym-miejscu)
-12. [Mocki a testy API](#mocki-a-testy-api)
-13. [Sprawdzanie wywołań mocka](#sprawdzanie-wywołań-mocka)
-14. [`return_value` i `side_effect`](#return_value-i-side_effect)
-15. [Mockowanie wyjątków](#mockowanie-wyjątków)
-16. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-17. [Praktyczne przykłady](#praktyczne-przykłady)
-18. [Dobre praktyki](#dobre-praktyki)
-19. [Podsumowanie](#podsumowanie)
-20. [Mini ściąga](#mini-ściąga)
-21. [Ćwiczenia](#ćwiczenia)
-22. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+11. [Patchowanie we właściwym miejscu](#patchowanie-we-właściwym-miejscu)
+12. [Sprawdzanie wywołań mocka](#sprawdzanie-wywołań-mocka)
+13. [Mocki a testy integracyjne](#mocki-a-testy-integracyjne)
+14. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+15. [Praktyczna ściąga](#praktyczna-ściąga)
+16. [Ćwiczenia](#ćwiczenia)
+17. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -31,25 +26,34 @@
 
 Mocking to bardzo ważna część testowania.
 
-Pozwala zastępować prawdziwe elementy programu sztucznymi obiektami testowymi.
+Pomaga wtedy, gdy testowany kod korzysta z czegoś zewnętrznego, czego nie chcesz naprawdę uruchamiać podczas testu.
 
-To przydaje się wtedy, gdy nie chcesz podczas testu naprawdę:
+Przykłady:
 
-- robić requestu HTTP,
-- pisać do bazy,
-- wysyłać maili,
-- wywoływać zewnętrznych usług,
-- używać kosztownych lub niestabilnych zależności.
+- request HTTP,
+- baza danych,
+- wysyłka maila,
+- zapis do zewnętrznego systemu,
+- odczyt aktualnego czasu,
+- losowość,
+- kosztowna albo niestabilna zależność.
 
 ---
 
 ## Czym jest mocking
 
-Mocking to tworzenie zastępczego obiektu albo zastępczego zachowania na potrzeby testu.
+Mocking to zastępowanie prawdziwego obiektu albo funkcji kontrolowaną wersją testową.
 
 Najprościej:
 
-zamiast prawdziwego elementu używasz kontrolowanej wersji testowej.
+zamiast uruchamiać prawdziwe działanie, podstawiasz obiekt, nad którym masz pełną kontrolę.
+
+Dzięki temu możesz:
+
+- ustawić, co ma zwrócić,
+- sprawdzić, czy został wywołany,
+- zasymulować wyjątek,
+- odizolować logikę od świata zewnętrznego.
 
 ---
 
@@ -59,27 +63,256 @@ Po to, żeby test:
 
 - był szybszy,
 - był stabilniejszy,
-- nie zależał od internetu lub API,
-- nie wykonywał kosztownych akcji,
-- testował właściwy fragment logiki, a nie wszystko naraz.
+- nie wymagał internetu ani bazy,
+- nie wykonywał kosztownych działań,
+- skupiał się na logice, którą naprawdę chcesz sprawdzić.
+
+To bardzo ważne przy testach jednostkowych.
 
 ---
 
-## `unittest.mock`
+## `Mock` i `MagicMock`
 
-To standardowy moduł Pythona do mockowania.
-
-Najczęściej importuje się:
+Najczęściej importujesz:
 
 ```python
 from unittest.mock import Mock, MagicMock, patch
 ```
 
+### `Mock`
+
+Prosty obiekt testowy.
+
+```python
+from unittest.mock import Mock
+
+m = Mock()
+m.return_value = 123
+
+print(m())
+```
+
+Przykładowy output:
+
+```text
+123
+```
+
+### `MagicMock`
+
+To wygodniejsza wersja, lepiej wspierająca magic methods.
+
+W praktyce często właśnie jej używa się najczęściej.
+
 ---
 
-## Czym jest `Mock`
+## `return_value`
 
-`Mock` to prosty sztuczny obiekt, który możesz skonfigurować i sprawdzać.
+`return_value` ustawia wartość zwracaną przez mock.
+
+```python
+from unittest.mock import Mock
+
+api = Mock()
+api.get_user.return_value = {"name": "Ania"}
+
+wynik = api.get_user(1)
+print(wynik)
+```
+
+Przykładowy output:
+
+```text
+{'name': 'Ania'}
+```
+
+To przydatne, gdy chcesz zasymulować odpowiedź zależności.
+
+---
+
+## `side_effect`
+
+`side_effect` pozwala:
+
+- rzucić wyjątek,
+- zwrócić kolejne wartości,
+- wykonać niestandardową logikę.
+
+Przykład z wyjątkiem:
+
+```python
+from unittest.mock import Mock
+
+api = Mock()
+api.fetch.side_effect = TimeoutError("Za dlugo")
+```
+
+Test:
+
+```python
+import pytest
+
+
+def test_fetch_timeout():
+    with pytest.raises(TimeoutError):
+        api.fetch()
+```
+
+---
+
+## `patch`
+
+`patch` tymczasowo podmienia obiekt w czasie testu.
+
+To jeden z najważniejszych mechanizmów mockowania.
+
+Przykład ogólnej idei:
+
+```python
+with patch("modul.funkcja") as mock_f:
+    ...
+```
+
+Po wyjściu z bloku podmiana znika.
+
+---
+
+## Patchowanie funkcji
+
+Załóżmy taki kod:
+
+```python
+# notifications.py
+
+def send_email(to: str, subject: str) -> bool:
+    return True
+```
+
+```python
+# service.py
+from notifications import send_email
+
+
+def register_user(email: str) -> str:
+    send_email(email, "Witamy")
+    return "ok"
+```
+
+Test:
+
+```python
+from unittest.mock import patch
+from service import register_user
+
+
+def test_register_user_wysyla_maila():
+    with patch("service.send_email") as mock_send:
+        wynik = register_user("a@example.com")
+
+        assert wynik == "ok"
+        mock_send.assert_called_once_with("a@example.com", "Witamy")
+```
+
+Tu nie wysyłasz prawdziwego maila.
+
+Sprawdzasz tylko, czy logika próbowała go wysłać.
+
+---
+
+## Patchowanie klas
+
+Załóżmy taki kod:
+
+```python
+class EmailClient:
+    def send(self, to: str, subject: str) -> bool:
+        return True
+
+
+def notify_user(email: str) -> bool:
+    client = EmailClient()
+    return client.send(email, "Hello")
+```
+
+Test:
+
+```python
+from unittest.mock import patch
+
+
+def test_notify_user():
+    with patch("service.EmailClient") as mock_client_cls:
+        mock_client = mock_client_cls.return_value
+        mock_client.send.return_value = True
+
+        wynik = notify_user("a@example.com")
+
+        assert wynik is True
+        mock_client.send.assert_called_once_with("a@example.com", "Hello")
+```
+
+---
+
+## Patchowanie obiektów
+
+Czasem nie chcesz podmieniać całej klasy, tylko konkretny obiekt albo jego metodę.
+
+Przykład:
+
+```python
+from unittest.mock import Mock
+
+repo = Mock()
+repo.get_user.return_value = {"id": 1}
+
+assert repo.get_user(1) == {"id": 1}
+```
+
+To często wystarcza w prostych testach serwisów.
+
+---
+
+## Patchowanie we właściwym miejscu
+
+To jedna z najważniejszych zasad całego mockowania.
+
+Patchujesz nie tam, gdzie funkcja została zdefiniowana, tylko tam, skąd jest używana.
+
+Jeśli `service.py` zrobił:
+
+```python
+from notifications import send_email
+```
+
+To w teście patchujesz:
+
+```python
+patch("service.send_email")
+```
+
+A nie:
+
+```python
+patch("notifications.send_email")
+```
+
+w tym konkretnym scenariuszu.
+
+To bardzo częsta pułapka początkujących.
+
+---
+
+## Sprawdzanie wywołań mocka
+
+Najczęstsze metody:
+
+```python
+mock.called
+mock.assert_called()
+mock.assert_called_once()
+mock.assert_called_once_with(...)
+mock.assert_not_called()
+```
 
 Przykład:
 
@@ -87,253 +320,92 @@ Przykład:
 from unittest.mock import Mock
 
 m = Mock()
-m.return_value = 123
-print(m())
+m("abc")
+
+m.assert_called_once_with("abc")
 ```
 
----
-
-## Czym jest `MagicMock`
-
-`MagicMock` to rozszerzona wersja `Mock`, lepiej wspierająca magic methods.
-
-W praktyce bardzo często używa się właśnie `MagicMock`, bo jest wygodniejszy.
+Dzięki temu testujesz nie tylko wynik, ale też interakcję z zależnością.
 
 ---
 
-## `patch`
+## Mocki a testy integracyjne
 
-`patch` pozwala tymczasowo podmienić funkcję, klasę albo obiekt.
+Bardzo ważne:
 
-To jeden z najważniejszych elementów mockowania.
+jeśli mockujesz wszystko, to przestajesz testować integrację.
 
-Przykład idei:
+Dlatego:
 
-```python
-with patch("modul.funkcja") as mock_f:
-    ...
-```
+- w testach jednostkowych mocki są bardzo częste,
+- w testach integracyjnych zwykle chcesz mniej mocków i więcej realnej współpracy elementów.
 
----
+Mocki nie są celem samym w sobie.
 
-## Patchowanie funkcji
-
-Jeśli funkcja robi coś zewnętrznego, możesz ją podmienić.
-
-Na przykład zamiast prawdziwego requestu HTTP podstawiasz mock.
-
----
-
-## Patchowanie klas
-
-Możesz podmienić klasę, żeby zamiast prawdziwego obiektu tworzyła mock.
-
-To przydatne, gdy testowany kod tworzy instancje samodzielnie.
-
----
-
-## Patchowanie obiektów
-
-Możesz też patchować konkretne atrybuty obiektu.
-
-Na przykład metodę klienta API albo atrybut konfiguracyjny.
-
----
-
-## Patchowanie „we właściwym miejscu”
-
-To jedna z najważniejszych zasad mockowania.
-
-Patchujesz nie tam, gdzie funkcja „powstała”, tylko tam, skąd jest używana w testowanym module.
-
-To bardzo częsta pułapka.
-
----
-
-## Mocki a testy API
-
-W testach API bardzo często mockuje się:
-
-- requesty do zewnętrznych serwisów,
-- klientów HTTP,
-- warstwę dostępu do bazy,
-- wysyłkę maili,
-- kolejki zadań.
-
-To pozwala testować logikę endpointu bez prawdziwego wyjścia na zewnątrz.
-
----
-
-## Sprawdzanie wywołań mocka
-
-Mocki potrafią pamiętać, jak zostały użyte.
-
-Na przykład:
-
-```python
-mock.assert_called_once()
-mock.assert_called_once_with(1, 2)
-```
-
-To bardzo ważne, bo testujesz nie tylko wynik, ale też interakcję.
-
----
-
-## `return_value` i `side_effect`
-
-### `return_value`
-
-Ustawia zwracany wynik.
-
-### `side_effect`
-
-Pozwala:
-
-- rzucić wyjątek,
-- zwracać różne rzeczy,
-- dodać własne zachowanie.
-
----
-
-## Mockowanie wyjątków
-
-Możesz wymusić błąd:
-
-```python
-mock.side_effect = ValueError("blad")
-```
-
-To przydatne przy testowaniu obsługi wyjątków.
+One mają pomóc izolować to, co trzeba izolować.
 
 ---
 
 ## Typowe błędy początkujących
 
-### 1. Patchowanie w złym miejscu
-
-### 2. Mockowanie za dużo
-
-### 3. Pisanie testów, które tylko sprawdzają mocki, a nie logikę
-
-### 4. Nadużywanie mocków tam, gdzie prostszy fake albo fixture byłby lepszy
-
-### 5. Brak zrozumienia, co dokładnie jest zależnością zewnętrzną
+- patchowanie nie tego miejsca, co trzeba,
+- mockowanie wszystkiego bez zastanowienia,
+- testowanie szczegółów implementacji zamiast zachowania,
+- brak sprawdzenia argumentów wywołania,
+- zbyt rozbudowane testy z wieloma mockami naraz,
+- używanie mocka tam, gdzie prosty fake albo fixture byłby czytelniejszy.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Prosty mock
+### Prosty `Mock`
 
 ```python
-from unittest.mock import Mock
-
-m = Mock(return_value=10)
+m = Mock()
+m.return_value = 10
 assert m() == 10
 ```
 
-### Patchowanie funkcji
+### Symulacja wyjątku
 
 ```python
-from unittest.mock import patch
+m.side_effect = ValueError("blad")
+```
 
-with patch("modul.pobierz_dane") as mock_pobierz:
-    mock_pobierz.return_value = {"ok": True}
+### Patch funkcji
+
+```python
+with patch("service.send_email") as mock_send:
+    ...
 ```
 
 ### Sprawdzenie wywołania
 
 ```python
-mock_pobierz.assert_called_once()
-```
-
-### Mock wyjątku
-
-```python
-mock_pobierz.side_effect = ConnectionError("brak polaczenia")
-```
-
----
-
-## Dobre praktyki
-
-### Mockuj tylko prawdziwe zależności zewnętrzne
-
-### Nie mockuj własnej prostej logiki bez potrzeby
-
-### Patchuj w miejscu użycia
-
-### Testuj i wynik, i interakcję tam, gdzie to ważne
-
-### Utrzymuj testy czytelne
-
----
-
-## Podsumowanie
-
-Najważniejsze rzeczy do zapamiętania:
-
-- mocking pozwala zastępować zależności kontrolowanymi obiektami testowymi,
-- `Mock`, `MagicMock` i `patch` to podstawowe narzędzia,
-- bardzo ważne jest patchowanie we właściwym miejscu,
-- mocki są świetne do testów API i integracji z usługami zewnętrznymi.
-
----
-
-## Mini ściąga
-
-```python
-from unittest.mock import Mock, MagicMock, patch
-```
-
-```python
-m = Mock(return_value=10)
-m.assert_called_once()
-```
-
-```python
-with patch("modul.funkcja") as mock_f:
-    ...
+mock_send.assert_called_once_with("a@example.com", "Witamy")
 ```
 
 ---
 
 ## Ćwiczenia
 
-### Ćwiczenie 1
-
-Utwórz `Mock`, który zwraca `123`.
-
-### Ćwiczenie 2
-
-Ustaw `side_effect` na wyjątek.
-
-### Ćwiczenie 3
-
-Sprawdź, czy mock został wywołany raz z konkretnymi argumentami.
+1. Zbuduj prosty `Mock`, który zwraca liczbę `5`.
+2. Ustaw `side_effect`, żeby mock rzucał `ValueError`.
+3. Napisz funkcję, która wywołuje klienta API, i zamockuj tę zależność w teście.
+4. Sprawdź, czy mock został wywołany raz i z poprawnymi argumentami.
+5. Napisz przykład patchowania klasy tworzonej wewnątrz funkcji.
+6. Celowo patchuj złe miejsce i zobacz, co się stanie.
+7. Popraw test tak, by patchował właściwy symbol.
+8. Zastanów się, czy w Twoim przykładzie to nadal test jednostkowy, czy już nie.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### Ćwiczenie 1
-
-```python
-from unittest.mock import Mock
-
-m = Mock(return_value=123)
-assert m() == 123
-```
-
-### Ćwiczenie 2
-
-```python
-m.side_effect = ValueError("blad")
-```
-
-### Ćwiczenie 3
-
-```python
-m(1, 2)
-m.assert_called_once_with(1, 2)
-```
+- Mock pozwala zastąpić prawdziwą zależność kontrolowaną wersją testową.
+- `return_value` ustawia wynik mocka.
+- `side_effect` pozwala symulować wyjątki albo bardziej złożone zachowanie.
+- `patch` działa tymczasowo w czasie testu.
+- Patchujesz tam, skąd obiekt jest używany, a nie tylko tam, gdzie został zdefiniowany.
+- Mockuj tyle, ile trzeba, ale nie więcej.
