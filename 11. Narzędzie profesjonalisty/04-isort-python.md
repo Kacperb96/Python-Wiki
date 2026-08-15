@@ -7,15 +7,13 @@
 3. [Po co porządkować importy](#po-co-porządkować-importy)
 4. [Jak działa `isort`](#jak-działa-isort)
 5. [Grupowanie importów](#grupowanie-importów)
-6. [Konfiguracja](#konfiguracja)
-7. [Relacja z `ruff` i `black`](#relacja-z-ruff-i-black)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+6. [Przykład przed i po](#przykład-przed-i-po)
+7. [Konfiguracja](#konfiguracja)
+8. [Relacja z `ruff` i `black`](#relacja-z-ruff-i-black)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -23,7 +21,7 @@
 
 `isort` służy do porządkowania importów w Pythonie.
 
-W wielu projektach tę rolę częściowo przejmuje też `ruff`, ale `isort` nadal warto znać.
+Dziś część tej roli bywa przejęta przez `ruff`, ale samo rozumienie zasad porządku importów nadal jest bardzo ważne.
 
 ---
 
@@ -34,25 +32,30 @@ To narzędzie, które:
 - sortuje importy,
 - grupuje je,
 - poprawia ich układ,
-- pomaga utrzymać porządek na górze plików.
+- pomaga utrzymać porządek na górze pliku.
 
 ---
 
 ## Po co porządkować importy
 
-Bo chaotyczne importy:
+Chaotyczne importy:
 
 - utrudniają czytanie pliku,
-- zwiększają ryzyko duplikatów,
-- utrudniają szybkie rozpoznanie zależności.
+- ukrywają zależności,
+- zwiększają bałagan,
+- utrudniają szybkie skanowanie modułu.
+
+Dobrze ułożone importy od razu dają czytelniejszy start każdego pliku.
 
 ---
 
 ## Jak działa `isort`
 
-Narzędzie bierze blok importów i układa go według zasad.
+Najprościej:
 
-Najczęściej oddziela:
+bierze blok importów i układa go według ustalonych zasad.
+
+Najczęściej rozdziela:
 
 - standard library,
 - third-party,
@@ -62,7 +65,7 @@ Najczęściej oddziela:
 
 ## Grupowanie importów
 
-Przykład docelowego układu:
+Docelowy układ zwykle wygląda tak:
 
 ```python
 import os
@@ -74,7 +77,33 @@ import pytest
 from app.services import run_job
 ```
 
-To dużo czytelniejsze niż przypadkowa mieszanka.
+To dużo czytelniejsze niż przypadkowa mieszanka wszystkiego.
+
+---
+
+## Przykład przed i po
+
+### Przed
+
+```python
+import httpx
+import os
+from app.services import task
+import sys
+```
+
+### Po
+
+```python
+import os
+import sys
+
+import httpx
+
+from app.services import task
+```
+
+To prosty przykład, ale bardzo dobrze pokazuje sens narzędzia.
 
 ---
 
@@ -88,72 +117,35 @@ profile = "black"
 line_length = 88
 ```
 
-`profile = "black"` pomaga utrzymać zgodność z formatterem.
+`profile = "black"` pomaga zachować zgodność z formatterem.
 
 ---
 
 ## Relacja z `ruff` i `black`
 
-Dziś często masz dwa warianty:
+Dziś częsty wybór wygląda tak:
 
 - `isort` + `black`,
-- `ruff` z regułami importów + formatter.
+- albo `ruff` z obsługą importów + formatter.
 
-Ważne jest nie tyle narzędzie samo w sobie, ile spójny workflow.
+Najważniejsze nie jest samo narzędzie, tylko spójny workflow.
+
+Nie chcesz mieć konfliktu między jednym narzędziem a drugim.
 
 ---
 
 ## Typowe błędy początkujących
 
-- ręczne sortowanie importów raz tak, raz inaczej,
-- brak rozdziału standard library i lokalnych importów,
-- niespójna konfiguracja między narzędziami,
-- dublowanie różnych narzędzi bez planu.
+- ręczne sortowanie importów za każdym razem inaczej,
+- brak rozdziału między standard library i lokalnym kodem,
+- niespójna konfiguracja narzędzi,
+- dublowanie roli kilku narzędzi bez planu.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Chaos
-
-```python
-import httpx
-import os
-from app.services import task
-import sys
-```
-
-### Porządek
-
-```python
-import os
-import sys
-
-import httpx
-
-from app.services import task
-```
-
----
-
-## Dobre praktyki
-
-- automatyzuj sortowanie importów,
-- trzymaj zgodność z formatterem,
-- nie poprawiaj ręcznie tego, co narzędzie zrobi lepiej,
-- w projekcie wybierz jedno spójne podejście.
-
----
-
-## Podsumowanie
-
-`isort` to praktyczne narzędzie porządkujące importy.
-
-Nawet jeśli część jego roli przejmie `ruff`, rozumienie zasad układu importów nadal jest bardzo ważne.
-
----
-
-## Mini ściąga
+### Minimalna konfiguracja
 
 ```toml
 [tool.isort]
@@ -161,50 +153,27 @@ profile = "black"
 line_length = 88
 ```
 
-Najważniejsze:
+### Sens porządkowania
 
-- `isort` porządkuje importy,
-- rozdziela grupy importów,
-- dobrze współpracuje z `black`.
+- czytelniejszy plik,
+- łatwiejszy review,
+- spójny układ zależności.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij, czemu warto grupować importy.
-2. Dodaj konfigurację `isort`.
-3. Uporządkuj przykładowy blok importów.
-4. Wyjaśnij, czemu `profile = "black"` bywa przydatne.
-5. Porównaj rolę `isort` i `ruff` przy importach.
+1. Przygotuj chaotyczny blok importów i uporządkuj go.
+2. Dodaj konfigurację `isort` do `pyproject.toml`.
+3. Wyjaśnij, czemu `profile = "black"` jest przydatne.
+4. Porównaj rolę `isort` z regułami importów w `ruff`.
+5. Własnymi słowami opisz, dlaczego porządek importów poprawia czytelność.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Po co grupowanie
-
-Bo poprawia czytelność i ułatwia zrozumienie zależności pliku.
-
-### 2. Konfiguracja
-
-```toml
-[tool.isort]
-profile = "black"
-```
-
-### 3. Uporządkowanie
-
-```python
-import os
-import sys
-
-import httpx
-```
-
-### 4. `profile = "black"`
-
-Pomaga uniknąć konfliktów formatowania między narzędziami.
-
-### 5. `isort` vs `ruff`
-
-Oba mogą pomagać z importami, ale ważne jest, by narzędzia nie robiły tego w sprzeczny sposób.
+- `isort` porządkuje i grupuje importy.
+- Importy powinny być uporządkowane i czytelne.
+- Warto utrzymywać zgodność między `isort` i formatterem.
+- Nawet jeśli używasz `ruff`, zasady porządku importów nadal są ważne.

@@ -9,13 +9,11 @@
 5. [Relacja z CI](#relacja-z-ci)
 6. [Relacja z `pytest`, `ruff`, `mypy`](#relacja-z-pytest-ruff-mypy)
 7. [Kiedy `tox` ma sens](#kiedy-tox-ma-sens)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Kiedy może być nadmiarem](#kiedy-może-być-nadmiarem)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -35,7 +33,8 @@ Na przykład:
 
 - testy,
 - linting,
-- type checking.
+- type checking,
+- różne wersje Pythona.
 
 ---
 
@@ -45,7 +44,8 @@ Bo pomaga:
 
 - sprawdzać projekt w powtarzalny sposób,
 - testować wiele wersji Pythona,
-- uniezależnić lokalne checki od ręcznego odpalania wszystkiego osobno.
+- uporządkować lokalne checki,
+- zbliżyć lokalny workflow do CI.
 
 ---
 
@@ -58,8 +58,9 @@ Możesz sprawdzić, czy projekt działa:
 - na Pythonie 3.11,
 - na Pythonie 3.12,
 - na Pythonie 3.13,
+- albo z różnymi zestawami zależności.
 
-albo w różnych zestawach zależności.
+To bardzo ważne szczególnie dla bibliotek i narzędzi używanych szerzej niż tylko w jednym środowisku.
 
 ---
 
@@ -68,6 +69,11 @@ albo w różnych zestawach zależności.
 `tox` nie zastępuje CI.
 
 Dobrze współpracuje z CI, bo daje jeden spójny sposób uruchamiania checków lokalnie i w pipeline.
+
+To bardzo pomaga uniknąć rozjazdu typu:
+
+- lokalnie odpalamy jedno,
+- w CI odpalamy coś zupełnie innego.
 
 ---
 
@@ -81,6 +87,10 @@ On raczej orkiestruje narzędzia takie jak:
 - `ruff`,
 - `mypy`.
 
+To ważne rozróżnienie:
+
+`tox` organizuje środowiska i sposób uruchamiania, a nie zastępuje samych narzędzi jakości.
+
 ---
 
 ## Kiedy `tox` ma sens
@@ -89,7 +99,18 @@ Szczególnie gdy:
 
 - rozwijasz bibliotekę,
 - wspierasz wiele wersji Pythona,
-- chcesz mieć powtarzalne środowiska checków.
+- chcesz mieć powtarzalne środowiska checków,
+- repo ma bardziej dojrzały workflow.
+
+---
+
+## Kiedy może być nadmiarem
+
+Nie każdy projekt go potrzebuje.
+
+Dla bardzo małego projektu wewnętrznego z jedną wersją Pythona i prostym workflow może być zbędny.
+
+Narzędzie ma dawać realną wartość, a nie tylko zwiększać liczbę plików konfiguracyjnych.
 
 ---
 
@@ -102,41 +123,19 @@ Szczególnie gdy:
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Kiedy warto
+### Gdzie `tox` pasuje
 
 - biblioteka open source,
-- narzędzie używane na kilku wersjach Pythona.
+- projekt wspierający wiele wersji Pythona,
+- repo z bardziej rozbudowanym QA workflow.
 
-### Kiedy niekoniecznie
+### O czym pamiętać
 
-- bardzo mały projekt wewnętrzny z jedną wersją Pythona i prostym workflow.
-
----
-
-## Dobre praktyki
-
-- używaj `tox`, gdy daje realną wartość,
-- trzymaj konfigurację możliwie prostą,
-- mapuj środowiska na konkretne cele,
-- utrzymuj zgodność między lokalnym workflow i CI.
-
----
-
-## Podsumowanie
-
-`tox` to ważne narzędzie profesjonalnego ekosystemu Python, szczególnie dla projektów wymagających wielu środowisk testowych.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- `tox` orkiestruje checki,
-- świetnie nadaje się do wielu wersji Pythona,
-- dobrze współpracuje z CI.
+- `tox` orkiestruje środowiska i checki,
+- dobrze współpracuje z CI,
+- nie jest obowiązkowy w każdym projekcie.
 
 ---
 
@@ -150,24 +149,9 @@ Najważniejsze:
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Po co wiele środowisk
-
-Żeby sprawdzić zgodność projektu z różnymi wersjami Pythona lub różnymi zestawami zależności.
-
-### 2. `tox` i CI
-
-`tox` daje spójny lokalny workflow, który CI może później uruchamiać automatycznie.
-
-### 3. Gdzie ma sens
-
-W bibliotece wspierającej kilka wersji interpretera.
-
-### 4. Gdzie zbędny
-
-W małym projekcie z jedną wersją Pythona i prostymi checkami.
-
-### 5. Czemu nie zastępuje testów
-
-Bo sam nie jest frameworkiem testowym, tylko uruchamia inne narzędzia.
+- `tox` służy do orkiestracji checków w wielu środowiskach.
+- Największą wartość daje tam, gdzie liczy się kompatybilność wielowersyjna.
+- Dobrze współpracuje z CI.
+- Nie każdy projekt go potrzebuje.

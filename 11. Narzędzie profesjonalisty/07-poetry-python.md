@@ -5,17 +5,15 @@
 1. [Wprowadzenie](#wprowadzenie)
 2. [Czym jest `poetry`](#czym-jest-poetry)
 3. [Po co używać `poetry`](#po-co-używać-poetry)
-4. [Zależności i środowisko](#zależności-i-środowisko)
-5. [Relacja z `pyproject.toml`](#relacja-z-pyprojecttoml)
-6. [Poetry a `pip` i `venv`](#poetry-a-pip-i-venv)
+4. [Relacja z `pyproject.toml`](#relacja-z-pyprojecttoml)
+5. [Poetry a `pip` i `venv`](#poetry-a-pip-i-venv)
+6. [Typowy workflow](#typowy-workflow)
 7. [Kiedy `poetry` ma sens](#kiedy-poetry-ma-sens)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Kiedy może być nadmiarowe](#kiedy-może-być-nadmiarowe)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -29,114 +27,121 @@
 
 ## Czym jest `poetry`
 
-To narzędzie, które pomaga:
+`poetry` pomaga:
 
 - zarządzać zależnościami,
 - pracować ze środowiskiem,
+- utrzymywać metadane projektu,
 - budować pakiet,
-- utrzymywać projekt wokół `pyproject.toml`.
+- opierać projekt o `pyproject.toml`.
+
+To narzędzie bardzo często spotykane w nowoczesnych repozytoriach Pythona.
 
 ---
 
 ## Po co używać `poetry`
 
-Bo daje:
+Bo daje jeden spójny model pracy.
 
-- uporządkowany workflow,
-- wygodne zarządzanie zależnościami,
-- lepszą spójność projektu,
-- prostszy onboarding.
+Zamiast składać workflow z wielu ręcznych kroków, dostajesz bardziej uporządkowane podejście do:
 
----
-
-## Zależności i środowisko
-
-W projekcie trzeba panować nad:
-
-- zależnościami runtime,
-- zależnościami developerskimi,
-- wersją Pythona,
-- środowiskiem izolowanym od systemu.
-
-`poetry` dobrze adresuje ten zestaw problemów.
+- instalacji zależności,
+- rozróżniania runtime i dev dependencies,
+- zarządzania projektem.
 
 ---
 
 ## Relacja z `pyproject.toml`
 
-`poetry` bardzo mocno opiera się na `pyproject.toml`.
+`poetry` bardzo mocno opiera się o `pyproject.toml`.
 
-To dobry przykład nowoczesnego podejścia do organizacji projektu Python.
+To tam zwykle trzymasz:
+
+- metadane projektu,
+- zależności,
+- grupy zależności.
+
+To dobrze wpisuje się w nowoczesny kierunek ekosystemu Python.
 
 ---
 
 ## Poetry a `pip` i `venv`
 
-`pip` i `venv` to klasyczne fundamenty.
+Klasyczny model:
 
-`poetry` buduje wygodniejszy workflow na poziomie zarządzania całym projektem.
+- `venv` tworzy środowisko,
+- `pip` instaluje zależności.
 
-Warto znać oba podejścia.
+`poetry` daje bardziej zintegrowany workflow nad podobnym problemem.
+
+To nie znaczy, że klasyczny model jest zły.
+
+To znaczy tylko, że `poetry` próbuje go uporządkować i uprościć.
+
+---
+
+## Typowy workflow
+
+Mentalny przykład pracy:
+
+1. tworzysz projekt,
+2. dodajesz zależności,
+3. dodajesz zależności dev,
+4. uruchamiasz projekt w kontekście środowiska,
+5. trzymasz wszystko spójnie w jednym workflow.
+
+Najważniejsza wartość to porządek i przewidywalność.
 
 ---
 
 ## Kiedy `poetry` ma sens
 
-Najczęściej gdy:
+Szczególnie gdy:
 
-- budujesz pełny projekt,
-- zależy ci na przewidywalnym workflow,
+- budujesz pełny projekt, a nie jednorazowy skrypt,
+- chcesz mieć porządek w zależnościach,
 - pracujesz zespołowo,
-- chcesz mieć porządek w zależnościach i metadanych projektu.
+- projekt ma rosnąć,
+- zależy Ci na czytelnym workflow wokół `pyproject.toml`.
+
+---
+
+## Kiedy może być nadmiarowe
+
+Nie zawsze musisz go używać.
+
+Dla bardzo małego, jednorazowego skryptu często wystarczy:
+
+- `venv`,
+- `pip`,
+- prosty `requirements.txt` albo minimalny setup projektu.
+
+Narzędzie ma pomagać, a nie komplikować prostą sytuację.
 
 ---
 
 ## Typowe błędy początkujących
 
-- używanie `poetry` bez rozumienia, co robi środowisko i zależności,
+- używanie `poetry` bez rozumienia środowiska i zależności,
 - mieszanie kilku systemów zarządzania projektem bez planu,
-- brak rozdzielenia zależności dev i runtime.
+- brak rozdzielenia runtime i dev dependencies,
+- wybieranie narzędzia tylko dlatego, że jest modne.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
 ### Gdzie `poetry` pasuje
 
 - aplikacja backendowa,
+- narzędzie CLI,
 - projekt biblioteczny,
-- narzędzie CLI.
+- repo zespołowe.
 
 ### Gdzie nie zawsze jest konieczne
 
-- bardzo mały jednorazowy skrypt.
-
----
-
-## Dobre praktyki
-
-- trzymaj jeden spójny workflow na projekt,
-- dokumentuj sposób pracy z zależnościami,
-- rozdzielaj zależności produkcyjne i developerskie,
-- rozumiej, co dzieje się pod spodem, zamiast tylko klikać komendy.
-
----
-
-## Podsumowanie
-
-`poetry` to ważne narzędzie ekosystemu Python i warto je znać jako profesjonalista.
-
-Nie jest jedyną drogą, ale dobrze pokazuje nowoczesny sposób organizacji projektu.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- `poetry` pomaga ogarniać zależności i projekt,
-- opiera się o `pyproject.toml`,
-- dobrze sprawdza się w pełnych projektach.
+- mały jednorazowy skrypt,
+- bardzo prosty projekt bez rozbudowanego workflow.
 
 ---
 
@@ -150,24 +155,9 @@ Najważniejsze:
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Problem
-
-Porządkuje zarządzanie zależnościami, środowiskiem i projektem wokół jednego workflow.
-
-### 2. Porównanie
-
-`pip` i `venv` są bazą, a `poetry` daje wyższy poziom organizacji projektu.
-
-### 3. Gdzie ma sens
-
-W rozwijanym projekcie aplikacyjnym lub bibliotecznym.
-
-### 4. Gdzie nadmiarowe
-
-W jednorazowym, bardzo prostym skrypcie.
-
-### 5. Po co rozdzielać
-
-Żeby nie instalować narzędzi developerskich tam, gdzie potrzebne jest tylko uruchomienie aplikacji.
+- `poetry` porządkuje zależności i projekt wokół jednego workflow.
+- Dobrze współpracuje z `pyproject.toml`.
+- Nie jest jedyną drogą, ale warto je znać.
+- Najważniejsze to wybrać jeden spójny model pracy dla projektu.

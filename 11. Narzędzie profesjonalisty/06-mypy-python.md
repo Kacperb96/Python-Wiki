@@ -7,15 +7,14 @@
 3. [Po co używać `mypy`](#po-co-używać-mypy)
 4. [Relacja z `typing`](#relacja-z-typing)
 5. [Jakie błędy pomaga łapać](#jakie-błędy-pomaga-łapać)
-6. [Konfiguracja w `pyproject.toml`](#konfiguracja-w-pyprojecttoml)
-7. [Tryb `strict`](#tryb-strict)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+6. [Podstawowe komendy](#podstawowe-komendy)
+7. [Przykładowy output](#przykładowy-output)
+8. [Konfiguracja w `pyproject.toml`](#konfiguracja-w-pyprojecttoml)
+9. [Tryb `strict`](#tryb-strict)
+10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+11. [Praktyczna ściąga](#praktyczna-ściąga)
+12. [Ćwiczenia](#ćwiczenia)
+13. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -24,6 +23,8 @@
 `mypy` to narzędzie do statycznej analizy typów w Pythonie.
 
 Pomaga wykrywać błędy jeszcze przed uruchomieniem programu.
+
+To bardzo wartościowe szczególnie wtedy, gdy projekt zaczyna rosnąć.
 
 ---
 
@@ -41,12 +42,14 @@ Na przykład może wykryć, że:
 
 ## Po co używać `mypy`
 
-Bo w większych projektach znacząco pomaga:
+Bo w większych projektach pomaga:
 
 - wcześniej łapać regresje,
 - poprawiać czytelność API,
-- lepiej współpracować zespołowo,
-- spokojniej refaktoryzować kod.
+- spokojniej refaktoryzować kod,
+- szybciej zauważać niespójności między modułami.
+
+To nie zastępuje testów, ale bardzo dobrze je uzupełnia.
 
 ---
 
@@ -56,23 +59,75 @@ Bo w większych projektach znacząco pomaga:
 
 `mypy` daje narzędzie, które potrafi te adnotacje sprawdzić.
 
-Jedno bez drugiego ma mniejszą wartość.
+Jedno bez drugiego ma mniejszą wartość:
+
+- same typy bez sprawdzania łatwo zignorować,
+- samo sprawdzanie bez adnotacji ma ograniczony zasięg.
 
 ---
 
 ## Jakie błędy pomaga łapać
 
-Na przykład:
+Przykłady:
 
 - zły typ argumentu,
 - zły typ zwracany,
 - brak obsługi `None`,
 - niespójne struktury danych,
-- błędy przy refaktoryzacji.
+- błędy po refaktoryzacji.
+
+To są problemy, które w dynamicznym języku łatwo przegapić.
+
+---
+
+## Podstawowe komendy
+
+Sprawdzenie projektu:
+
+```bash
+mypy .
+```
+
+Sprawdzenie konkretnego modułu:
+
+```bash
+mypy app.py
+```
+
+To najprostszy punkt wejścia.
+
+---
+
+## Przykładowy output
+
+Kod:
+
+```python
+def dodaj(a: int, b: int) -> int:
+    return "wynik"
+
+
+wynik = dodaj("2", 3)
+```
+
+Przykładowy output:
+
+```text
+app.py:2: error: Incompatible return value type (got "str", expected "int")  [return-value]
+app.py:5: error: Argument 1 to "dodaj" has incompatible type "str"; expected "int"  [arg-type]
+Found 2 errors in 1 file (checked 1 source file)
+```
+
+To bardzo czytelny sygnał:
+
+- masz zły typ zwracany,
+- i zły typ argumentu.
 
 ---
 
 ## Konfiguracja w `pyproject.toml`
+
+Przykład:
 
 ```toml
 [tool.mypy]
@@ -82,15 +137,25 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 ```
 
-To dobry kierunek na bardziej profesjonalny projekt.
+To sensowny kierunek dla bardziej profesjonalnego projektu.
 
 ---
 
 ## Tryb `strict`
 
-`strict = true` to mocniejszy reżim sprawdzania.
+`strict = true` włącza mocniejszy reżim sprawdzania.
 
-Nie zawsze warto włączać go od pierwszej minuty w starym projekcie, ale w nowych projektach bardzo często jest sensownym celem.
+Przykład:
+
+```toml
+[tool.mypy]
+python_version = "3.12"
+strict = true
+```
+
+W nowych projektach to często bardzo dobry cel.
+
+W starszym projekcie lepiej czasem dojść do tego etapami.
 
 ---
 
@@ -99,59 +164,20 @@ Nie zawsze warto włączać go od pierwszej minuty w starym projekcie, ale w now
 - oczekiwanie, że `mypy` zastąpi testy,
 - zalewanie kodu `Any`,
 - ignorowanie błędów typów zamiast ich zrozumienia,
-- brak spójności adnotacji w publicznych funkcjach.
+- brak typów w publicznych funkcjach,
+- włączanie zbyt ostrej konfiguracji bez planu w istniejącym bałaganie.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Błąd typu zwracanego
+### Sprawdzenie projektu
 
-```python
-def dodaj(a: int, b: int) -> int:
-    return "wynik"
+```bash
+mypy .
 ```
 
-To powinno zostać zgłoszone jako błąd.
-
-### Błąd argumentu
-
-```python
-def policz(x: int) -> int:
-    return x * 2
-
-policz("abc")
-```
-
----
-
-## Dobre praktyki
-
-- typuj publiczne funkcje i kluczowe modele danych,
-- nie uciekaj zbyt szybko do `Any`,
-- w nowych projektach rozważ mocniejszą konfigurację,
-- używaj `mypy` razem z testami i lintingiem.
-
----
-
-## Podsumowanie
-
-`mypy` jest bardzo ważnym narzędziem profesjonalnego Pythona.
-
-Nie zastępuje testów, ale świetnie uzupełnia workflow jakościowy i zwiększa bezpieczeństwo refaktoryzacji.
-
----
-
-## Mini ściąga
-
-Przykład:
-
-```python
-def hello(name: str) -> str:
-    return f"Hi {name}"
-```
-
-Przykładowa konfiguracja:
+### Prosta konfiguracja
 
 ```toml
 [tool.mypy]
@@ -159,57 +185,28 @@ python_version = "3.12"
 strict = true
 ```
 
-Najważniejsze:
+### Pamiętaj
 
-- `mypy` sprawdza zgodność typów,
-- działa na adnotacjach,
-- najlepiej używać go regularnie, a nie od święta.
+- `mypy` nie uruchamia kodu,
+- sprawdza zgodność typów,
+- bardzo pomaga przy refaktoryzacji.
 
 ---
 
 ## Ćwiczenia
 
-1. Dodaj typy do prostej funkcji sumującej.
-2. Pokaż przykład błędnego typu zwracanego.
-3. Pokaż przykład błędnego argumentu funkcji.
-4. Dodaj prostą konfigurację `mypy` do `pyproject.toml`.
-5. Wyjaśnij, czemu `Any` osłabia korzyści typowania.
+1. Napisz funkcję z błędnym typem zwracanym i sprawdź raport `mypy`.
+2. Przekaż zły typ argumentu i zobacz, czy zostanie zgłoszony.
+3. Dodaj minimalną konfigurację `mypy` do `pyproject.toml`.
+4. Wyjaśnij własnymi słowami, czym różni się `typing` od `mypy`.
+5. Zastanów się, czemu `mypy` nie zastępuje testów.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Typy funkcji
-
-```python
-def dodaj(a: int, b: int) -> int:
-    return a + b
-```
-
-### 2. Zły typ zwracany
-
-```python
-def f() -> int:
-    return "x"
-```
-
-### 3. Zły argument
-
-```python
-def podwoj(x: int) -> int:
-    return x * 2
-
-podwoj("abc")
-```
-
-### 4. Konfiguracja
-
-```toml
-[tool.mypy]
-python_version = "3.12"
-disallow_untyped_defs = true
-```
-
-### 5. `Any`
-
-Bo wyłącza część ochrony, którą normalnie dają adnotacje i checker typów.
+- `mypy` statycznie sprawdza zgodność typów.
+- Pomaga łapać błędy przed uruchomieniem programu.
+- Najlepiej działa razem z adnotacjami z `typing`.
+- Uzupełnia testy i linting, ale ich nie zastępuje.
+- W nowych projektach warto rozważyć mocniejszą konfigurację.

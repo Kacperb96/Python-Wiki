@@ -7,14 +7,13 @@
 3. [Po co używać hooków przed commitem](#po-co-używać-hooków-przed-commitem)
 4. [Jakie narzędzia warto podpiąć](#jakie-narzędzia-warto-podpiąć)
 5. [Przykładowa konfiguracja](#przykładowa-konfiguracja)
-6. [Korzyści w pracy zespołowej](#korzyści-w-pracy-zespołowej)
-7. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-8. [Praktyczne przykłady](#praktyczne-przykłady)
-9. [Dobre praktyki](#dobre-praktyki)
-10. [Podsumowanie](#podsumowanie)
-11. [Mini ściąga](#mini-ściąga)
-12. [Ćwiczenia](#ćwiczenia)
-13. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+6. [Jak działa ten workflow w praktyce](#jak-działa-ten-workflow-w-praktyce)
+7. [Przykładowy output](#przykładowy-output)
+8. [Korzyści w pracy zespołowej](#korzyści-w-pracy-zespołowej)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -33,7 +32,7 @@ To menedżer hooków Git.
 Pozwala odpalać na przykład:
 
 - `ruff`,
-- `black`,
+- formatter,
 - `mypy`,
 - sprawdzenie końcowych spacji,
 - sprawdzenie końca pliku nową linią.
@@ -49,26 +48,26 @@ Bo pomagają:
 - zmniejszać liczbę drobnych poprawek po pushu,
 - budować powtarzalny workflow.
 
+To jedna z najtańszych automatyzacji, które dają bardzo duży efekt.
+
 ---
 
 ## Jakie narzędzia warto podpiąć
 
-Na start zwykle sensowne są:
+Na start zwykle wystarczą:
 
 - `ruff`,
-- `black`,
-- proste hooki tekstowe,
-- czasem `mypy`.
+- formatter,
+- `trailing-whitespace`,
+- `end-of-file-fixer`.
 
-Nie zawsze warto od razu podpinać bardzo ciężkie checki do każdego commita, jeśli dramatycznie spowalniają pracę.
+Czasem warto dodać też `mypy`, ale nie zawsze na sam początek, jeśli ma mocno spowalniać workflow.
 
 ---
 
 ## Przykładowa konfiguracja
 
-Najczęściej tworzy się plik `.pre-commit-config.yaml`.
-
-Przykład:
+Plik `.pre-commit-config.yaml`:
 
 ```yaml
 repos:
@@ -85,16 +84,62 @@ repos:
       - id: trailing-whitespace
 ```
 
+To bardzo sensowny lekki zestaw na start.
+
+---
+
+## Jak działa ten workflow w praktyce
+
+Typowy przebieg:
+
+1. zmieniasz kod,
+2. robisz `git commit`,
+3. `pre-commit` uruchamia hooki,
+4. jeśli coś jest nie tak, commit zostaje zatrzymany,
+5. poprawiasz kod i próbujesz jeszcze raz.
+
+To znaczy, że wiele drobiazgów nie przedostaje się dalej.
+
+---
+
+## Przykładowy output
+
+Przykładowy output przy pierwszym uruchomieniu:
+
+```text
+ruff.....................................................................Passed
+ruff-format..............................................................Passed
+fix end of files.........................................................Passed
+trim trailing whitespace.................................................Passed
+```
+
+Przykładowy output przy błędzie:
+
+```text
+ruff.....................................................................Failed
+- hook id: ruff
+- exit code: 1
+
+F401 `os` imported but unused
+ --> app.py:1:8
+```
+
+Interpretacja:
+
+- commit został zatrzymany,
+- narzędzie mówi dokładnie, co poprawić,
+- po poprawce próbujesz ponownie.
+
 ---
 
 ## Korzyści w pracy zespołowej
 
-`pre-commit` sprawia, że standard jest bardziej automatyczny niż umowny.
+`pre-commit` sprawia, że standard jakości jest bardziej automatyczny niż umowny.
 
-Zespół nie musi wciąż przypominać:
+Zespół nie musi ciągle pisać w review:
 
 - "usuń spacje",
-- "napraw importy",
+- "posortuj importy",
 - "sformatuj plik".
 
 To robi narzędzie.
@@ -104,13 +149,13 @@ To robi narzędzie.
 ## Typowe błędy początkujących
 
 - brak hooków mimo używania linterów i formatterów,
-- podpinanie zbyt wielu ciężkich testów do każdego commita,
-- ignorowanie błędów hooków zamiast poprawienia kodu,
+- podpinanie zbyt wielu ciężkich checków do każdego commita,
+- ignorowanie błędów hooków zamiast poprawiania kodu,
 - brak wersjonowania konfiguracji w repo.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
 ### Minimalny zestaw
 
@@ -120,95 +165,30 @@ repos:
     rev: v0.6.9
     hooks:
       - id: ruff
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: trailing-whitespace
 ```
 
-### Rozsądny zestaw dla małego projektu
+### Rozsądny start
 
-- `ruff`
-- `ruff-format` lub formatter
-- `end-of-file-fixer`
-- `trailing-whitespace`
-
----
-
-## Dobre praktyki
-
-- zacznij od lekkich i naprawdę użytecznych hooków,
-- trzymaj konfigurację w repo,
-- dbaj, aby hooki były szybkie,
-- używaj `pre-commit` razem z CI, a nie zamiast CI.
-
----
-
-## Podsumowanie
-
-`pre-commit` to małe narzędzie, które daje bardzo duży efekt organizacyjny i jakościowy.
-
-W profesjonalnych projektach jest często jedną z najtańszych i najbardziej opłacalnych automatyzacji.
-
----
-
-## Mini ściąga
-
-Przykład:
-
-```yaml
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
-    hooks:
-      - id: ruff
-```
-
-Najważniejsze:
-
-- `pre-commit` odpala checki przed commitem,
-- pomaga utrzymać standard,
-- najlepiej zacząć od małej konfiguracji.
+- `ruff`,
+- formatter,
+- `end-of-file-fixer`,
+- `trailing-whitespace`.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij, po co zespołowi `pre-commit`.
-2. Wypisz 2-3 hooki, które warto włączyć na start.
-3. Napisz minimalny `.pre-commit-config.yaml` z `ruff`.
-4. Wyjaśnij, czemu nie każdy test warto odpalać przed każdym commitem.
-5. Wyjaśnij różnicę między `pre-commit` a CI.
+1. Napisz minimalny `.pre-commit-config.yaml`.
+2. Dodaj `ruff` i przynajmniej jeden prosty hook tekstowy.
+3. Opisz, co się dzieje podczas `git commit`, gdy hook wykryje błąd.
+4. Zastanów się, które checki są lekkie, a które mogą być zbyt ciężkie na każdy commit.
+5. Wyjaśnij, czemu `pre-commit` nie zastępuje CI.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Po co zespołowi
-
-Żeby automatycznie wychwytywać drobne problemy przed commitem i utrzymać spójny standard.
-
-### 2. Hooki startowe
-
-- `ruff`
-- `trailing-whitespace`
-- `end-of-file-fixer`
-
-### 3. Minimalna konfiguracja
-
-```yaml
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
-    hooks:
-      - id: ruff
-```
-
-### 4. Czemu nie wszystko
-
-Bo zbyt ciężkie hooki mogą mocno spowolnić codzienną pracę.
-
-### 5. `pre-commit` vs CI
-
-`pre-commit` działa lokalnie przed commitem, a CI działa na serwerze lub platformie po pushu lub pull requeście.
+- `pre-commit` uruchamia checki automatycznie przed commitem.
+- To świetny sposób na zatrzymywanie drobnych problemów bardzo wcześnie.
+- Najlepiej zacząć od lekkich i użytecznych hooków.
+- `pre-commit` uzupełnia CI, ale go nie zastępuje.

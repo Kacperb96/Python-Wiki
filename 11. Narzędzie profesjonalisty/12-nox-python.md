@@ -9,13 +9,11 @@
 5. [Nox a `tox`](#nox-a-tox)
 6. [Nox a CI](#nox-a-ci)
 7. [Kiedy `nox` ma sens](#kiedy-nox-ma-sens)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Kiedy może być nadmiarem](#kiedy-może-być-nadmiarem)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -38,6 +36,8 @@ Na przykład:
 - type checking,
 - budowanie projektu.
 
+To daje bardziej programowalny styl konfiguracji niż klasyczny plik konfiguracyjny.
+
 ---
 
 ## Po co używać `nox`
@@ -46,9 +46,10 @@ Bo daje:
 
 - automatyzację,
 - elastyczność,
-- czytelną konfigurację w samym Pythonie.
+- czytelną konfigurację w samym Pythonie,
+- wygodny sposób organizacji wielu rodzajów checków.
 
-To bywa wygodne dla osób, które wolą programowalny workflow.
+To bywa bardzo wygodne dla osób, które wolą programowalny workflow.
 
 ---
 
@@ -61,6 +62,8 @@ W `nox` myślisz zwykle przez sesje:
 - sesja `typecheck`.
 
 To czytelny sposób organizacji pracy nad projektem.
+
+Zamiast pamiętać wiele osobnych poleceń, możesz mieć zestaw nazwanych zadań.
 
 ---
 
@@ -83,6 +86,8 @@ Tak jak `tox`, `nox` dobrze współpracuje z CI.
 
 Może być lokalnym i pipeline'owym punktem uruchamiania tych samych checków.
 
+To pomaga utrzymać spójność między pracą lokalną a automatyzacją w repo.
+
 ---
 
 ## Kiedy `nox` ma sens
@@ -91,7 +96,22 @@ Gdy:
 
 - chcesz programowalną konfigurację,
 - lubisz definiować workflow w Pythonie,
-- projekt ma kilka różnych rodzajów checków i zadań.
+- projekt ma kilka różnych rodzajów checków i zadań,
+- potrzebujesz bardziej elastycznej organizacji sesji.
+
+---
+
+## Kiedy może być nadmiarem
+
+Dla bardzo prostego projektu może być zbyt rozbudowany.
+
+Jeśli repo ma:
+
+- jedną wersję Pythona,
+- prosty zestaw checków,
+- bardzo mały zespół,
+
+czasem prostszy workflow wystarczy.
 
 ---
 
@@ -104,45 +124,19 @@ Gdy:
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
 ### Sensowny zestaw sesji
 
-- `tests`
-- `lint`
-- `typecheck`
+- `tests`,
+- `lint`,
+- `typecheck`.
 
-### Gdzie `nox` pasuje
-
-- projekt biblioteczny,
-- projekt z kilkoma różnymi workflow checków.
-
----
-
-## Dobre praktyki
-
-- trzymaj sesje proste i jednoznaczne,
-- nie dubluj bez sensu funkcji różnych narzędzi,
-- utrzymuj spójność między lokalnym workflow a CI,
-- dobieraj narzędzie do potrzeb projektu.
-
----
-
-## Podsumowanie
-
-`nox` to wartościowe narzędzie automatyzacji dla profesjonalnych projektów Python.
-
-Warto je znać nawet wtedy, gdy finalnie w danym repo wybierzesz `tox` albo prostszy workflow.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
+### O czym pamiętać
 
 - `nox` organizuje zadania w sesje,
 - dobrze nadaje się do automatyzacji checków,
-- jest alternatywą dla `tox`.
+- nie każdy projekt musi go używać.
 
 ---
 
@@ -156,24 +150,9 @@ Najważniejsze:
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Sesje
-
-To zdefiniowane zadania, np. testy, linting albo type checking.
-
-### 2. `nox` vs `tox`
-
-`nox` daje bardziej programowalny styl konfiguracji, a `tox` jest klasycznym narzędziem tego obszaru.
-
-### 3. Gdzie ma sens
-
-W projekcie z kilkoma różnymi checkami i potrzebą wygodnej automatyzacji.
-
-### 4. Gdzie za duży
-
-W małym projekcie z prostym workflow i jedną wersją Pythona.
-
-### 5. Zgodność z CI
-
-Bo zmniejsza rozjazd między tym, co działa lokalnie, a tym, co sprawdza pipeline.
+- `nox` organizuje zadania w sesje i daje bardziej programowalny workflow.
+- Dobrze nadaje się do automatyzacji checków developerskich.
+- Jest alternatywą dla `tox`, ale nie zawsze musi być potrzebny.
+- Najważniejsza jest spójność całego workflow projektu.

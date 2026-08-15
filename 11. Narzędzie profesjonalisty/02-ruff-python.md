@@ -7,35 +7,38 @@
 3. [Po co używać `ruff`](#po-co-używać-ruff)
 4. [Linting](#linting)
 5. [Autofix](#autofix)
-6. [Konfiguracja w `pyproject.toml`](#konfiguracja-w-pyprojecttoml)
-7. [Praca lokalna i w CI](#praca-lokalna-i-w-ci)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+6. [Podstawowe komendy](#podstawowe-komendy)
+7. [Przykładowy output](#przykładowy-output)
+8. [Konfiguracja w `pyproject.toml`](#konfiguracja-w-pyprojecttoml)
+9. [Jak używać `ruff` z innymi narzędziami](#jak-używać-ruff-z-innymi-narzędziami)
+10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+11. [Praktyczna ściąga](#praktyczna-ściąga)
+12. [Ćwiczenia](#ćwiczenia)
+13. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
 ## Wprowadzenie
 
-`ruff` to bardzo szybkie narzędzie do lintingu i częściowo także autofixów w Pythonie.
+`ruff` to bardzo szybkie narzędzie do lintingu Pythona.
 
-W nowoczesnych projektach jest dziś jednym z najważniejszych elementów jakości kodu.
+W nowoczesnych projektach jest jednym z najważniejszych elementów codziennego workflow jakościowego.
+
+Pomaga łapać problemy wcześniej, zanim kod trafi do review albo CI.
 
 ---
 
 ## Czym jest `ruff`
 
-`ruff` analizuje kod i wykrywa problemy takie jak:
+`ruff` analizuje kod statycznie i wykrywa między innymi:
 
 - nieużywane importy,
 - nieużywane zmienne,
-- część błędów stylistycznych,
+- część błędów jakościowych,
 - wybrane potencjalne bugi,
-- niespójności formatowania i jakości kodu.
+- problemy z układem importów.
+
+To nie jest formatter w klasycznym sensie `black`, ale potrafi też część rzeczy automatycznie poprawić.
 
 ---
 
@@ -43,39 +46,111 @@ W nowoczesnych projektach jest dziś jednym z najważniejszych elementów jakoś
 
 Bo pomaga:
 
-- szybciej wyłapywać błędy,
-- utrzymywać spójny standard,
-- odciążyć code review z drobiazgów,
-- automatyzować część poprawek.
+- szybciej zauważać błędy,
+- odciążać code review z drobiazgów,
+- utrzymywać spójność jakości,
+- automatyzować część prostych poprawek,
+- trzymać standard projektu lokalnie i w CI.
 
 ---
 
 ## Linting
 
-Linting to statyczna analiza kodu pod kątem jakości i błędów.
+Linting to statyczna analiza kodu.
 
-Przykład mentalny:
+Najprościej:
 
-- interpreter często wykrywa błąd dopiero przy uruchomieniu,
-- linter może wskazać problem wcześniej.
+narzędzie patrzy na kod bez jego uruchamiania i próbuje wskazać problemy.
+
+To ważne, bo część rzeczy możesz wykryć:
+
+- wcześniej niż przy uruchomieniu,
+- wcześniej niż w testach,
+- zanim ktoś inny zobaczy to w pull requeście.
 
 ---
 
 ## Autofix
 
-`ruff` potrafi część rzeczy poprawić automatycznie.
+`ruff` potrafi część problemów naprawić automatycznie.
 
-To bardzo przydatne dla:
+To bardzo wygodne przy takich rzeczach jak:
 
-- importów,
-- części prostych wykroczeń jakościowych,
-- porządkowania drobnych rzeczy.
+- niektóre importy,
+- proste porządki w kodzie,
+- część drobnych naruszeń reguł.
+
+Automatyczne poprawki nie zwalniają z myślenia, ale oszczędzają dużo czasu.
+
+---
+
+## Podstawowe komendy
+
+Sprawdzenie projektu:
+
+```bash
+ruff check .
+```
+
+Sprawdzenie i automatyczna próba naprawy:
+
+```bash
+ruff check . --fix
+```
+
+Jeśli projekt używa osobnego formatowania Ruff:
+
+```bash
+ruff format .
+```
+
+To są najczęstsze komendy, które zobaczysz w realnych repozytoriach.
+
+---
+
+## Przykładowy output
+
+Kod:
+
+```python
+import os
+
+
+def hello():
+    x = 123
+    return "ok"
+```
+
+Przykładowy output `ruff check .`:
+
+```text
+F401 [*] `os` imported but unused
+ --> app.py:1:8
+  |
+1 | import os
+  |        ^^
+
+F841 Local variable `x` is assigned to but never used
+ --> app.py:5:5
+  |
+5 |     x = 123
+  |     ^
+
+Found 2 errors.
+[*] 1 fixable with the `--fix` option.
+```
+
+Jak to czytać:
+
+- `F401` mówi o nieużywanym imporcie,
+- `F841` mówi o nieużywanej zmiennej lokalnej,
+- część problemów może być naprawiona automatycznie.
 
 ---
 
 ## Konfiguracja w `pyproject.toml`
 
-Przykład:
+Przykład prosty i sensowny na start:
 
 ```toml
 [tool.ruff]
@@ -85,22 +160,33 @@ line-length = 88
 select = ["E", "F", "I"]
 ```
 
-To oznacza zwykle:
+Najprostsza interpretacja:
 
-- `E` i `F` dla typowych problemów stylu i błędów,
-- `I` dla importów.
+- `E` i `F` obejmują podstawowe problemy jakościowe,
+- `I` obejmuje importy,
+- `line-length` ustawia wspólną szerokość linii.
+
+Na początku lepiej mieć małą i zrozumiałą konfigurację niż wielką listę reguł skopiowaną bez sensu.
 
 ---
 
-## Praca lokalna i w CI
+## Jak używać `ruff` z innymi narzędziami
 
-`ruff` warto uruchamiać:
+Najczęściej `ruff` działa razem z:
 
-- lokalnie przed commitem,
-- w `pre-commit`,
-- w CI.
+- `black` albo `ruff format`,
+- `mypy`,
+- `pytest`,
+- `pre-commit`,
+- CI.
 
-Dzięki temu standard jakości jest stale pilnowany.
+Przykładowy zdrowy workflow:
+
+1. piszesz kod,
+2. odpalasz `ruff check . --fix`,
+3. odpalasz formatter,
+4. odpalasz testy,
+5. commitujesz zmiany.
 
 ---
 
@@ -108,122 +194,52 @@ Dzięki temu standard jakości jest stale pilnowany.
 
 - uruchamianie lintera dopiero na końcu projektu,
 - ignorowanie wszystkich ostrzeżeń bez zrozumienia,
-- kopiowanie ogromnej konfiguracji bez potrzeby,
-- traktowanie lintingu jako czystej kosmetyki.
+- kopiowanie ogromnej konfiguracji z internetu,
+- traktowanie lintingu jako czystej kosmetyki,
+- próba włączenia naraz wszystkiego bez oswojenia podstawowych reguł.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
+
+### Sprawdzenie projektu
+
+```bash
+ruff check .
+```
+
+### Autofix
+
+```bash
+ruff check . --fix
+```
 
 ### Prosta konfiguracja
 
 ```toml
 [tool.ruff]
-line-length = 100
-
-[tool.ruff.lint]
-select = ["E", "F", "I"]
-```
-
-### Przykład problemu
-
-```python
-import os
-
-def hello():
-    x = 123
-    return "ok"
-```
-
-`ruff` prawdopodobnie zgłosi:
-
-- nieużywany import,
-- nieużywaną zmienną.
-
----
-
-## Dobre praktyki
-
-- zacznij od małej, zrozumiałej konfiguracji,
-- odpalaj `ruff` często,
-- włącz go do `pre-commit`,
-- poprawiaj realne problemy, a nie tylko wygładzaj licznik ostrzeżeń.
-
----
-
-## Podsumowanie
-
-`ruff` to jedno z najważniejszych narzędzi profesjonalnego workflow w Pythonie.
-
-Jest szybki, praktyczny i bardzo dobrze podnosi jakość kodu w codziennej pracy.
-
----
-
-## Mini ściąga
-
-Przykładowa konfiguracja:
-
-```toml
-[tool.ruff]
 line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 ```
-
-Najważniejsze:
-
-- `ruff` lintuje kod,
-- pomaga wyłapać błędy wcześniej,
-- część problemów umie poprawić sam,
-- najlepiej działa jako element codziennego workflow.
 
 ---
 
 ## Ćwiczenia
 
-1. Dodaj konfigurację `ruff` do `pyproject.toml`.
-2. Wskaż przykład nieużywanego importu.
-3. Wskaż przykład nieużywanej zmiennej.
-4. Wyjaśnij, dlaczego warto uruchamiać linter przed commitem.
-5. Podaj 2-3 rodziny reguł, które warto włączyć na start.
+1. Przygotuj plik z nieużywanym importem i zobacz raport `ruff`.
+2. Dodaj nieużywaną zmienną i sprawdź, czy zostanie zgłoszona.
+3. Uruchom `ruff check . --fix` i zobacz, co narzędzie poprawi samo.
+4. Dodaj minimalną konfigurację `ruff` do `pyproject.toml`.
+5. Wyjaśnij własnymi słowami, czym różni się linting od testów.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Konfiguracja
-
-```toml
-[tool.ruff]
-line-length = 88
-
-[tool.ruff.lint]
-select = ["E", "F", "I"]
-```
-
-### 2. Nieużywany import
-
-```python
-import json
-
-print("hello")
-```
-
-### 3. Nieużywana zmienna
-
-```python
-def f():
-    x = 10
-    return 1
-```
-
-### 4. Po co przed commitem
-
-Bo łatwiej poprawić małe problemy od razu niż zbierać je przez tygodnie.
-
-### 5. Startowe reguły
-
-- `E`
-- `F`
-- `I`
+- `ruff` bardzo szybko wykrywa wiele codziennych problemów jakościowych.
+- Linting działa statycznie, bez uruchamiania programu.
+- Część problemów `ruff` potrafi naprawić sam.
+- Najlepiej używać go lokalnie, w `pre-commit` i w CI.
+- Zacznij od małej, zrozumiałej konfiguracji.

@@ -6,15 +6,14 @@
 2. [Po co Pythonowcowi `Makefile`](#po-co-pythonowcowi-makefile)
 3. [Czym jest target](#czym-jest-target)
 4. [Typowe zastosowania](#typowe-zastosowania)
-5. [Relacja z innymi narzędziami](#relacja-z-innymi-narzędziami)
-6. [Czy `Makefile` jest obowiązkowy](#czy-makefile-jest-obowiązkowy)
-7. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-8. [Praktyczne przykłady](#praktyczne-przykłady)
-9. [Dobre praktyki](#dobre-praktyki)
-10. [Podsumowanie](#podsumowanie)
-11. [Mini ściąga](#mini-ściąga)
-12. [Ćwiczenia](#ćwiczenia)
-13. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+5. [Przykład praktyczny](#przykład-praktyczny)
+6. [Jak używa się tego w zespole](#jak-używa-się-tego-w-zespole)
+7. [Relacja z innymi narzędziami](#relacja-z-innymi-narzędziami)
+8. [Czy `Makefile` jest obowiązkowy](#czy-makefile-jest-obowiązkowy)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -28,13 +27,14 @@ W Pythonie nie jest obowiązkowy, ale często bardzo wygodny.
 
 ## Po co Pythonowcowi `Makefile`
 
-Bo zamiast pamiętać długie polecenia, można mieć krótkie cele:
+Bo zamiast pamiętać długie polecenia, możesz mieć krótkie cele:
 
-- `make test`
-- `make lint`
-- `make format`
+- `make test`,
+- `make lint`,
+- `make format`,
+- `make check`.
 
-To poprawia ergonomię pracy zespołowej.
+To poprawia ergonomię pracy lokalnej i zespołowej.
 
 ---
 
@@ -42,7 +42,7 @@ To poprawia ergonomię pracy zespołowej.
 
 Target to nazwane zadanie.
 
-Na przykład:
+Przykład:
 
 ```make
 test:
@@ -55,14 +55,50 @@ To oznacza, że `make test` uruchomi `pytest`.
 
 ## Typowe zastosowania
 
-Najczęściej:
+Najczęściej do:
 
-- testy,
-- linting,
-- formatowanie,
-- type checking,
-- uruchamianie aplikacji,
-- budowanie projektu.
+- testów,
+- lintingu,
+- formatowania,
+- type checkingu,
+- uruchamiania aplikacji,
+- budowania projektu.
+
+---
+
+## Przykład praktyczny
+
+```make
+test:
+	pytest
+
+lint:
+	ruff check .
+
+format:
+	black .
+
+check:
+	ruff check .
+	mypy .
+	pytest
+```
+
+To prosty przykład, ale daje już bardzo wygodny punkt wejścia do codziennej pracy.
+
+---
+
+## Jak używa się tego w zespole
+
+Bardzo praktyczna zaleta:
+
+zamiast tłumaczyć każdej osobie długie komendy, możesz powiedzieć po prostu:
+
+- uruchom `make test`,
+- uruchom `make check`,
+- uruchom `make format`.
+
+To zmniejsza chaos i upraszcza onboarding.
 
 ---
 
@@ -73,8 +109,11 @@ Najczęściej:
 - `pytest`,
 - `ruff`,
 - `mypy`,
+- `black`.
 
-tylko daje wygodny punkt wejścia do ich uruchamiania.
+On jest tylko wygodną warstwą skrótów nad nimi.
+
+To ważne rozróżnienie.
 
 ---
 
@@ -84,20 +123,24 @@ Nie.
 
 Ale bywa bardzo użyteczny, zwłaszcza gdy projekt ma kilka często powtarzanych poleceń.
 
+Dla bardzo małego skryptu może być zbędny.
+
+Dla większego repo zwykle jest wygodny.
+
 ---
 
 ## Typowe błędy początkujących
 
 - wrzucanie do `Makefile` wszystkiego bez planu,
 - ukrywanie zbyt skomplikowanej logiki,
-- brak dokumentacji, co robią cele,
-- różny workflow lokalnie i w dokumentacji.
+- brak zgodności między `Makefile`, README i CI,
+- robienie targetów o niejasnych nazwach.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Minimalny `Makefile`
+### Minimalny przykład
 
 ```make
 test:
@@ -105,47 +148,14 @@ test:
 
 lint:
 	ruff check .
-
-format:
-	black .
 ```
 
-### Wygoda zespołowa
+### Po co to mieć
 
-Zamiast tłumaczyć każdemu długie komendy, można napisać:
-
-- uruchom `make test`
-- uruchom `make lint`
-
----
-
-## Dobre praktyki
-
-- trzymaj cele proste i czytelne,
-- używaj go jako skrótu do workflow,
-- nie ukrywaj w nim magicznych, trudnych do zrozumienia działań,
-- dbaj o zgodność z README i CI.
-
----
-
-## Podsumowanie
-
-`Makefile` to małe narzędzie, które może znacząco poprawić ergonomię codziennej pracy z projektem Python.
-
----
-
-## Mini ściąga
-
-```make
-test:
-	pytest
-```
-
-Najważniejsze:
-
-- target to nazwane zadanie,
-- `Makefile` upraszcza codzienny workflow,
-- dobrze sprawdza się jako warstwa skrótów nad innymi narzędziami.
+- krótsze komendy,
+- wygodniejsza praca,
+- prostszy onboarding,
+- bardziej przewidywalny workflow.
 
 ---
 
@@ -154,38 +164,13 @@ Najważniejsze:
 1. Napisz target `test`.
 2. Napisz target `lint`.
 3. Napisz target `format`.
-4. Wyjaśnij, po co zespołowi `Makefile`.
-5. Wyjaśnij, czemu nie warto ukrywać w nim zbyt skomplikowanej logiki.
+4. Dodaj target `check` uruchamiający kilka narzędzi jakości.
+5. Wyjaśnij, po co zespołowi `Makefile`.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. `test`
-
-```make
-test:
-	pytest
-```
-
-### 2. `lint`
-
-```make
-lint:
-	ruff check .
-```
-
-### 3. `format`
-
-```make
-format:
-	black .
-```
-
-### 4. Po co zespołowi
-
-Żeby skrócić i ujednolicić najczęściej używane komendy projektu.
-
-### 5. Czemu nie komplikować
-
-Bo wtedy `Makefile` przestaje upraszczać, a zaczyna ukrywać trudny workflow.
+- `Makefile` upraszcza codzienny workflow przez krótkie komendy.
+- Nie zastępuje narzędzi, tylko je wygodnie uruchamia.
+- Najlepiej trzymać targety proste, czytelne i zgodne z dokumentacją projektu.

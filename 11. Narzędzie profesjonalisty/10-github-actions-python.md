@@ -7,15 +7,13 @@
 3. [Po co Pythonowcowi GitHub Actions](#po-co-pythonowcowi-github-actions)
 4. [Co zwykle uruchamia pipeline](#co-zwykle-uruchamia-pipeline)
 5. [Podstawowa struktura workflow](#podstawowa-struktura-workflow)
-6. [Najczęstsze checki](#najczęstsze-checki)
-7. [Korzyści zawodowe](#korzyści-zawodowe)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+6. [Minimalny workflow](#minimalny-workflow)
+7. [Jak czytać taki plik](#jak-czytać-taki-plik)
+8. [Przykładowy output i sens czerwonego buildu](#przykładowy-output-i-sens-czerwonego-buildu)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -23,7 +21,7 @@
 
 GitHub Actions to popularne narzędzie CI/CD.
 
-W projektach Python najczęściej używa się go do automatycznego uruchamiania testów i kontroli jakości po pushu lub pull requeście.
+W projektach Python najczęściej używa się go do automatycznego uruchamiania testów i kontroli jakości po pushu albo pull requeście.
 
 ---
 
@@ -47,71 +45,39 @@ Bo pomaga:
 - szybko wykrywać regresje,
 - utrzymać standard jakości,
 - automatyzować rutynowe checki,
-- pracować zespołowo bez zgadywania, czy projekt przechodzi testy.
+- mieć pewność, że projekt przechodzi podstawową weryfikację poza lokalną maszyną.
 
 ---
 
 ## Co zwykle uruchamia pipeline
 
-Najczęściej:
+W projekcie Python bardzo często chcesz w CI uruchamiać:
 
 - `ruff`,
 - `mypy`,
 - `pytest`,
 - czasem coverage.
 
-To bardzo sensowny minimalny zestaw.
+To sensowny minimalny zestaw dla wielu repozytoriów.
 
 ---
 
 ## Podstawowa struktura workflow
 
-Workflow opisuje się w pliku YAML.
+Workflow opisuje się w YAML-u.
 
 Typowe elementy:
 
-- `name`
-- `on`
-- `jobs`
-- `steps`
+- `name`,
+- `on`,
+- `jobs`,
+- `steps`.
+
+To jest szkielet, który będziesz widzieć praktycznie zawsze.
 
 ---
 
-## Najczęstsze checki
-
-W projekcie Python zwykle chcesz:
-
-- sprawdzić jakość kodu,
-- odpalić testy,
-- sprawdzić typy,
-- upewnić się, że projekt buduje się poprawnie.
-
----
-
-## Korzyści zawodowe
-
-To ważne, bo profesjonalny projekt powinien sam potwierdzać podstawową jakość po zmianach.
-
-To zmniejsza ryzyko:
-
-- zepsutego maina,
-- nieprzechodzących testów,
-- błędów wykrywanych zbyt późno.
-
----
-
-## Typowe błędy początkujących
-
-- brak CI mimo pracy zespołowej,
-- odpalanie tylko testów bez lintingu i typów,
-- zbyt skomplikowany pipeline na start,
-- ignorowanie czerwonych buildów.
-
----
-
-## Praktyczne przykłady
-
-### Minimalny workflow
+## Minimalny workflow
 
 ```yaml
 name: Python CI
@@ -119,7 +85,7 @@ name: Python CI
 on: [push, pull_request]
 
 jobs:
-  test:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -130,77 +96,87 @@ jobs:
       - run: pytest
 ```
 
-### Lepszy kierunek
+To najprostszy punkt wejścia.
 
-- `ruff`
-- `mypy`
-- `pytest`
+Rozsądny kierunek rozbudowy:
 
----
-
-## Dobre praktyki
-
-- zacznij od prostego pipeline,
-- uruchamiaj tylko najważniejsze checki,
-- trzymaj CI spójne z lokalnym workflow,
-- traktuj czerwony pipeline poważnie.
+- dodać `ruff`,
+- dodać `mypy`,
+- zadbać o spójność z lokalnym workflow.
 
 ---
 
-## Podsumowanie
+## Jak czytać taki plik
 
-GitHub Actions to ważny element profesjonalnego workflow Python.
+Patrz po kolei:
 
-Nie chodzi o samą platformę, tylko o nawyk automatycznej weryfikacji jakości projektu.
+1. kiedy workflow się uruchamia,
+2. jakie joby istnieją,
+3. jaka wersja Pythona jest używana,
+4. jak instalowane są zależności,
+5. jakie checki są naprawdę odpalane.
+
+To pozwala szybko ocenić dojrzałość projektu.
 
 ---
 
-## Mini ściąga
+## Przykładowy output i sens czerwonego buildu
 
-Najważniejsze:
+W praktyce najważniejszy jest nie sam YAML, tylko to, że pipeline daje prosty sygnał:
 
-- CI sprawdza projekt po zmianach,
-- GitHub Actions to popularne narzędzie CI,
-- w Pythonie zwykle odpalasz `ruff`, `mypy`, `pytest`.
+- zielono: podstawowe checki przeszły,
+- czerwono: coś wymaga poprawy.
+
+Czerwony build nie jest ozdobą.
+
+To znak, że projekt przestał spełniać ustalone warunki jakości.
+
+Dlatego powinno się go traktować poważnie.
+
+---
+
+## Typowe błędy początkujących
+
+- brak CI mimo pracy zespołowej,
+- odpalanie tylko testów bez lintingu i typów,
+- zbyt skomplikowany pipeline na start,
+- brak zgodności między tym, co działa lokalnie, a tym, co robi CI,
+- ignorowanie czerwonych buildów.
+
+---
+
+## Praktyczna ściąga
+
+### Minimalny sensowny zestaw
+
+- checkout repo,
+- setup Pythona,
+- instalacja zależności,
+- `ruff`,
+- `mypy`,
+- `pytest`.
+
+### O czym pamiętać
+
+- CI ma odtwarzać realny workflow projektu,
+- nie powinno być całkowicie oderwane od pracy lokalnej,
+- im prostszy start, tym lepiej.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij, czym jest CI.
-2. Wypisz 3 checki, które warto odpalać dla projektu Python.
-3. Napisz minimalny workflow z testami.
-4. Wyjaśnij, czemu czerwony build jest ważnym sygnałem.
-5. Wyjaśnij, czemu warto mieć zgodność między lokalnym workflow a CI.
+1. Napisz minimalny workflow GitHub Actions dla projektu Python.
+2. Dodaj `ruff` do pipeline.
+3. Dodaj `mypy` do pipeline.
+4. Wyjaśnij, po co CI uruchamia się na `push` i `pull_request`.
+5. Opisz, czemu czerwony build powinien blokować dalszą pracę nad zmianą.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. CI
-
-To automatyczne sprawdzanie jakości projektu po zmianach w kodzie.
-
-### 2. 3 checki
-
-- `ruff`
-- `mypy`
-- `pytest`
-
-### 3. Minimalny workflow
-
-```yaml
-name: Python CI
-on: [push]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-```
-
-### 4. Czerwony build
-
-Sygnalizuje, że projekt po zmianie nie przechodzi ustalonych checków.
-
-### 5. Zgodność
-
-Bo wtedy to, co działa lokalnie, ma dużą szansę działać też w pipeline.
+- GitHub Actions automatyzuje sprawdzanie jakości projektu.
+- W Pythonie najczęściej odpala testy, linting i type checking.
+- CI powinno być spójne z lokalnym workflow.
+- Prosty pipeline jest lepszy niż przesadnie skomplikowany od pierwszego dnia.

@@ -5,17 +5,15 @@
 1. [Wprowadzenie](#wprowadzenie)
 2. [Czym jest `uv`](#czym-jest-uv)
 3. [Po co używać `uv`](#po-co-używać-uv)
-4. [Zależności i środowisko](#zależności-i-środowisko)
-5. [Relacja z `pip` i `venv`](#relacja-z-pip-i-venv)
-6. [Relacja z `pyproject.toml`](#relacja-z-pyprojecttoml)
+4. [Relacja z `pip` i `venv`](#relacja-z-pip-i-venv)
+5. [Relacja z `pyproject.toml`](#relacja-z-pyprojecttoml)
+6. [Dlaczego `uv` jest kojarzone z szybkością](#dlaczego-uv-jest-kojarzone-z-szybkością)
 7. [Kiedy `uv` ma sens](#kiedy-uv-ma-sens)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Kiedy nie jest konieczne](#kiedy-nie-jest-konieczne)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -33,7 +31,8 @@ W dużym uproszczeniu to narzędzie, które pomaga:
 
 - zarządzać środowiskiem,
 - instalować zależności,
-- pracować z projektem Python szybciej niż klasyczny zestaw narzędzi.
+- pracować z projektem Python szybciej niż klasyczny zestaw narzędzi,
+- lepiej wpisywać się w nowoczesny workflow projektu.
 
 ---
 
@@ -43,21 +42,10 @@ Najczęstsze powody:
 
 - szybkość,
 - wygodniejszy workflow,
-- nowocześniejsze podejście do projektu,
+- nowocześniejsze podejście do zależności,
 - dobra współpraca z `pyproject.toml`.
 
----
-
-## Zależności i środowisko
-
-W profesjonalnym projekcie trzeba sprawnie ogarnąć:
-
-- wersję Pythona,
-- środowisko wirtualne,
-- zależności runtime,
-- zależności developerskie.
-
-`uv` próbuje ten workflow uprościć.
+To narzędzie warto znać nawet jeśli nie każdy projekt będzie go używał.
 
 ---
 
@@ -70,7 +58,9 @@ Klasyczny zestaw:
 
 `uv` oferuje nowocześniejszą i często szybszą warstwę pracy nad tym samym problemem.
 
-To nie znaczy, że trzeba zapomnieć o `pip`, ale warto znać nowoczesne narzędzia.
+To nie znaczy, że klasyczny model przestaje mieć sens.
+
+To znaczy tylko, że pojawiły się wygodniejsze opcje dla wielu projektów.
 
 ---
 
@@ -80,6 +70,22 @@ W nowoczesnych projektach coraz więcej rzeczy kręci się wokół `pyproject.to
 
 `uv` dobrze wpisuje się w ten model pracy.
 
+To jeden z powodów, dla których jest dziś coraz częściej brane pod uwagę przy nowych projektach.
+
+---
+
+## Dlaczego `uv` jest kojarzone z szybkością
+
+To narzędzie zdobyło popularność między innymi dlatego, że workflow związany z:
+
+- tworzeniem środowisk,
+- instalacją zależności,
+- pracą na wielu projektach,
+
+potrafi być odczuwalnie szybszy i wygodniejszy.
+
+Dla osoby pracującej na wielu repozytoriach to naprawdę robi różnicę.
+
 ---
 
 ## Kiedy `uv` ma sens
@@ -87,90 +93,60 @@ W nowoczesnych projektach coraz więcej rzeczy kręci się wokół `pyproject.to
 Szczególnie gdy:
 
 - budujesz nowy projekt,
-- zależy ci na szybkim workflow,
-- chcesz mieć nowocześniejsze podejście do zależności,
-- pracujesz często na wielu projektach.
+- zależy Ci na szybkim workflow,
+- pracujesz często na wielu projektach,
+- chcesz podejścia nowocześniejszego niż samo `pip` + `venv`.
+
+---
+
+## Kiedy nie jest konieczne
+
+Nie zawsze musisz go używać.
+
+Dla bardzo prostego skryptu albo projektu, który już ma ustalony workflow zespołowy, zmiana narzędzia może nic realnie nie dawać.
+
+Narzędzie ma pomagać, a nie tylko wyglądać nowocześnie.
 
 ---
 
 ## Typowe błędy początkujących
 
-- używanie narzędzia bez zrozumienia podstaw `pip`, `venv` i `pyproject.toml`,
-- mieszanie kilku sposobów zarządzania projektem bez planu,
-- brak rozróżnienia zależności runtime i dev.
+- używanie `uv` bez zrozumienia podstaw `pip`, `venv` i `pyproject.toml`,
+- mieszanie wielu workflow zależności bez planu,
+- brak rozróżnienia runtime i dev dependencies,
+- wybór narzędzia tylko dlatego, że jest szybkie, bez oceny potrzeb projektu.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Kiedy warto rozważyć `uv`
+### Gdzie `uv` pasuje
 
 - nowe API w Pythonie,
 - nowe narzędzie CLI,
-- projekt zespołowy z `pyproject.toml`.
+- projekt zespołowy z `pyproject.toml`,
+- praca na wielu repozytoriach.
 
-### Kiedy nie jest konieczne
+### Gdzie nie musi być konieczne
 
 - prosty jednorazowy skrypt,
-- środowisko, gdzie i tak obowiązuje sztywny workflow zespołowy.
-
----
-
-## Dobre praktyki
-
-- najpierw rozumiej podstawy, potem wybieraj narzędzie,
-- trzymaj jeden spójny workflow w projekcie,
-- dokumentuj sposób pracy z zależnościami w README,
-- nie mieszaj chaotycznie `pip`, `poetry`, `uv` i innych narzędzi.
-
----
-
-## Podsumowanie
-
-`uv` to ważne nowoczesne narzędzie, które warto znać jako profesjonalista Python, nawet jeśli nie każdy projekt będzie go używał.
-
-Najważniejsze jest rozumienie problemu, który rozwiązuje.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- `uv` pomaga zarządzać środowiskiem i zależnościami,
-- dobrze pasuje do nowoczesnych projektów,
-- nie zastępuje potrzeby rozumienia `pip`, `venv` i `pyproject.toml`.
+- środowisko ze sztywnym istniejącym workflow.
 
 ---
 
 ## Ćwiczenia
 
 1. Wyjaśnij, jaki problem rozwiązuje `uv`.
-2. Porównaj mentalnie `uv` z `pip` + `venv`.
-3. Wskaż, kiedy w projekcie `uv` ma sens.
-4. Wskaż, kiedy nie jest konieczny.
+2. Porównaj je mentalnie z `pip` + `venv`.
+3. Wskaż projekt, w którym `uv` ma sens.
+4. Wskaż projekt, gdzie nie jest konieczne.
 5. Wyjaśnij, czemu nie warto mieszać wielu workflow naraz.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Problem
-
-Upraszcza i przyspiesza zarządzanie środowiskiem oraz zależnościami projektu.
-
-### 2. Porównanie
-
-`pip` i `venv` to klasyczne podstawy, a `uv` daje nowocześniejszy workflow wokół podobnych potrzeb.
-
-### 3. Kiedy ma sens
-
-Przy nowym, aktywnie rozwijanym projekcie.
-
-### 4. Kiedy niekonieczny
-
-Przy bardzo prostym skrypcie bez większego zaplecza projektowego.
-
-### 5. Czemu nie mieszać
-
-Bo łatwo o chaos konfiguracyjny i trudniejszy onboarding.
+- `uv` pomaga zarządzać środowiskiem i zależnościami nowocześniej i często szybciej.
+- Dobrze wpisuje się w świat `pyproject.toml`.
+- Nie zwalnia z rozumienia podstaw `pip` i `venv`.
+- Narzędzie powinno być dopasowane do projektu, a nie wybrane tylko dlatego, że jest modne.
