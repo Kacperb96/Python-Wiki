@@ -130,6 +130,14 @@ pip freeze
 
 To drugie częściej używa się do zapisu zależności.
 
+Przykładowy wynik `pip list` może wyglądać tak:
+
+```text
+Package    Version
+pytest     8.0.0
+requests   2.31.0
+```
+
 ---
 
 ## `requirements.txt`
@@ -246,6 +254,10 @@ Nie warto aktualizować wszystkiego w ciemno.
 - aktualizacja zależności bez testów,
 - chaos między bibliotekami dev i produkcyjnymi.
 
+### 6. Wrzucanie całego `pip freeze` bez zrozumienia, co tam jest
+
+Warto wiedzieć, które pakiety są naprawdę Twoimi zależnościami bezpośrednimi.
+
 ---
 
 ## Praktyczne przykłady
@@ -264,6 +276,18 @@ pytest==8.0.0
 requests==2.31.0
 ```
 
+### Odtworzenie środowiska
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Efekt:
+
+masz środowisko z tym samym zestawem pakietów, co w projekcie źródłowym.
+
 ---
 
 ## Dobre praktyki
@@ -273,6 +297,10 @@ requests==2.31.0
 - pinuj ważne wersje,
 - testuj projekt po aktualizacji,
 - utrzymuj porządek w zależnościach.
+
+Praktyczna zasada:
+
+jeśli projekt ma działać u kogoś innego niż Ty, zależności muszą być opisane jawnie i możliwe do odtworzenia.
 
 ---
 
@@ -284,6 +312,12 @@ Najważniejsze rzeczy do zapamiętania:
 - dependency management to świadome zarządzanie zależnościami projektu,
 - `requirements.txt` pomaga odtwarzać środowisko,
 - wersje bibliotek trzeba kontrolować świadomie.
+
+Najważniejsze do zapamiętania:
+
+- samo `pip install` nie kończy tematu,
+- zależności trzeba umieć odtworzyć,
+- aktualizacje bez testów i bezmyślne zmiany wersji szybko prowadzą do problemów.
 
 ---
 

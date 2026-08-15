@@ -111,6 +111,14 @@ logging.warning("To jest ostrzezenie")
 logging.error("To jest blad")
 ```
 
+Przykładowy wynik:
+
+```text
+INFO:root:Program startuje
+WARNING:root:To jest ostrzezenie
+ERROR:root:To jest blad
+```
+
 ---
 
 ## Logger, handler, formatter
@@ -146,6 +154,12 @@ logging.basicConfig(
 
 Teraz logi będą trafiać do pliku.
 
+Efekt w pliku może wyglądać tak:
+
+```text
+INFO:root:Program startuje
+```
+
 ---
 
 ## Format logów
@@ -164,6 +178,12 @@ To pozwala dodać:
 - czas,
 - poziom,
 - treść komunikatu.
+
+Przykładowy wynik:
+
+```text
+2026-08-15 10:00:00,000 INFO Program startuje
+```
 
 ---
 
@@ -206,6 +226,15 @@ except ZeroDivisionError:
 
 `logging.exception()` automatycznie dodaje traceback.
 
+Przykładowy wynik:
+
+```text
+ERROR:root:Wystapil blad dzielenia
+Traceback (most recent call last):
+...
+ZeroDivisionError: division by zero
+```
+
 ---
 
 ## Loggery modułowe
@@ -230,6 +259,10 @@ To bardzo powszechna dobra praktyka.
 - logowanie błędów bez sensownego kontekstu,
 - brak formatowania logów.
 
+### 6. Logowanie poufnych danych
+
+Nie wszystko powinno trafiać do logów, np. hasła, tokeny czy pełne dane wrażliwe.
+
 ---
 
 ## Praktyczne przykłady
@@ -244,6 +277,13 @@ logging.basicConfig(
 
 logging.info("Aplikacja uruchomiona")
 logging.warning("Brak pliku konfiguracyjnego")
+```
+
+Wynik:
+
+```text
+INFO: Aplikacja uruchomiona
+WARNING: Brak pliku konfiguracyjnego
 ```
 
 ### Logger modułowy
@@ -265,6 +305,10 @@ logger.info("Hello")
 - używaj loggerów modułowych,
 - unikaj zalewania logów bezwartościowymi komunikatami.
 
+Praktyczna zasada:
+
+log powinien pomagać odpowiedzieć na pytanie "co się stało?", a nie tylko zwiększać liczbę linii w pliku.
+
 ---
 
 ## Podsumowanie
@@ -275,6 +319,12 @@ Najważniejsze rzeczy do zapamiętania:
 - ma poziomy ważności,
 - pozwala logować do pliku i konsoli,
 - jest dużo lepsze niż `print` w profesjonalnym kodzie.
+
+Najważniejsze do zapamiętania:
+
+- `print()` służy do prostych, chwilowych komunikatów,
+- `logging` służy do kontrolowanego śledzenia działania aplikacji,
+- poziomy logów i format mają ogromne znaczenie praktyczne.
 
 ---
 

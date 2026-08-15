@@ -1,29 +1,26 @@
-# Dokumentowanie kodu w Pythonie — docstrings, type hints, Sphinx
+# Dokumentowanie kodu w Pythonie
 
 ## Spis treści
 
 1. [Wprowadzenie](#wprowadzenie)
 2. [Po co dokumentować kod](#po-co-dokumentować-kod)
 3. [Czym jest docstring](#czym-jest-docstring)
-4. [Docstring funkcji](#docstring-funkcji)
-5. [Docstring klasy](#docstring-klasy)
-6. [Docstring modułu](#docstring-modułu)
-7. [Co pisać w docstringu](#co-pisać-w-docstringu)
+4. [Docstring modułu](#docstring-modułu)
+5. [Docstring funkcji](#docstring-funkcji)
+6. [Docstring klasy i metody](#docstring-klasy-i-metody)
+7. [Jak pisać dobry docstring](#jak-pisać-dobry-docstring)
 8. [Type hints](#type-hints)
-9. [Po co używać type hints](#po-co-używać-type-hints)
-10. [Type hints a czytelność](#type-hints-a-czytelność)
-11. [Docstrings a type hints](#docstrings-a-type-hints)
-12. [Sphinx](#sphinx)
-13. [Po co używać Sphinx](#po-co-używać-sphinx)
-14. [Automatyczne generowanie dokumentacji](#automatyczne-generowanie-dokumentacji)
-15. [Dokumentowanie API biblioteki](#dokumentowanie-api-biblioteki)
+9. [Najczęstsze typy i adnotacje](#najczęstsze-typy-i-adnotacje)
+10. [Docstrings i type hints razem](#docstrings-i-type-hints-razem)
+11. [Styl dokumentowania](#styl-dokumentowania)
+12. [Dokumentowanie wyjątków i zachowania](#dokumentowanie-wyjątków-i-zachowania)
+13. [Dokumentowanie modułów użytkowych](#dokumentowanie-modułów-użytkowych)
+14. [Sphinx](#sphinx)
+15. [Automatyczne generowanie dokumentacji](#automatyczne-generowanie-dokumentacji)
 16. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-17. [Praktyczne przykłady](#praktyczne-przykłady)
-18. [Dobre praktyki](#dobre-praktyki)
-19. [Podsumowanie](#podsumowanie)
-20. [Mini ściąga](#mini-ściąga)
-21. [Ćwiczenia](#ćwiczenia)
-22. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+17. [Praktyczna ściąga](#praktyczna-ściąga)
+18. [Ćwiczenia](#ćwiczenia)
+19. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -31,44 +28,42 @@
 
 Dobry kod to nie tylko kod, który działa.
 
-To też kod, który:
+Dobry kod to też kod, który:
 
-- da się zrozumieć,
-- da się utrzymać,
-- da się przekazać innym,
-- da się łatwo używać po kilku miesiącach.
+- da się zrozumieć po miesiącu,
+- da się łatwo użyć z innego pliku,
+- da się przekazać innej osobie,
+- nie wymaga zgadywania, co robi funkcja albo klasa.
 
-Właśnie dlatego dokumentowanie kodu jest tak ważne.
+Dokumentowanie kodu w Pythonie zwykle opiera się na trzech rzeczach:
 
-Najważniejsze elementy to:
+- dobrych nazwach,
+- docstringach,
+- type hints.
 
-- docstrings,
-- type hints,
-- narzędzia do generowania dokumentacji, np. Sphinx.
+W większych projektach dochodzą też narzędzia takie jak Sphinx.
 
 ---
 
 ## Po co dokumentować kod
 
-Bo z czasem nawet własny kod staje się „kodem obcym”.
+Po kilku tygodniach nawet własny kod potrafi wyglądać obco.
 
 Dokumentacja pomaga:
 
 - szybciej wrócić do projektu,
-- wdrożyć inną osobę,
-- zrozumieć API modułu lub klasy,
-- ograniczyć liczbę pytań i nieporozumień.
+- zrozumieć API modułu,
+- ograniczyć liczbę pomyłek,
+- skrócić czas wdrożenia nowej osoby,
+- łatwiej testować i utrzymywać kod.
+
+Jeśli funkcja ma nietrywialne zachowanie, to sama nazwa zwykle nie wystarcza.
 
 ---
 
 ## Czym jest docstring
 
-Docstring to tekst umieszczony na początku:
-
-- modułu,
-- funkcji,
-- klasy,
-- metody.
+Docstring to tekst umieszczony na początku modułu, funkcji, klasy albo metody.
 
 Przykład:
 
@@ -78,7 +73,53 @@ def dodaj(a, b):
     return a + b
 ```
 
-To podstawowy sposób dokumentowania kodu w Pythonie.
+To nie jest zwykły komentarz.
+
+Docstring jest częścią obiektu i można go odczytać np. przez `help()` albo atrybut `.__doc__`.
+
+Przykład:
+
+```python
+def dodaj(a, b):
+    """Zwraca sumę dwóch liczb."""
+    return a + b
+
+print(dodaj.__doc__)
+help(dodaj)
+```
+
+Przykładowy output `print(dodaj.__doc__)`:
+
+```text
+Zwraca sumę dwóch liczb.
+```
+
+Fragment uproszczonego outputu `help(dodaj)`:
+
+```text
+Help on function dodaj:
+
+dodaj(a, b)
+    Zwraca sumę dwóch liczb.
+```
+
+---
+
+## Docstring modułu
+
+Na samej górze pliku możesz opisać cały moduł.
+
+```python
+"""Moduł zawiera funkcje pomocnicze do operacji na tekstach."""
+
+
+def wyczysc_tekst(tekst: str) -> str:
+    return tekst.strip().lower()
+```
+
+Docstring modułu powinien odpowiadać na pytanie:
+
+co znajduje się w tym pliku i do czego służy?
 
 ---
 
@@ -87,44 +128,93 @@ To podstawowy sposób dokumentowania kodu w Pythonie.
 Dobry docstring funkcji powinien wyjaśniać:
 
 - co robi funkcja,
-- co przyjmuje,
+- jakie przyjmuje argumenty,
 - co zwraca,
-- czasem jakie są wyjątki lub ważne uwagi.
+- czy rzuca wyjątki,
+- czy ma jakieś ważne ograniczenia.
+
+Przykład prosty:
+
+```python
+def pole_prostokata(a: float, b: float) -> float:
+    """Zwraca pole prostokąta o bokach a i b."""
+    return a * b
+```
+
+Przykład bardziej praktyczny:
+
+```python
+def parse_int(tekst: str) -> int | None:
+    """Próbuje zamienić tekst na int.
+
+    Zwraca liczbę całkowitą, jeśli konwersja się powiedzie.
+    Jeśli tekst nie reprezentuje poprawnej liczby, zwraca None.
+    """
+    try:
+        return int(tekst)
+    except ValueError:
+        return None
+```
+
+Taki docstring daje dużo więcej informacji niż sama nazwa funkcji.
 
 ---
 
-## Docstring klasy
+## Docstring klasy i metody
 
-Docstring klasy opisuje:
+Klasa też powinna mieć opis.
 
-- do czego służy klasa,
-- jaki reprezentuje byt,
-- jak jej używać.
+```python
+class BankAccount:
+    """Proste konto bankowe przechowujące saldo użytkownika."""
+
+    def __init__(self, owner: str, balance: float = 0.0) -> None:
+        self.owner = owner
+        self.balance = balance
+
+    def deposit(self, amount: float) -> None:
+        """Dodaje środki do konta."""
+        self.balance += amount
+```
+
+Docstring klasy opisuje cały byt.
+
+Docstring metody opisuje konkretne zachowanie tej metody.
 
 ---
 
-## Docstring modułu
+## Jak pisać dobry docstring
 
-To opis całego pliku modułu.
+Dobry docstring jest:
 
-Może zawierać:
+- krótki, ale konkretny,
+- praktyczny,
+- zgodny z realnym zachowaniem funkcji,
+- aktualny.
 
-- cel modułu,
-- przegląd zawartości,
-- ważne informacje użytkowe.
+Słaby docstring:
 
----
+```python
+def dodaj(a, b):
+    """Ta funkcja coś dodaje."""
+```
 
-## Co pisać w docstringu
+Lepszy:
 
-Najważniejsze:
+```python
+def dodaj(a: int, b: int) -> int:
+    """Zwraca sumę dwóch liczb całkowitych."""
+```
 
-- cel,
-- zachowanie,
-- znaczenie argumentów,
-- ważne ograniczenia.
+Jeszcze lepszy, jeśli zachowanie nie jest oczywiste:
 
-Nie opisuj rzeczy oczywistych, jeśli kod już to jasno pokazuje.
+```python
+def podziel(a: float, b: float) -> float | None:
+    """Zwraca wynik dzielenia a przez b.
+
+    Gdy b jest równe 0, funkcja zwraca None zamiast rzucać wyjątek.
+    """
+```
 
 ---
 
@@ -135,54 +225,181 @@ Type hints to adnotacje typów.
 Przykład:
 
 ```python
-def dodaj(a: int, b: int) -> int:
-    return a + b
+def powitaj(imie: str) -> str:
+    return f"Witaj {imie}"
 ```
 
-To nie wymusza typów w czasie wykonania, ale bardzo poprawia czytelność i współpracę z narzędziami.
+Tu od razu widać:
+
+- argument `imie` powinien być `str`,
+- funkcja zwraca `str`.
+
+Ważne:
+
+Python zwykle nie wymusza tych typów w czasie działania.
+
+One pomagają przede wszystkim:
+
+- ludziom,
+- edytorowi,
+- narzędziom statycznej analizy.
 
 ---
 
-## Po co używać type hints
+## Najczęstsze typy i adnotacje
 
-Bo pomagają:
+### Proste typy
 
-- lepiej rozumieć API,
-- wychwytywać błędy narzędziami statycznymi,
-- szybciej orientować się, jakie dane przepływają przez kod.
+```python
+x: int = 5
+nazwa: str = "Python"
+czy_aktywny: bool = True
+cena: float = 19.99
+```
+
+### Kolekcje
+
+```python
+def policz_sume(liczby: list[int]) -> int:
+    return sum(liczby)
+```
+
+```python
+def policz_wystapienia(slowa: tuple[str, ...]) -> int:
+    return len(slowa)
+```
+
+```python
+def zwroc_punkty() -> dict[str, int]:
+    return {"Anna": 10, "Jan": 7}
+```
+
+### Wartość opcjonalna
+
+```python
+def znajdz_uzytkownika(user_id: int) -> str | None:
+    ...
+```
+
+To znaczy: funkcja może zwrócić `str` albo `None`.
+
+### Brak zwracanej wartości
+
+```python
+def wypisz_komunikat(tekst: str) -> None:
+    print(tekst)
+```
 
 ---
 
-## Type hints a czytelność
+## Docstrings i type hints razem
 
-W dobrym kodzie type hints bardzo poprawiają orientację.
-
-Na przykład od razu widać:
-
-- czy funkcja zwraca listę,
-- czy może `None`,
-- czy przyjmuje słownik,
-- czy argument jest opcjonalny.
-
----
-
-## Docstrings a type hints
-
-To nie są rzeczy konkurujące.
+To bardzo ważne: one się nie wykluczają.
 
 ### Type hints
 
-Mówią:
+Mówią głównie:
 
-- jakie są typy.
+- jakie dane wchodzą,
+- jakie dane wychodzą.
 
 ### Docstring
 
 Mówi:
 
-- co funkcja robi i jak jej używać.
+- co funkcja robi,
+- jakie są reguły działania,
+- jakie są wyjątki,
+- kiedy zwraca szczególne wartości.
 
-Najlepszy efekt daje połączenie obu.
+Przykład połączenia obu:
+
+```python
+def bezpieczne_dzielenie(a: float, b: float) -> float | None:
+    """Zwraca wynik dzielenia a przez b.
+
+    Jeśli b == 0, funkcja zwraca None.
+    """
+    if b == 0:
+        return None
+    return a / b
+```
+
+To jest dużo czytelniejsze niż sama implementacja bez opisu.
+
+---
+
+## Styl dokumentowania
+
+W praktyce warto trzymać się kilku zasad:
+
+- publiczne funkcje i klasy dokumentuj prawie zawsze,
+- prywatne, trywialne helpery nie zawsze potrzebują pełnego docstringu,
+- jeśli kod jest oczywisty, nie opisuj banałów,
+- jeśli zachowanie może zaskakiwać, opisz je wyraźnie.
+
+Przykład niepotrzebnego banału:
+
+```python
+def increment(x: int) -> int:
+    """Zwiększa x o 1."""
+    return x + 1
+```
+
+To jeszcze może przejść, ale jeśli cały projekt ma pełno takich opisów, dokumentacja zaczyna przeszkadzać zamiast pomagać.
+
+---
+
+## Dokumentowanie wyjątków i zachowania
+
+Jeśli funkcja:
+
+- zwraca `None` w nietypowej sytuacji,
+- rzuca wyjątek,
+- modyfikuje argument,
+- zapisuje do pliku,
+- wykonuje zapytanie do sieci,
+
+warto to wyraźnie napisać.
+
+Przykład:
+
+```python
+def wczytaj_plik(sciezka: str) -> str:
+    """Wczytuje zawartość pliku tekstowego.
+
+    Raises:
+        FileNotFoundError: Gdy plik nie istnieje.
+    """
+    with open(sciezka, "r", encoding="utf-8") as f:
+        return f.read()
+```
+
+Nawet jeśli nie używasz formalnego stylu `Raises`, sama informacja o wyjątkach jest bardzo cenna.
+
+---
+
+## Dokumentowanie modułów użytkowych
+
+W projektach Pythona często masz moduły typu:
+
+- `utils.py`
+- `validators.py`
+- `parsers.py`
+- `config.py`
+
+Takie moduły łatwo zamieniają się w worki na przypadkowy kod.
+
+Docstring modułu pomaga od razu zrozumieć jego rolę.
+
+Przykład:
+
+```python
+"""Narzędzia do walidacji danych wejściowych użytkownika.
+
+Moduł zawiera funkcje sprawdzające e-mail, hasło i numer telefonu.
+"""
+```
 
 ---
 
@@ -190,59 +407,46 @@ Najlepszy efekt daje połączenie obu.
 
 Sphinx to popularne narzędzie do generowania dokumentacji projektu.
 
-Może budować dokumentację na podstawie:
+Może budować dokumentację z:
 
-- plików `.rst`,
-- docstringów,
-- struktury kodu.
+- plików tekstowych,
+- struktury projektu,
+- docstringów.
 
-Jest bardzo popularny w bibliotekach Pythona.
+W praktyce Sphinx jest często używany w bibliotekach i większych projektach.
 
----
-
-## Po co używać Sphinx
-
-Bo pozwala budować profesjonalną, spójną dokumentację projektu.
-
-Szczególnie przydaje się, gdy:
-
-- tworzysz bibliotekę,
-- masz większy projekt,
-- chcesz publikować dokumentację.
+Nie musisz go umieć perfekcyjnie na początku, ale warto wiedzieć, do czego służy.
 
 ---
 
 ## Automatyczne generowanie dokumentacji
 
-Dzięki narzędziom takim jak Sphinx część dokumentacji można budować automatycznie z docstringów.
+Duża zaleta dobrych docstringów jest taka, że dokumentację można z nich generować automatycznie.
 
-To bardzo praktyczne, bo:
+To oznacza:
 
-- nie dublujesz wiedzy w wielu miejscach,
-- zmniejszasz ryzyko rozjazdu dokumentacji i kodu.
+- mniej ręcznego przepisywania wiedzy,
+- mniejsze ryzyko rozjazdu dokumentacji z kodem,
+- lepszą spójność projektu.
 
----
-
-## Dokumentowanie API biblioteki
-
-Jeśli piszesz moduł albo bibliotekę, dokumentacja publicznych funkcji i klas jest bardzo ważna.
-
-To właśnie ją najczęściej czytają inni użytkownicy projektu.
+Jeśli funkcja ma sensowne nazwy, type hints i dobry docstring, to już budujesz bardzo solidną bazę pod dokumentację.
 
 ---
 
 ## Typowe błędy początkujących
 
-- brak docstringów w ważnych funkcjach,
-- pisanie bezużytecznych docstringów typu „ta funkcja coś robi”,
-- brak type hints tam, gdzie byłyby bardzo pomocne,
-- traktowanie dokumentacji jako czegoś opcjonalnego w większym projekcie.
+- brak dokumentacji w publicznych funkcjach,
+- docstringi nic nie mówiące,
+- opisy niezgodne z realnym działaniem funkcji,
+- brak type hints tam, gdzie bardzo pomagają,
+- nadmierne opisywanie banałów,
+- traktowanie dokumentacji jak czegoś „na później”.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Funkcja
+### Prosty docstring funkcji
 
 ```python
 def dodaj(a: int, b: int) -> int:
@@ -250,81 +454,50 @@ def dodaj(a: int, b: int) -> int:
     return a + b
 ```
 
-### Klasa
+### Funkcja z opisem nietypowego zachowania
 
 ```python
-class Konto:
-    """Reprezentuje proste konto z saldem."""
-
-    def __init__(self, saldo: float) -> None:
-        self.saldo = saldo
+def parse_int(tekst: str) -> int | None:
+    """Zamienia tekst na int albo zwraca None, jeśli to niemożliwe."""
+    ...
 ```
 
-### Moduł
+### Docstring klasy
 
 ```python
-"""Narzędzia do podstawowych obliczeń matematycznych."""
+class User:
+    """Reprezentuje użytkownika systemu."""
 ```
 
----
-
-## Dobre praktyki
-
-- dokumentuj publiczne API,
-- używaj type hints w nowym kodzie,
-- pisz docstringi zwięzłe, ale konkretne,
-- nie dokumentuj rzeczy oczywistych bez potrzeby,
-- aktualizuj dokumentację razem z kodem.
-
----
-
-## Podsumowanie
-
-Najważniejsze rzeczy do zapamiętania:
-
-- docstrings opisują działanie kodu,
-- type hints opisują typy,
-- Sphinx pomaga generować profesjonalną dokumentację,
-- dobra dokumentacja bardzo zwiększa jakość projektu.
-
----
-
-## Mini ściąga
+### Odczyt docstringu
 
 ```python
-def f(x: int) -> int:
-    """Opis funkcji."""
-    return x
+print(dodaj.__doc__)
+help(dodaj)
 ```
-
-### Kluczowe narzędzia
-
-- docstrings
-- type hints
-- Sphinx
 
 ---
 
 ## Ćwiczenia
 
-### Ćwiczenie 1
-
-Dodaj docstring do własnej funkcji.
-
-### Ćwiczenie 2
-
-Dodaj type hints do funkcji przyjmującej listę liczb.
-
-### Ćwiczenie 3
-
-Napisz krótki docstring klasy `Osoba`.
+1. Dodaj docstring do funkcji `powitaj(imie)`.
+2. Napisz funkcję `pole_kola(r)` z type hints i krótkim docstringiem.
+3. Napisz funkcję `parse_float(tekst)`, która zwraca `float | None`, i opisz to w docstringu.
+4. Utwórz klasę `Car` z docstringiem klasy i metodą `start()` z własnym docstringiem.
+5. Napisz docstring modułu dla pliku z funkcjami walidującymi dane.
+6. Wypisz `.__doc__` dla własnej funkcji.
+7. Użyj `help()` dla własnej klasy i zobacz, jak Python pokazuje dokumentację.
+8. Przerób jedną starą funkcję w projekcie tak, aby miała i type hints, i docstring.
+9. Zapisz własnymi słowami różnicę między komentarzem, docstringiem i type hint.
+10. Wskaż trzy miejsca, w których dokumentacja naprawdę pomaga bardziej niż sam kod.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-```python
-def suma(liczby: list[int]) -> int:
-    """Zwraca sumę listy liczb całkowitych."""
-    return sum(liczby)
-```
+- Docstring opisuje zachowanie i sposób użycia.
+- Type hints opisują typy danych.
+- Najlepszy efekt daje połączenie dobrych nazw, docstringów i type hints.
+- Dokumentacja ma pomagać, a nie produkować szum.
+- Jeśli funkcja ma nietypowe zachowanie, opisz je wyraźnie.
+- Dobrze udokumentowany kod łatwiej rozwijać, testować i poprawiać.

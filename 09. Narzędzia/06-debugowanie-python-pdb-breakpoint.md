@@ -158,6 +158,26 @@ albo nawet uruchamiać proste wyrażenia.
 
 To bardzo pomaga zrozumieć stan programu w danym miejscu.
 
+Przykład:
+
+jeśli zatrzymasz program w funkcji:
+
+```python
+def policz(a, b):
+    breakpoint()
+    wynik = a + b
+    return wynik
+```
+
+możesz w debuggerze wpisać:
+
+```text
+(Pdb) p a
+2
+(Pdb) p b
+3
+```
+
 ---
 
 ## Wyjście z debuggera
@@ -203,6 +223,10 @@ Gdy:
 - nieznajomość podstawowych komend `pdb`,
 - panika po wejściu do debuggera.
 
+### 5. Wychodzenie z debuggera bez zrozumienia stanu programu
+
+Debugger daje wartość tylko wtedy, gdy naprawdę patrzysz na zmienne i przepływ wykonania.
+
 ---
 
 ## Praktyczne przykłady
@@ -212,6 +236,19 @@ def policz(a, b):
     breakpoint()
     wynik = a + b
     return wynik
+```
+
+Przykładowy przebieg:
+
+```text
+(Pdb) p a
+2
+(Pdb) p b
+3
+(Pdb) n
+(Pdb) p wynik
+5
+(Pdb) c
 ```
 
 ### Starszy styl
@@ -233,6 +270,10 @@ def policz(a, b):
 - zaczynaj od prostych komend `n`, `s`, `p`, `c`,
 - jeśli problem jest mały, `print()` czasem nadal wystarczy.
 
+Praktyczna zasada:
+
+najpierw ustal, czego chcesz się dowiedzieć, a dopiero potem wchodź do debuggera. Wtedy szybciej znajdziesz problem.
+
 ---
 
 ## Podsumowanie
@@ -243,6 +284,12 @@ Najważniejsze rzeczy do zapamiętania:
 - `pdb` pozwala analizować program krok po kroku,
 - debugger daje dużo więcej niż `print()`,
 - debugowanie to podstawowa umiejętność programisty.
+
+Najważniejsze do zapamiętania:
+
+- `print()` pokazuje stan na chwilę,
+- debugger pozwala zatrzymać program i naprawdę go obejrzeć,
+- kilka podstawowych komend `pdb` wystarcza do bardzo wielu realnych problemów.
 
 ---
 

@@ -103,6 +103,14 @@ python3 -m venv .venv
 
 To utworzy katalog `.venv` z izolowanym środowiskiem.
 
+W praktyce po utworzeniu możesz zobaczyć np. taki układ:
+
+```text
+.venv/
+.venv/bin/
+.venv/lib/
+```
+
 ---
 
 ## Aktywacja i dezaktywacja
@@ -125,6 +133,12 @@ Wyjście ze środowiska:
 deactivate
 ```
 
+Po aktywacji prompt terminala często pokazuje coś w stylu:
+
+```text
+(.venv) kacper@Ubuntu:~/projekt$
+```
+
 ---
 
 ## Instalowanie pakietów w `venv`
@@ -136,6 +150,14 @@ pip install requests
 ```
 
 Pakiet trafi do tego konkretnego środowiska, a nie do globalnego Pythona.
+
+Jeśli potem wpiszesz:
+
+```bash
+pip list
+```
+
+zobaczysz bibliotekę na liście pakietów tylko w tym środowisku.
 
 ---
 
@@ -217,6 +239,12 @@ Najczęściej najlepiej trzymać się konwencji projektu.
 - trzymaj jawny opis zależności,
 - nie instaluj przypadkowych rzeczy globalnie bez potrzeby.
 
+Praktyczna zasada:
+
+jeśli pracujesz nad projektem i widzisz `pip install`, pierwsza myśl powinna brzmieć:
+
+"czy jestem we właściwym środowisku?"
+
 ---
 
 ## Typowe błędy początkujących
@@ -226,6 +254,10 @@ Najczęściej najlepiej trzymać się konwencji projektu.
 - mieszanie globalnego `pip` z lokalnym środowiskiem,
 - commitowanie całego `.venv`,
 - brak pliku z zależnościami.
+
+### 6. Sprawdzanie wersji Pythona nie z tego miejsca, co trzeba
+
+Czasem ktoś myśli, że działa w `.venv`, a w rzeczywistości używa systemowego interpretera.
 
 ---
 
@@ -239,10 +271,23 @@ source .venv/bin/activate
 pip install pytest
 ```
 
-### zapis zależności
+Efekt praktyczny:
+
+- tworzysz środowisko,
+- aktywujesz je,
+- instalujesz `pytest` lokalnie dla projektu.
+
+### Zapis zależności
 
 ```bash
 pip freeze > requirements.txt
+```
+
+Efekt w pliku może wyglądać tak:
+
+```txt
+pytest==8.0.0
+requests==2.31.0
 ```
 
 ### `poetry`
@@ -265,6 +310,12 @@ Najważniejsze rzeczy do zapamiętania:
 - `venv` to podstawowe, wbudowane rozwiązanie,
 - `pipenv` i `poetry` dają bardziej rozbudowane workflow,
 - profesjonalna praca w Pythonie praktycznie zawsze powinna używać środowiska per projekt.
+
+Najważniejsze do zapamiętania:
+
+- osobne środowisko na projekt to zdrowy domyślny nawyk,
+- `.venv` nie powinno trafiać do repo,
+- samo środowisko nie wystarczy, jeśli nie zapiszesz też zależności projektu.
 
 ---
 

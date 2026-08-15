@@ -69,6 +69,12 @@ result = subprocess.run(
 print(result.stdout)
 ```
 
+Wynik:
+
+```python
+hello
+```
+
 ---
 
 ## Kody wyjścia
@@ -81,6 +87,14 @@ import subprocess
 result = subprocess.run(["python", "--version"], capture_output=True, text=True)
 print(result.returncode)
 ```
+
+Przykładowy wynik:
+
+```python
+0
+```
+
+`0` zwykle oznacza sukces.
 
 ---
 
@@ -151,6 +165,10 @@ To przydatne, gdy zewnętrzne polecenie może się zawiesić.
 - nieświadome używanie `shell=True`,
 - brak timeoutu dla potencjalnie długich komend.
 
+### 5. Zakładanie, że `stdout` zawsze zawiera wynik
+
+Czasem program wypisuje ważne informacje do `stderr`, a nie do `stdout`.
+
 ---
 
 ## Praktyczne przykłady
@@ -168,6 +186,12 @@ result = subprocess.run(
 print(result.stdout or result.stderr)
 ```
 
+Przykładowy wynik:
+
+```python
+Python 3.x.x
+```
+
 ### Bezpieczne uruchomienie komendy
 
 ```python
@@ -182,6 +206,12 @@ result = subprocess.run(
 print(result.stdout)
 ```
 
+Wynik:
+
+```python
+Raport gotowy
+```
+
 ---
 
 ## Dobre praktyki
@@ -192,6 +222,15 @@ print(result.stdout)
 - ustawiaj timeout dla ryzykownych poleceń,
 - unikaj `shell=True`, jeśli nie jest konieczne.
 
+Praktyczna zasada:
+
+jeśli uruchamiasz zewnętrzny proces, myśl jednocześnie o:
+
+- bezpieczeństwie argumentów,
+- błędach,
+- czasie działania,
+- wyniku procesu.
+
 ---
 
 ## Podsumowanie
@@ -199,6 +238,12 @@ print(result.stdout)
 `subprocess` to podstawowe narzędzie do łączenia Pythona ze światem zewnętrznych programów.
 
 Najważniejsze jest bezpieczne przekazywanie argumentów i rozsądna obsługa błędów.
+
+Najważniejsze do zapamiętania:
+
+- `run()` wystarcza w większości prostych przypadków,
+- `capture_output=True` i `text=True` są bardzo wygodne,
+- `check=True` i `timeout` mocno poprawiają bezpieczeństwo i przewidywalność.
 
 ---
 
