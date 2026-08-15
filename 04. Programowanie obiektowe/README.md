@@ -11,6 +11,7 @@ Po tym dziale powinieneś rozumieć:
 - dziedziczenie,
 - polimorfizm,
 - kompozycję,
+- klasy abstrakcyjne i `@abstractmethod`,
 - magic methods,
 - podstawy metaklas.
 
@@ -48,8 +49,9 @@ Najlepiej iść dokładnie po kolei:
 4. dziedziczenie i `super()`,
 5. polimorfizm,
 6. kompozycja vs dziedziczenie,
-7. magic methods,
-8. metaklasy.
+7. klasy abstrakcyjne i `@abstractmethod`,
+8. magic methods,
+9. metaklasy.
 
 Ta kolejność ma znaczenie.
 
@@ -81,6 +83,7 @@ Dobry znak to sytuacja, w której potrafisz:
 - wyjaśnić, po co użyć `super()`,
 - pokazać przykład polimorfizmu bez sztucznego komplikowania,
 - powiedzieć, kiedy kompozycja jest lepsza niż dziedziczenie,
+- wyjaśnić, kiedy `ABC` ma sens, a kiedy byłoby przesadą,
 - napisać `__repr__`, `__str__`, `__len__` albo `__eq__` w prostym obiekcie.
 
 ---

@@ -17,7 +17,10 @@ Ten dział zbiera moduły standardowej biblioteki, które bardzo często pojawia
 - `collections`,
 - `typing`,
 - `dataclasses`,
-- `enum`.
+- `enum`,
+- `decimal`,
+- `heapq`,
+- `bisect`.
 
 ## Jaki problem rozwiązuje ten folder
 
@@ -52,8 +55,10 @@ Najlepiej iść po kolei:
 5. `05-typing-python.md`
 6. `06-dataclasses-python.md`
 7. `07-enum-python.md`
+8. `08-decimal-python.md`
+9. `09-heapq-i-bisect-python.md`
 
-Ta kolejność ma sens, bo przechodzisz od pracy na tekście i danych, przez iteratory i funkcje, do typowania, modelowania danych i nazwanych zestawów wartości.
+Ta kolejność ma sens, bo przechodzisz od pracy na tekście i danych, przez iteratory i funkcje, do typowania, modelowania danych, nazwanych zestawów wartości i bardziej wyspecjalizowanych narzędzi do liczb oraz uporządkowanych danych.
 
 ## Najważniejsze pytanie w tym folderze
 
@@ -167,6 +172,35 @@ Nie używaj, gdy:
 - zbiór wartości nie jest naprawdę zamknięty,
 - dodajesz enum tylko dla ozdoby.
 
+### `decimal`
+
+Używaj, gdy:
+
+- liczysz pieniądze,
+- potrzebujesz dokładności dziesiętnej,
+- chcesz przewidywalnych zaokrągleń biznesowych.
+
+Nie używaj, gdy:
+
+- zwykły `float` jest w pełni wystarczający,
+- problem nie wymaga takiej precyzji,
+- kod numeryczny bardziej korzysta z prostoty i szybkości `float`.
+
+### `heapq` i `bisect`
+
+Używaj, gdy:
+
+- potrzebujesz kolejki priorytetowej,
+- chcesz szybko wybierać najmniejsze lub największe elementy,
+- utrzymujesz posortowaną listę,
+- chcesz szybko znaleźć miejsce wstawienia.
+
+Nie używaj, gdy:
+
+- zwykłe `sorted()` i indeksowanie są czytelniejsze,
+- nie pracujesz na danych uporządkowanych albo priorytetowych,
+- specjalistyczna struktura nic realnie nie upraszcza.
+
 ## Jak ćwiczyć najlepiej
 
 Najlepszy styl nauki dla tego folderu wygląda tak:
@@ -187,7 +221,9 @@ Po przerobieniu tego działu powinieneś umieć zrobić małe rzeczy typu:
 - mini warstwę konfiguracji z `ChainMap` i `TypedDict`,
 - model danych z `dataclass` i walidacją w `__post_init__`,
 - dekorator z `wraps` i cache przez `lru_cache`,
-- model statusów lub ról oparty o `Enum`.
+- model statusów lub ról oparty o `Enum`,
+- prosty moduł finansowy oparty o `Decimal`,
+- ranking lub kolejkę priorytetową przez `heapq`.
 
 ## Po czym poznasz, że temat naprawdę siedzi
 
@@ -199,6 +235,8 @@ Dobry znak, jeśli potrafisz:
 - dodać sensowne typowanie bez zamieniania kodu w ścianę adnotacji,
 - odróżnić `dataclass` od zwykłej klasy i wiedzieć, kiedy która jest lepsza,
 - rozpoznać, kiedy `Enum` daje lepszy model niż luźne stringi,
+- rozpoznać, kiedy `Decimal` jest bezpieczniejszy niż `float`,
+- wiedzieć, kiedy `heapq` albo `bisect` rozwiązują problem lepiej niż ręczne kombinowanie na listach,
 - połączyć kilka tych bibliotek w jednym małym projekcie.
 
 ## Główne ryzyko tego folderu
@@ -214,7 +252,9 @@ Czyli na przykład:
 - `itertools` tam, gdzie prosta lista wystarczy,
 - `typing` robione tylko dla ozdoby,
 - `dataclass` wciskane tam, gdzie klasa ma głównie zachowanie, nie dane,
-- `Enum` dodawany tam, gdzie zwykły `bool` albo prosty string byłby czytelniejszy.
+- `Enum` dodawany tam, gdzie zwykły `bool` albo prosty string byłby czytelniejszy,
+- `Decimal` używany bez zrozumienia, skąd go tworzyć,
+- `heapq` używany tam, gdzie pełne `sorted()` byłoby prostsze.
 
 ## Podsumowanie
 

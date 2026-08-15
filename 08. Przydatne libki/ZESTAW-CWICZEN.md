@@ -105,24 +105,41 @@ Dlatego przy wielu zadaniach warto zrobić oba warianty i odpowiedzieć sobie:
 72. Porównaj wersję z luźnymi stringami i wersję z `Enum` dla ról użytkownika.
 73. Opisz 3 sytuacje, gdzie `Enum` poprawia jakość kodu, i 2, gdzie byłby przesadą.
 
-## Poziom 8 — zadania przekrojowe
+## Poziom 8 — `decimal`
 
-74. Napisz parser prostych logów:
+74. Pokaż różnicę między `0.1 + 0.2` dla `float` i `Decimal`.
+75. Policz cenę koszyka z 3 produktami przez `Decimal`.
+76. Policz rabat procentowy i zaokrąglij wynik do 2 miejsc.
+77. Pokaż różnicę między `Decimal("0.1")` i `Decimal(0.1)`.
+78. Opisz 3 przypadki, gdzie `Decimal` jest lepszy niż `float`.
+
+## Poziom 9 — `heapq` i `bisect`
+
+79. Zbuduj prostą kolejkę priorytetową przez `heapq`.
+80. Pobierz 3 najmniejsze elementy z listy przez `heapq`.
+81. Pobierz 2 największe elementy z listy przez `heapq`.
+82. Użyj `bisect_left()` dla listy z duplikatami.
+83. Użyj `insort()` do wstawienia elementu do posortowanej listy.
+84. Opisz, kiedy lepszy będzie `heapq`, a kiedy zwykłe `sorted()`.
+
+## Poziom 10 — zadania przekrojowe
+
+85. Napisz parser prostych logów:
 - użyj `re` do wyciągnięcia pól,
 - `dataclass` do modelu danych,
 - `typing` do opisania funkcji.
 
-75. Zgrupuj wpisy po poziomie logowania przez `defaultdict(list)`.
-76. Policz najczęstsze komunikaty przez `Counter`.
-77. Użyj `itertools` do przetworzenia wielu kolekcji wpisów w jeden strumień.
-78. Dodaj cache do kosztownej funkcji analitycznej przez `lru_cache`.
-79. Zbuduj mały system konfiguracji oparty o `ChainMap`, `TypedDict` i `Enum`.
-80. Zbuduj prostą analizę zamówień, gdzie część rozwiązań piszesz ręcznie, a część przez standardową bibliotekę, i porównujesz oba style.
-81. Weź 5 problemów z tego folderu i dla każdego dopisz jedno zdanie: „dlaczego tutaj używam biblioteki zamiast zwykłej pętli/prostego kodu”.
+86. Zgrupuj wpisy po poziomie logowania przez `defaultdict(list)`.
+87. Policz najczęstsze komunikaty przez `Counter`.
+88. Użyj `itertools` do przetworzenia wielu kolekcji wpisów w jeden strumień.
+89. Dodaj cache do kosztownej funkcji analitycznej przez `lru_cache`.
+90. Zbuduj mały system konfiguracji oparty o `ChainMap`, `TypedDict` i `Enum`.
+91. Zbuduj prostą analizę zamówień, gdzie część rozwiązań piszesz ręcznie, a część przez standardową bibliotekę, i porównujesz oba style.
+92. Weź 5 problemów z tego folderu i dla każdego dopisz jedno zdanie: „dlaczego tutaj używam biblioteki zamiast zwykłej pętli/prostego kodu”.
 
 ## Zadanie końcowe
 
-82. Zbuduj mini moduł przetwarzania zamówień lub logów, w którym połączysz co najmniej 4 biblioteki z tego folderu.
+93. Zbuduj mini moduł przetwarzania zamówień lub logów, w którym połączysz co najmniej 4 biblioteki z tego folderu.
 
 Minimalne wymagania:
 
@@ -132,6 +149,7 @@ Minimalne wymagania:
 - typowanie funkcji,
 - `dataclass` dla modelu danych,
 - `Enum` dla statusu, typu albo roli,
+- `Decimal` albo `heapq`/`bisect` tam, gdzie mają realny sens,
 - przynajmniej jeden sensowny element z `itertools` albo `functools`.
 
 Na końcu opisz:

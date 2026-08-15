@@ -48,36 +48,46 @@
 32. Napisz przykład, w którym kompozycja jest lepsza niż dziedziczenie, i zaimplementuj oba podejścia.
 33. Zbuduj klasę `LibraryUser`, która przechowuje historię wypożyczeń jako osobny obiekt, a nie przez dziedziczenie.
 34. Napisz klasę bazową i dwie klasy potomne, a potem wskaż, co jest współdzielone, a co nadpisane.
+35. Zbuduj abstrakcyjną klasę `Shape` z metodą `area()`.
+36. Utwórz klasy `Rectangle` i `Circle`, które implementują `area()`.
+37. Pokaż, co się stanie, gdy spróbujesz utworzyć obiekt klasy abstrakcyjnej.
+38. Zbuduj abstrakcyjną klasę `Notifier` z metodą `send(message)`.
+39. Opisz, kiedy `ABC` ma sens, a kiedy byłoby przesadą.
 
 ## Poziom 6 — zadania przekrojowe
 
-35. Zbuduj model sklepu:
+40. Zbuduj model sklepu:
    - `Product`,
    - `Cart`,
    - `User`,
    - metody dodawania produktów,
    - liczenie długości koszyka,
    - czytelny `__repr__`.
-36. Zbuduj model biblioteki:
+41. Zbuduj model biblioteki:
    - `Book`,
    - `Author`,
    - `Library`,
    - wypożyczenia,
    - zwroty,
    - sprawdzanie dostępności.
-37. Zbuduj prosty system kont bankowych:
+42. Zbuduj prosty system kont bankowych:
    - klasa bazowa konta,
    - konto oszczędnościowe,
    - konto firmowe,
    - polimorficzne liczenie opłat lub salda.
-38. Zrób dwa rozwiązania tego samego problemu:
+43. Zrób dwa rozwiązania tego samego problemu:
    - przez dziedziczenie,
    - przez kompozycję,
    i napisz, które jest lepsze i dlaczego.
+44. Zbuduj mini system powiadomień:
+   - abstrakcyjna klasa `Notifier`,
+   - implementacje `EmailNotifier` i `SmsNotifier`,
+   - wspólny kod w bazie,
+   - metoda abstrakcyjna wymuszana przez `@abstractmethod`.
 
 ## Zadanie końcowe
 
-39. Zbuduj mini system biblioteki:
+45. Zbuduj mini system biblioteki:
    - `Book`,
    - `User`,
    - `Library`,
@@ -87,4 +97,5 @@
    - czytelne metody,
    - sensowny podział klas,
    - trochę polimorfizmu albo kompozycji,
-   - przynajmniej jedną metodę specjalną.
+   - przynajmniej jedną metodę specjalną,
+   - i jedną abstrakcyjną bazę, jeśli ma to realny sens.
