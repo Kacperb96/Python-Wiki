@@ -16,7 +16,8 @@ Ten dział zbiera moduły standardowej biblioteki, które bardzo często pojawia
 - `functools`,
 - `collections`,
 - `typing`,
-- `dataclasses`.
+- `dataclasses`,
+- `enum`.
 
 ## Jaki problem rozwiązuje ten folder
 
@@ -50,8 +51,9 @@ Najlepiej iść po kolei:
 4. `04-collections-python.md`
 5. `05-typing-python.md`
 6. `06-dataclasses-python.md`
+7. `07-enum-python.md`
 
-Ta kolejność ma sens, bo przechodzisz od pracy na tekście i danych, przez iteratory i funkcje, do typowania i modelowania danych.
+Ta kolejność ma sens, bo przechodzisz od pracy na tekście i danych, przez iteratory i funkcje, do typowania, modelowania danych i nazwanych zestawów wartości.
 
 ## Najważniejsze pytanie w tym folderze
 
@@ -150,6 +152,21 @@ Nie używaj, gdy:
 - klasa ma rozbudowane zachowanie i mało danych,
 - potrzebujesz bardziej niestandardowej logiki niż prostego modelu danych.
 
+### `enum`
+
+Używaj, gdy:
+
+- masz zamknięty zestaw nazwanych wartości,
+- chcesz uniknąć luźnych stringów typu `"paid"` albo `"admin"`,
+- modelujesz statusy, role, tryby, typy lub poziomy,
+- chcesz lepiej komunikować ograniczony zestaw dozwolonych opcji.
+
+Nie używaj, gdy:
+
+- zwykły `bool` lub prosty typ wystarcza,
+- zbiór wartości nie jest naprawdę zamknięty,
+- dodajesz enum tylko dla ozdoby.
+
 ## Jak ćwiczyć najlepiej
 
 Najlepszy styl nauki dla tego folderu wygląda tak:
@@ -169,7 +186,8 @@ Po przerobieniu tego działu powinieneś umieć zrobić małe rzeczy typu:
 - prostą analizę danych tekstowych z `defaultdict` i `itertools`,
 - mini warstwę konfiguracji z `ChainMap` i `TypedDict`,
 - model danych z `dataclass` i walidacją w `__post_init__`,
-- dekorator z `wraps` i cache przez `lru_cache`.
+- dekorator z `wraps` i cache przez `lru_cache`,
+- model statusów lub ról oparty o `Enum`.
 
 ## Po czym poznasz, że temat naprawdę siedzi
 
@@ -180,6 +198,7 @@ Dobry znak, jeśli potrafisz:
 - użyć `Counter`, `defaultdict` i `deque` bez zastanawiania się nad prowizorką,
 - dodać sensowne typowanie bez zamieniania kodu w ścianę adnotacji,
 - odróżnić `dataclass` od zwykłej klasy i wiedzieć, kiedy która jest lepsza,
+- rozpoznać, kiedy `Enum` daje lepszy model niż luźne stringi,
 - połączyć kilka tych bibliotek w jednym małym projekcie.
 
 ## Główne ryzyko tego folderu
@@ -194,7 +213,8 @@ Czyli na przykład:
 - `reduce()` zamiast czytelnego `sum()`,
 - `itertools` tam, gdzie prosta lista wystarczy,
 - `typing` robione tylko dla ozdoby,
-- `dataclass` wciskane tam, gdzie klasa ma głównie zachowanie, nie dane.
+- `dataclass` wciskane tam, gdzie klasa ma głównie zachowanie, nie dane,
+- `Enum` dodawany tam, gdzie zwykły `bool` albo prosty string byłby czytelniejszy.
 
 ## Podsumowanie
 

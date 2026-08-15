@@ -95,24 +95,34 @@ Dlatego przy wielu zadaniach warto zrobić oba warianty i odpowiedzieć sobie:
 65. Porównaj prostą klasę ręczną i klasę opartą o `dataclass`.
 66. Dla 3 przykładów odpowiedz, czy lepsza będzie `dataclass`, zwykły `dict`, czy zwykła klasa.
 
-## Poziom 7 — zadania przekrojowe
+## Poziom 7 — `enum`
 
-67. Napisz parser prostych logów:
+67. Zbuduj `Enum` dla statusów zamówienia.
+68. Wypisz wszystkie elementy enumu razem z `.name` i `.value`.
+69. Zamień string `"paid"` na odpowiedni element enumu.
+70. Zbuduj `IntEnum` dla prostych kodów wyjścia programu.
+71. Połącz `Enum` z `dataclass` w modelu `Order`.
+72. Porównaj wersję z luźnymi stringami i wersję z `Enum` dla ról użytkownika.
+73. Opisz 3 sytuacje, gdzie `Enum` poprawia jakość kodu, i 2, gdzie byłby przesadą.
+
+## Poziom 8 — zadania przekrojowe
+
+74. Napisz parser prostych logów:
 - użyj `re` do wyciągnięcia pól,
 - `dataclass` do modelu danych,
 - `typing` do opisania funkcji.
 
-68. Zgrupuj wpisy po poziomie logowania przez `defaultdict(list)`.
-69. Policz najczęstsze komunikaty przez `Counter`.
-70. Użyj `itertools` do przetworzenia wielu kolekcji wpisów w jeden strumień.
-71. Dodaj cache do kosztownej funkcji analitycznej przez `lru_cache`.
-72. Zbuduj mały system konfiguracji oparty o `ChainMap` i `TypedDict`.
-73. Zbuduj prostą analizę zamówień, gdzie część rozwiązań piszesz ręcznie, a część przez standardową bibliotekę, i porównujesz oba style.
-74. Weź 5 problemów z tego folderu i dla każdego dopisz jedno zdanie: „dlaczego tutaj używam biblioteki zamiast zwykłej pętli/prostego kodu”.
+75. Zgrupuj wpisy po poziomie logowania przez `defaultdict(list)`.
+76. Policz najczęstsze komunikaty przez `Counter`.
+77. Użyj `itertools` do przetworzenia wielu kolekcji wpisów w jeden strumień.
+78. Dodaj cache do kosztownej funkcji analitycznej przez `lru_cache`.
+79. Zbuduj mały system konfiguracji oparty o `ChainMap`, `TypedDict` i `Enum`.
+80. Zbuduj prostą analizę zamówień, gdzie część rozwiązań piszesz ręcznie, a część przez standardową bibliotekę, i porównujesz oba style.
+81. Weź 5 problemów z tego folderu i dla każdego dopisz jedno zdanie: „dlaczego tutaj używam biblioteki zamiast zwykłej pętli/prostego kodu”.
 
 ## Zadanie końcowe
 
-75. Zbuduj mini moduł przetwarzania zamówień lub logów, w którym połączysz co najmniej 4 biblioteki z tego folderu.
+82. Zbuduj mini moduł przetwarzania zamówień lub logów, w którym połączysz co najmniej 4 biblioteki z tego folderu.
 
 Minimalne wymagania:
 
@@ -121,6 +131,7 @@ Minimalne wymagania:
 - analiza częstości przez `Counter`,
 - typowanie funkcji,
 - `dataclass` dla modelu danych,
+- `Enum` dla statusu, typu albo roli,
 - przynajmniej jeden sensowny element z `itertools` albo `functools`.
 
 Na końcu opisz:
