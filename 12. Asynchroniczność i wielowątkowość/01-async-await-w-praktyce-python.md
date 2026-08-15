@@ -6,30 +6,27 @@
 2. [Po co znać `async` i `await`](#po-co-znać-async-i-await)
 3. [Co oznacza `async def`](#co-oznacza-async-def)
 4. [Co oznacza `await`](#co-oznacza-await)
-5. [Kiedy `await` ma sens](#kiedy-await-ma-sens)
+5. [Co naprawdę zwraca funkcja async](#co-naprawdę-zwraca-funkcja-async)
 6. [Sekwencyjnie vs współbieżnie](#sekwencyjnie-vs-współbieżnie)
-7. [Najczęstszy mentalny model](#najczęstszy-mentalny-model)
-8. [Jak projektować funkcje asynchroniczne](#jak-projektować-funkcje-asynchroniczne)
+7. [Przykład z outputem](#przykład-z-outputem)
+8. [Najważniejszy mentalny model](#najważniejszy-mentalny-model)
 9. [Łączenie wielu wywołań](#łączenie-wielu-wywołań)
 10. [Obsługa wyjątków](#obsługa-wyjątków)
 11. [Timeouty i anulowanie](#timeouty-i-anulowanie)
 12. [Kod blokujący w świecie async](#kod-blokujący-w-świecie-async)
 13. [Kiedy nie używać async](#kiedy-nie-używać-async)
 14. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-15. [Praktyczne przykłady](#praktyczne-przykłady)
-16. [Dobre praktyki](#dobre-praktyki)
-17. [Podsumowanie](#podsumowanie)
-18. [Mini ściąga](#mini-ściąga)
-19. [Ćwiczenia](#ćwiczenia)
-20. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+15. [Praktyczna ściąga](#praktyczna-ściąga)
+16. [Ćwiczenia](#ćwiczenia)
+17. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
 ## Wprowadzenie
 
-`async` i `await` to składnia, która pozwala pisać kod asynchroniczny w sposób czytelniejszy niż starsze style oparte na callbackach.
+`async` i `await` to składnia, która pozwala pisać kod asynchroniczny w dużo bardziej czytelny sposób niż starsze style oparte na callbackach.
 
-Dzięki temu kod wygląda prawie jak zwykły kod sekwencyjny, ale potrafi wykonywać wiele oczekujących operacji współbieżnie.
+Dzięki temu kod może wyglądać prawie jak zwykły kod sekwencyjny, ale potrafi wykonywać wiele oczekujących operacji współbieżnie.
 
 ---
 
@@ -41,10 +38,10 @@ Te słowa kluczowe są dziś podstawą pracy z:
 - websocketami,
 - asynchronicznymi bazami danych,
 - crawlerami,
-- workerami sieciowymi,
-- nowoczesnymi frameworkami backendowymi.
+- nowoczesnymi frameworkami backendowymi,
+- workerami sieciowymi.
 
-Bez nich trudno swobodnie poruszać się po nowoczesnym Pythonie.
+Bez nich trudno swobodnie poruszać się po nowoczesnym Pythonie backendowym.
 
 ---
 
@@ -59,9 +56,9 @@ async def pobierz_uzytkownika():
     return {"id": 1, "name": "Anna"}
 ```
 
-Wywołanie takiej funkcji nie daje od razu gotowego wyniku.
+Taka funkcja nie działa dokładnie jak zwykła funkcja `def`.
 
-Daje coroutine, którą trzeba uruchomić i zwykle `await`-ować.
+Jej wywołanie nie daje od razu gotowego wyniku.
 
 ---
 
@@ -69,7 +66,7 @@ Daje coroutine, którą trzeba uruchomić i zwykle `await`-ować.
 
 `await` mówi:
 
-"zaczekaj na wynik tej asynchronicznej operacji, ale nie blokuj całej pętli zdarzeń".
+"zaczekaj na wynik tej asynchronicznej operacji, ale oddaj w tym czasie sterowanie event loopowi".
 
 Przykład:
 
@@ -77,35 +74,45 @@ Przykład:
 uzytkownik = await pobierz_uzytkownika()
 ```
 
-To jest najważniejszy mechanizm w codziennej pracy z async.
+To jest kluczowy moment całego modelu async.
 
 ---
 
-## Kiedy `await` ma sens
+## Co naprawdę zwraca funkcja async
 
-`await` ma sens tylko wobec obiektów awaitable, czyli takich, które wspierają mechanizm asynchronicznego oczekiwania.
-
-Najczęściej będą to:
-
-- coroutine,
-- taski,
-- niektóre futures.
-
-Tego nie zrobisz:
+To bardzo ważne.
 
 ```python
-await 123
+async def hello():
+    return "ok"
 ```
 
-To spowoduje błąd.
+Jeśli zrobisz:
+
+```python
+wynik = hello()
+print(wynik)
+```
+
+Przykładowy output:
+
+```text
+<coroutine object hello at 0x...>
+```
+
+Czyli:
+
+- nie dostałeś jeszcze stringa `"ok"`,
+- dostałeś coroutine,
+- trzeba ją uruchomić, zwykle przez `await` albo `asyncio.run()`.
 
 ---
 
 ## Sekwencyjnie vs współbieżnie
 
-To bardzo ważna różnica.
+To jedna z najważniejszych różnic.
 
-Sekwencyjnie:
+### Sekwencyjnie
 
 ```python
 async def main():
@@ -116,7 +123,7 @@ async def main():
 
 Tutaj każde pobieranie startuje dopiero po poprzednim.
 
-Współbieżnie:
+### Współbieżnie
 
 ```python
 async def main():
@@ -127,354 +134,219 @@ async def main():
     )
 ```
 
-To często daje dużą różnicę wydajnościową.
+Tu zadania mogą czekać równolegle na swoje wyniki.
 
 ---
 
-## Najczęstszy mentalny model
+## Przykład z outputem
 
-Najprościej myśleć tak:
+```python
+import asyncio
+
+
+async def zadanie(nazwa, delay):
+    print(f"start {nazwa}")
+    await asyncio.sleep(delay)
+    print(f"koniec {nazwa}")
+    return nazwa
+
+
+async def main():
+    wyniki = await asyncio.gather(
+        zadanie("A", 1),
+        zadanie("B", 1),
+    )
+    print(wyniki)
+
+
+asyncio.run(main())
+```
+
+Przykładowy output:
+
+```text
+start A
+start B
+koniec A
+koniec B
+['A', 'B']
+```
+
+Najważniejsze obserwacje:
+
+- oba zadania startują szybko jedno po drugim,
+- nie czekasz na pełne zakończenie `A`, żeby dopiero zacząć `B`,
+- oba śpią współbieżnie.
+
+---
+
+## Najważniejszy mentalny model
+
+Najprościej myśl tak:
 
 - `async def` tworzy funkcję, która potrafi się zatrzymać,
 - `await` to moment oddania sterowania,
 - event loop w tym czasie może robić coś innego,
-- po gotowości wyników funkcja wraca do pracy.
+- po gotowości wyniku funkcja wraca do pracy.
 
-Ten model wystarcza do bardzo wielu praktycznych zastosowań.
-
----
-
-## Jak projektować funkcje asynchroniczne
-
-Dobra funkcja async zwykle:
-
-- robi operacje I/O,
-- jasno oddziela logikę od dostępu do zewnętrznych zasobów,
-- nie ukrywa ciężkich blokujących obliczeń,
-- zwraca normalne dane, a nie side effecty rozsiane po całym systemie.
-
-Przykład:
-
-```python
-async def pobierz_json(client, url):
-    response = await client.get(url)
-    response.raise_for_status()
-    return response.json()
-```
+To wystarcza do bardzo wielu praktycznych zastosowań.
 
 ---
 
 ## Łączenie wielu wywołań
 
-W praktyce bardzo często chcesz pobrać wiele rzeczy naraz.
+Najczęściej spotkasz:
 
-```python
-import asyncio
+- zwykły `await`,
+- `asyncio.gather(...)`,
+- `asyncio.create_task(...)`.
 
-async def pobierz(n):
-    await asyncio.sleep(1)
-    return f"dane {n}"
+Praktyczna intuicja:
 
-async def main():
-    wyniki = await asyncio.gather(
-        pobierz(1),
-        pobierz(2),
-        pobierz(3),
-    )
-    print(wyniki)
-```
-
-To podstawowy wzorzec produkcyjny.
+- `await` dla pojedynczego wyniku,
+- `gather()` gdy chcesz poczekać na kilka rzeczy naraz,
+- `create_task()` gdy chcesz uruchomić coś jako task zarządzany przez event loop.
 
 ---
 
 ## Obsługa wyjątków
 
-Async nie usuwa potrzeby obsługi błędów.
+Wyjątki w async obsługujesz podobnie jak w zwykłym kodzie.
 
 ```python
-import asyncio
-
-async def zepsuta():
-    await asyncio.sleep(0.1)
+async def pobierz_dane():
     raise ValueError("blad")
+
 
 async def main():
     try:
-        await zepsuta()
+        await pobierz_dane()
     except ValueError as e:
-        print("zlapano:", e)
-
-asyncio.run(main())
+        print(f"blad: {e}")
 ```
 
-Przy `gather()` warto pamiętać, że wyjątek jednego zadania może zatrzymać całość, jeśli nie używasz odpowiedniej strategii.
+To ważne, bo asynchroniczność nie usuwa potrzeby normalnej obsługi błędów.
 
 ---
 
 ## Timeouty i anulowanie
 
-W praktycznych systemach sieciowych timeout to obowiązek, a nie dodatek.
+Czasem nie chcesz czekać bez końca.
+
+Przykład timeoutu:
 
 ```python
 import asyncio
 
-async def pobierz():
+
+async def wolne_zadanie():
     await asyncio.sleep(5)
+
 
 async def main():
     try:
-        await asyncio.wait_for(pobierz(), timeout=1)
-    except asyncio.TimeoutError:
-        print("za dlugo")
+        await asyncio.wait_for(wolne_zadanie(), timeout=1)
+    except TimeoutError:
+        print("przekroczono limit czasu")
 ```
 
-Anulowanie zadań też trzeba traktować jako normalne zdarzenie.
+Przykładowy output:
+
+```text
+przekroczono limit czasu
+```
+
+To bardzo praktyczne przy HTTP, bazach danych i zewnętrznych usługach.
 
 ---
 
 ## Kod blokujący w świecie async
 
-To jeden z najczęstszych problemów.
+To jedna z największych pułapek.
 
-Jeśli wewnątrz `async def` zrobisz:
+Jeśli wewnątrz async wstawisz blokującą operację, np. ciężkie `time.sleep()` albo CPU-bound liczenie, to blokujesz event loop.
+
+Zły przykład:
 
 ```python
 import time
 
-time.sleep(3)
+async def zla_funkcja():
+    time.sleep(2)
 ```
 
-to blokujesz event loop.
+To nie jest prawdziwie asynchroniczne oczekiwanie.
 
-W efekcie cała zaleta async znika.
-
-Dlatego:
-
-- do czekania używaj `await asyncio.sleep(...)`,
-- ciężkie obliczenia przenoś do procesów lub osobnych mechanizmów,
-- blokujące biblioteki zastępuj asynchronicznymi odpowiednikami.
+To zatrzymuje cały loop.
 
 ---
 
 ## Kiedy nie używać async
 
-Nie każdy program potrzebuje async.
+Async nie jest magicznym przyspieszaczem wszystkiego.
 
-Nie warto komplikować kodu, jeśli:
+Nie warto go wciskać na siłę, gdy:
 
-- program jest prostym skryptem,
-- nie ma wielu operacji I/O,
-- głównym problemem są obliczenia CPU-bound,
-- biblioteki, których używasz, są całkowicie synchroniczne.
-
-Wtedy prosty kod bywa lepszy.
+- program jest bardzo prosty,
+- masz głównie CPU-bound obliczenia,
+- nie masz realnego I/O do przeplatania,
+- kod zrobiłby się dużo bardziej skomplikowany bez wyraźnego zysku.
 
 ---
 
 ## Typowe błędy początkujących
 
-- używanie `async def` wszędzie bez potrzeby,
+- mylenie coroutine z gotowym wynikiem,
 - zapominanie o `await`,
-- blokowanie event loop przez `time.sleep()` lub ciężką pętlę,
-- mylenie współbieżności z równoległością,
-- próba wywołania `await` poza kontekstem asynchronicznym.
+- używanie blokującego kodu w funkcjach async,
+- przekonanie, że async automatycznie daje wiele rdzeni CPU,
+- używanie async tam, gdzie zwykły kod byłby prostszy i wystarczający.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Proste użycie `await`
+### Definicja coroutine
 
 ```python
-import asyncio
+async def moja_funkcja():
+    ...
+```
 
-async def przywitaj():
-    await asyncio.sleep(1)
-    return "czesc"
+### Uruchomienie programu async
 
-async def main():
-    tekst = await przywitaj()
-    print(tekst)
-
+```python
 asyncio.run(main())
 ```
 
-### Sekwencyjnie
+### Wiele zadań naraz
 
 ```python
-import asyncio
-
-async def pobierz(n):
-    await asyncio.sleep(1)
-    return n
-
-async def main():
-    print(await pobierz(1))
-    print(await pobierz(2))
+await asyncio.gather(a(), b(), c())
 ```
 
-### Współbieżnie
+### Timeout
 
 ```python
-import asyncio
-
-async def pobierz(n):
-    await asyncio.sleep(1)
-    return n
-
-async def main():
-    wyniki = await asyncio.gather(
-        pobierz(1),
-        pobierz(2),
-    )
-    print(wyniki)
-
-asyncio.run(main())
+await asyncio.wait_for(zadanie(), timeout=2)
 ```
-
----
-
-## Dobre praktyki
-
-- używaj async tam, gdzie rzeczywiście jest dużo I/O,
-- trzymaj granice odpowiedzialności czytelne,
-- dodawaj timeouty do wywołań zewnętrznych,
-- nie mieszaj bez potrzeby stylu sync i async,
-- testuj błędy, anulowanie i scenariusze przeciążenia.
-
----
-
-## Podsumowanie
-
-`async` i `await` to praktyczna składnia do budowania wydajnych aplikacji I/O-bound.
-
-Najważniejsze jest nie samo zapamiętanie składni, ale zrozumienie, kiedy kod oddaje sterowanie i kiedy naprawdę działa współbieżnie.
-
-To fundament pod `asyncio`, `aiohttp`, `httpx`, FastAPI i wiele innych narzędzi.
-
----
-
-## Mini ściąga
-
-```python
-import asyncio
-
-async def pobierz():
-    await asyncio.sleep(1)
-    return "ok"
-
-async def main():
-    wynik = await pobierz()
-    print(wynik)
-
-asyncio.run(main())
-```
-
-Pamiętaj:
-
-- `async def` tworzy funkcję asynchroniczną,
-- `await` czeka na wynik,
-- `gather()` uruchamia wiele rzeczy współbieżnie,
-- `time.sleep()` nie pasuje do async,
-- timeouty są ważne.
 
 ---
 
 ## Ćwiczenia
 
-1. Napisz funkcję `async def hello()`, która po sekundzie zwróci napis `"hello"`.
-2. Uruchom trzy funkcje asynchroniczne współbieżnie.
-3. Zasymuluj timeout dla zbyt wolnej operacji.
-4. Pokaż różnicę czasu między wykonaniem sekwencyjnym i współbieżnym.
-5. Napisz funkcję async, która łapie wyjątek i zwraca komunikat błędu.
+1. Napisz coroutine zwracającą tekst po `asyncio.sleep()`.
+2. Pokaż, co zwraca wywołanie funkcji async bez `await`.
+3. Porównaj wykonanie sekwencyjne i przez `gather()`.
+4. Dodaj timeout do wolnego zadania.
+5. Napisz przykład blokującego kodu w async i wyjaśnij, dlaczego to błąd.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. `hello`
-
-```python
-import asyncio
-
-async def hello():
-    await asyncio.sleep(1)
-    return "hello"
-```
-
-### 2. Trzy funkcje współbieżnie
-
-```python
-import asyncio
-
-async def praca(n):
-    await asyncio.sleep(1)
-    return n
-
-async def main():
-    wyniki = await asyncio.gather(
-        praca(1),
-        praca(2),
-        praca(3),
-    )
-    print(wyniki)
-
-asyncio.run(main())
-```
-
-### 3. Timeout
-
-```python
-import asyncio
-
-async def wolna():
-    await asyncio.sleep(10)
-
-async def main():
-    try:
-        await asyncio.wait_for(wolna(), timeout=1)
-    except asyncio.TimeoutError:
-        print("timeout")
-
-asyncio.run(main())
-```
-
-### 4. Różnica czasu
-
-```python
-import asyncio
-import time
-
-async def praca():
-    await asyncio.sleep(1)
-
-async def sekwencyjnie():
-    await praca()
-    await praca()
-
-async def wspolbieznie():
-    await asyncio.gather(praca(), praca())
-
-start = time.perf_counter()
-asyncio.run(sekwencyjnie())
-print("sek:", time.perf_counter() - start)
-
-start = time.perf_counter()
-asyncio.run(wspolbieznie())
-print("wsp:", time.perf_counter() - start)
-```
-
-### 5. Obsługa błędu
-
-```python
-import asyncio
-
-async def niebezpieczna():
-    try:
-        raise ValueError("ups")
-    except ValueError as e:
-        return f"blad: {e}"
-
-print(asyncio.run(niebezpieczna()))
-```
+- `async def` tworzy coroutine, a nie gotowy wynik.
+- `await` oddaje sterowanie event loopowi.
+- Async najlepiej sprawdza się przy I/O-bound.
+- `gather()` pozwala współbieżnie czekać na wiele zadań.
+- Kod blokujący wewnątrz async psuje model współbieżności.

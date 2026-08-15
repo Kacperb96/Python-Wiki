@@ -1,4 +1,4 @@
-# Narzędzia kolejkujące w Pythonie — RabbitMQ, Celery, Kafka
+# Narzędzia kolejkowe w Pythonie — RabbitMQ, Celery, Kafka
 
 ## Spis treści
 
@@ -11,16 +11,13 @@
 7. [Celery](#celery)
 8. [Kafka](#kafka)
 9. [RabbitMQ vs Celery vs Kafka](#rabbitmq-vs-celery-vs-kafka)
-10. [Typowe zastosowania](#typowe-zastosowania)
+10. [Przykładowy mentalny przepływ](#przykładowy-mentalny-przepływ)
 11. [Retry, idempotencja i odporność](#retry-idempotencja-i-odporność)
 12. [Kolejki a asynchroniczność w aplikacji](#kolejki-a-asynchroniczność-w-aplikacji)
 13. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-14. [Praktyczne przykłady](#praktyczne-przykłady)
-15. [Dobre praktyki](#dobre-praktyki)
-16. [Podsumowanie](#podsumowanie)
-17. [Mini ściąga](#mini-ściąga)
-18. [Ćwiczenia](#ćwiczenia)
-19. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+14. [Praktyczna ściąga](#praktyczna-ściąga)
+15. [Ćwiczenia](#ćwiczenia)
+16. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -78,7 +75,8 @@ Warto znać:
 - broker,
 - topic,
 - acknowledgment,
-- retry.
+- retry,
+- idempotencję.
 
 To słownictwo wraca w prawie każdym systemie kolejkowym.
 
@@ -108,13 +106,11 @@ Jest często używany do:
 - routingu komunikatów,
 - klasycznej komunikacji producer-consumer.
 
-Zwykle dobrze pasuje do scenariuszy typu:
+Dobrze pasuje do scenariuszy typu:
 
 - wyślij zadanie do workera,
 - odbierz i potwierdź wykonanie,
 - rozdziel ruch między konsumentów.
-
-RabbitMQ kojarzy się z AMQP i klasycznym messagingiem.
 
 ---
 
@@ -137,9 +133,9 @@ Celery daje:
 - harmonogramy,
 - wygodne uruchamianie zadań asynchronicznych z poziomu kodu aplikacji.
 
-Przykład mentalny:
+Mentalnie:
 
-aplikacja mówi "wykonaj to później", a Celery zajmuje się dostarczeniem zadania do workera.
+aplikacja mówi „wykonaj to później”, a Celery zajmuje się dostarczeniem zadania do workera.
 
 ---
 
@@ -149,218 +145,131 @@ Kafka to platforma do strumieniowania zdarzeń i bardzo wydajnego przesyłania d
 
 Jest często używana do:
 
-- event streaming,
+- event streamingu,
 - logów zdarzeń,
 - integracji między usługami,
 - analityki danych w czasie zbliżonym do rzeczywistego.
 
-Kafka różni się mentalnie od prostych kolejek zadań.
+Kafka mentalnie różni się od prostych kolejek zadań.
 
-Często bardziej myślisz o strumieniu zdarzeń i historii komunikatów niż o pojedynczym "zrób task i zapomnij".
+Tu częściej myślisz o strumieniu zdarzeń i historii komunikatów niż o pojedynczym „zrób task i zapomnij”.
 
 ---
 
 ## RabbitMQ vs Celery vs Kafka
 
-Najprościej:
+### RabbitMQ
 
-`RabbitMQ`:
+To broker wiadomości.
 
-- broker wiadomości.
+### Celery
 
-`Celery`:
+To framework tasków w tle, zwykle używający brokera.
 
-- framework do tasków w tle w Pythonie,
-- zwykle działa na brokerze, np. RabbitMQ.
+### Kafka
 
-`Kafka`:
+To platforma event streamingowa, bardziej do zdarzeń i przepływów danych niż do prostych tasków backgroundowych.
 
-- platforma event streamingowa,
-- świetna do dużej skali i przepływu zdarzeń.
-
-To nie są idealni bezpośredni konkurenci w każdym scenariuszu.
+To nie są rzeczy całkiem wymienne 1:1.
 
 ---
 
-## Typowe zastosowania
+## Przykładowy mentalny przepływ
 
-RabbitMQ:
+Scenariusz:
 
-- task queue,
-- kolejki workerów,
-- routing zadań.
+1. użytkownik wrzuca plik do aplikacji,
+2. aplikacja zapisuje zgłoszenie,
+3. zamiast od razu robić ciężkie przetwarzanie, wysyła wiadomość do kolejki,
+4. worker odbiera zadanie,
+5. przetwarza plik,
+6. zapisuje wynik,
+7. opcjonalnie wysyła kolejne zdarzenie albo powiadomienie.
 
-Celery:
-
-- maile w tle,
-- generowanie raportów,
-- przetwarzanie obrazów po uploadzie,
-- harmonogramowane zadania.
-
-Kafka:
-
-- eventy biznesowe,
-- pipeline danych,
-- logowanie zdarzeń,
-- integracja wielu mikroserwisów.
+To jest właśnie bardzo typowy wzorzec „task w tle”.
 
 ---
 
 ## Retry, idempotencja i odporność
 
-To bardzo ważna część pracy z kolejkami.
+To bardzo ważne pojęcia.
 
-Jeśli zadanie się nie uda, system może spróbować ponownie.
+### Retry
 
-Dlatego zadania powinny być możliwie:
+Jeśli zadanie chwilowo się nie uda, system może spróbować ponownie.
 
-- idempotentne,
-- odporne na powtórne wykonanie,
-- dobrze logowane.
+### Idempotencja
 
-Przykład ryzyka:
+Jeśli to samo zadanie wykona się drugi raz, wynik nie powinien zepsuć systemu.
 
-jeśli task wysyła mail bez zabezpieczenia, retry może wysłać go dwa razy.
+To ważne, bo w systemach rozproszonych duplikaty i powtórzenia naprawdę się zdarzają.
 
 ---
 
 ## Kolejki a asynchroniczność w aplikacji
 
-To dwa różne poziomy problemu.
+Ważne rozróżnienie:
 
-`asyncio`:
+- async w aplikacji pomaga przeplatać oczekujące operacje,
+- kolejka pomaga oddelegować pracę poza aktualne żądanie albo poza aktualny proces.
 
-- pomaga w ramach jednego procesu i jednego programu.
+To są różne poziomy rozwiązania problemu.
 
-System kolejkowy:
+`async` nie zastępuje RabbitMQ czy Celery.
 
-- rozdziela pracę między procesy, maszyny i usługi.
-
-Można używać obu rzeczy jednocześnie, ale nie zastępują się wprost.
+Celery nie zastępuje `asyncio`.
 
 ---
 
 ## Typowe błędy początkujących
 
-- mylenie Celery z brokerem,
-- używanie Kafki do prostych zadań, gdzie wystarczyłaby zwykła kolejka,
-- brak idempotencji,
-- brak retry policy,
-- brak monitoringu i obserwowalności workerów,
-- wrzucanie do komunikatów zbyt ciężkich danych.
+- traktowanie RabbitMQ, Celery i Kafki jak dokładnie tego samego,
+- wrzucanie wszystkiego do kolejki bez potrzeby,
+- brak myślenia o retry,
+- brak myślenia o idempotencji,
+- mieszanie prostych task queue z event streamingiem.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Przykład mentalny z Celery
+### Gdy chcesz taski w tle w Pythonie
 
-```python
-from celery import Celery
+Bardzo często myślisz o:
 
-app = Celery("tasks", broker="pyamqp://guest@localhost//")
+- Celery,
+- brokerze typu RabbitMQ albo Redis.
 
-@app.task
-def dodaj(a, b):
-    return a + b
-```
+### Gdy myślisz o strumieniu zdarzeń
 
-Wywołanie:
+Częściej pojawia się Kafka.
 
-```python
-wynik = dodaj.delay(2, 3)
-```
+### Pytanie praktyczne
 
-Tutaj zadanie trafia do brokera, a worker wykona je później.
+Czy chcesz:
 
-### Przykład myślowy z RabbitMQ
+- wykonać zadanie później,
+- czy przesyłać i konsumować strumień zdarzeń?
 
-- aplikacja publikuje komunikat "przetworz zamowienie",
-- kolejka przechowuje wiadomość,
-- worker odbiera komunikat,
-- po sukcesie wysyła potwierdzenie.
-
-### Przykład myślowy z Kafką
-
-- serwis płatności publikuje zdarzenie `payment_completed`,
-- inne usługi czytają to zdarzenie,
-- analityka, powiadomienia i księgowość reagują niezależnie.
-
----
-
-## Dobre praktyki
-
-- dobieraj narzędzie do problemu, a nie do mody,
-- projektuj taski jako idempotentne,
-- dodawaj retry z rozsądnym backoffem,
-- monitoruj kolejki, opóźnienia i błędy workerów,
-- nie wkładaj do wiadomości więcej danych, niż trzeba.
-
----
-
-## Podsumowanie
-
-RabbitMQ, Celery i Kafka rozwiązują podobny obszar, ale nie ten sam problem.
-
-W dużym uproszczeniu:
-
-- RabbitMQ dobrze pasuje do klasycznych kolejek wiadomości,
-- Celery do tasków w tle w ekosystemie Pythona,
-- Kafka do event streaming i dużej skali zdarzeń.
-
-Najważniejsze jest zrozumienie architektury, a nie tylko składni.
-
----
-
-## Mini ściąga
-
-Najkrócej:
-
-- `RabbitMQ` = broker wiadomości,
-- `Celery` = taski w tle dla Pythona,
-- `Kafka` = strumienie zdarzeń i event streaming.
-
-Pamiętaj:
-
-- kolejka odciąża aplikację,
-- retry wymaga ostrożności,
-- idempotencja jest kluczowa,
-- async w kodzie i system kolejkowy to różne warstwy rozwiązania.
+To rozróżnienie jest kluczowe.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij własnymi słowami różnicę między producentem a konsumentem.
-2. Podaj przykład zadania, które warto wrzucić do Celery.
-3. Wskaż przypadek, w którym RabbitMQ pasuje lepiej niż Kafka.
-4. Wskaż przypadek, w którym Kafka pasuje lepiej niż prosta kolejka zadań.
-5. Wyjaśnij, dlaczego idempotencja jest ważna przy retry.
+1. Rozpisz rolę producenta, konsumenta i brokera.
+2. Opisz scenariusz, w którym RabbitMQ ma sens.
+3. Opisz scenariusz, w którym Celery ma sens.
+4. Opisz scenariusz, w którym Kafka ma sens.
+5. Wyjaśnij różnicę między task queue i event streamingiem.
+6. Wyjaśnij własnymi słowami, czemu idempotencja jest ważna.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Producent i konsument
-
-Producent wysyła wiadomość do systemu kolejkowego, a konsument ją odbiera i przetwarza.
-
-### 2. Zadanie do Celery
-
-Na przykład:
-
-- wysyłka maila po rejestracji,
-- generowanie PDF,
-- przetworzenie zdjęcia po uploadzie.
-
-### 3. RabbitMQ lepszy niż Kafka
-
-Gdy potrzebujesz klasycznej kolejki tasków dla workerów i prostego routingu komunikatów.
-
-### 4. Kafka lepsza niż prosta kolejka
-
-Gdy wiele usług ma niezależnie reagować na strumień zdarzeń biznesowych w dużej skali.
-
-### 5. Idempotencja
-
-Bo przy ponowieniu to samo zadanie może zostać wykonane więcej niż raz, a system nie powinien przez to produkować błędnych skutków ubocznych.
+- Kolejki służą do oddelegowywania i rozdzielania pracy.
+- RabbitMQ to broker wiadomości.
+- Celery to framework tasków w tle, zwykle używający brokera.
+- Kafka jest bardziej o strumieniu zdarzeń niż o prostych taskach backgroundowych.
+- Retry i idempotencja są kluczowe w systemach rozproszonych.

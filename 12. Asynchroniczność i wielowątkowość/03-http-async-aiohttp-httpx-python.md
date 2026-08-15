@@ -10,18 +10,16 @@
 6. [`httpx.AsyncClient`](#httpxasyncclient)
 7. [`aiohttp.ClientSession`](#aiohttpclientsession)
 8. [Wysyłanie wielu żądań naraz](#wysyłanie-wielu-żądań-naraz)
-9. [Timeouty](#timeouty)
-10. [Obsługa błędów HTTP](#obsługa-błędów-http)
-11. [Connection pooling](#connection-pooling)
-12. [Nagłówki, parametry i JSON](#nagłówki-parametry-i-json)
-13. [Limity współbieżności](#limity-współbieżności)
-14. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-15. [Praktyczne przykłady](#praktyczne-przykłady)
-16. [Dobre praktyki](#dobre-praktyki)
-17. [Podsumowanie](#podsumowanie)
-18. [Mini ściąga](#mini-ściąga)
-19. [Ćwiczenia](#ćwiczenia)
-20. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+9. [Przykład z outputem](#przykład-z-outputem)
+10. [Timeouty](#timeouty)
+11. [Obsługa błędów HTTP](#obsługa-błędów-http)
+12. [Connection pooling](#connection-pooling)
+13. [Nagłówki, parametry i JSON](#nagłówki-parametry-i-json)
+14. [Limity współbieżności](#limity-współbieżności)
+15. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+16. [Praktyczna ściąga](#praktyczna-ściąga)
+17. [Ćwiczenia](#ćwiczenia)
+18. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -76,8 +74,7 @@ Jeśli wysyłasz pojedyncze żądanie raz na jakiś czas, zwykły sync bywa wyst
 
 `httpx`:
 
-- nowocześniejszy interfejs,
-- bardzo przyjemne API,
+- ma bardzo przyjemne API,
 - obsługuje zarówno sync, jak i async,
 - bywa wygodny, gdy chcesz spójny styl w różnych częściach projektu.
 
@@ -89,12 +86,12 @@ Oba rozwiązania są sensowne.
 
 W async HTTP warto rozumieć:
 
-- sesję lub klienta,
-- połączenia wielokrotnego użytku,
+- klienta albo sesję,
 - timeouty,
+- błędy sieciowe,
 - statusy HTTP,
-- limity współbieżności,
-- obsługę wyjątków sieciowych.
+- connection pooling,
+- limity współbieżności.
 
 ---
 
@@ -106,20 +103,22 @@ Przykład:
 import asyncio
 import httpx
 
+
 async def main():
     async with httpx.AsyncClient() as client:
         response = await client.get("https://example.com")
         print(response.status_code)
-        print(response.text[:100])
+        print(response.text[:40])
+
 
 asyncio.run(main())
 ```
 
 Ważne:
 
-- klient tworzymy raz,
-- używamy go wielokrotnie,
-- zamykamy przez `async with`.
+- klient tworzysz raz,
+- używasz go wielokrotnie,
+- zamykasz przez `async with`.
 
 ---
 
@@ -131,12 +130,14 @@ Przykład:
 import asyncio
 import aiohttp
 
+
 async def main():
     async with aiohttp.ClientSession() as session:
         async with session.get("https://example.com") as response:
             text = await response.text()
             print(response.status)
-            print(text[:100])
+            print(text[:40])
+
 
 asyncio.run(main())
 ```
@@ -151,157 +152,157 @@ W `aiohttp` samo ciało odpowiedzi też pobierasz asynchronicznie.
 import asyncio
 import httpx
 
+
 URLS = [
     "https://example.com",
     "https://example.org",
     "https://example.net",
 ]
 
+
 async def fetch(client, url):
     response = await client.get(url)
     return url, response.status_code
 
+
 async def main():
     async with httpx.AsyncClient() as client:
-        wyniki = await asyncio.gather(
-            *(fetch(client, url) for url in URLS)
-        )
+        wyniki = await asyncio.gather(*(fetch(client, url) for url in URLS))
         print(wyniki)
+
 
 asyncio.run(main())
 ```
 
-To jest jedna z najczęstszych praktycznych korzyści async.
+---
+
+## Przykład z outputem
+
+Przykładowy output:
+
+```text
+[('https://example.com', 200), ('https://example.org', 200), ('https://example.net', 200)]
+```
+
+Najważniejsze:
+
+- wszystkie requesty mogły być wykonywane współbieżnie,
+- czekanie na jeden nie blokuje sensownie całej grupy,
+- końcowo dostajesz listę wyników.
 
 ---
 
 ## Timeouty
 
-Sieć bywa zawodna.
+Przy sieci timeout to obowiązek, nie luksus.
 
-Trzeba ustawiać limity czasu.
-
-W `httpx`:
+Przykład w `httpx`:
 
 ```python
 import httpx
 
-timeout = httpx.Timeout(5.0)
-```
 
-Przykład:
-
-```python
 async with httpx.AsyncClient(timeout=5.0) as client:
     response = await client.get("https://example.com")
 ```
 
-W `aiohttp` też można ustawić timeout na sesji lub żądaniu.
+Bez timeoutów ryzykujesz zbyt długie wiszenie na problematycznych połączeniach.
 
 ---
 
 ## Obsługa błędów HTTP
 
-Trzeba odróżnić:
+Ważne jest rozróżnienie:
 
-- błędy transportowe,
-- timeouty,
-- poprawną odpowiedź z błędnym statusem, np. `404` lub `500`.
+- błąd transportowy,
+- timeout,
+- status HTTP typu `404` albo `500`.
 
-Przykład `httpx`:
+Przykład:
 
 ```python
-import asyncio
 import httpx
 
-async def main():
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get("https://example.com")
-            response.raise_for_status()
-    except httpx.HTTPError as e:
-        print("blad HTTP:", e)
 
-asyncio.run(main())
+async def fetch(client, url):
+    try:
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.text
+    except httpx.HTTPStatusError as e:
+        print(f"blad statusu: {e.response.status_code}")
+    except httpx.RequestError as e:
+        print(f"blad sieci: {e}")
 ```
 
 ---
 
 ## Connection pooling
 
-To bardzo ważny temat wydajnościowy.
+To bardzo ważne praktycznie.
 
-Jeśli tworzysz nowego klienta dla każdego requestu, tracisz korzyści z:
+Jeśli tworzysz klienta raz i używasz go wielokrotnie, możesz korzystać z ponownego użycia połączeń.
 
-- utrzymywania połączeń,
-- oszczędności czasu na handshaku,
-- ponownego użycia zasobów.
+To daje:
 
-Dlatego zwykle:
+- mniejszy koszt połączeń,
+- lepszą wydajność,
+- zdrowszy workflow HTTP.
 
-- tworzysz jednego klienta,
-- używasz go do wielu żądań,
-- zamykasz dopiero na końcu.
+Dlatego zwykle nie tworzysz nowego klienta dla każdego pojedynczego requestu.
 
 ---
 
 ## Nagłówki, parametry i JSON
 
-Przykład `httpx`:
+Przykład:
 
 ```python
-import asyncio
-import httpx
-
-async def main():
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://api.example.com/users",
-            params={"page": 1},
-            headers={"Authorization": "Bearer TOKEN"},
-        )
-        data = response.json()
-        print(data)
-
-asyncio.run(main())
+response = await client.get(
+    "https://api.example.com/users",
+    params={"page": 1},
+    headers={"Authorization": "Bearer TOKEN"},
+)
 ```
 
-Przykład POST z JSON:
+Wysyłanie JSON:
 
 ```python
 response = await client.post(
     "https://api.example.com/items",
-    json={"name": "produkt", "price": 10},
+    json={"name": "item"},
 )
 ```
+
+To są bardzo codzienne przypadki użycia.
 
 ---
 
 ## Limity współbieżności
 
-To, że async pozwala wysłać setki zapytań, nie znaczy, że zawsze warto.
+Nie zawsze chcesz odpalić 1000 requestów naraz.
 
-Zbyt duża liczba równoległych requestów może:
+Czasem trzeba ograniczyć współbieżność.
 
-- przeciążyć serwer,
-- spowodować rate limiting,
-- zużyć za dużo pamięci,
-- pogorszyć stabilność.
-
-Dlatego często stosuje się semafor:
+Przykład z semaforem:
 
 ```python
 import asyncio
 
+
 semafor = asyncio.Semaphore(10)
+
+
+async def fetch_limited(client, url):
+    async with semafor:
+        return await client.get(url)
 ```
 
-I w zadaniu:
+To chroni:
 
-```python
-async with semafor:
-    ...
-```
+- Twoją aplikację,
+- zewnętrzne API,
+- połączenia sieciowe.
 
 ---
 
@@ -309,187 +310,55 @@ async with semafor:
 
 - tworzenie nowego klienta dla każdego requestu,
 - brak timeoutów,
-- brak `raise_for_status()` tam, gdzie status ma znaczenie,
-- uruchamianie zbyt wielu requestów naraz,
-- mieszanie bibliotek sync z async w tym samym przepływie.
+- brak obsługi błędów sieciowych,
+- odpalanie zbyt wielu requestów naraz bez limitu,
+- używanie async HTTP tam, gdzie jedno rzadkie żądanie sync byłoby prostsze.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Pobranie JSON przez `httpx`
+### Jeden klient `httpx`
 
 ```python
-import asyncio
-import httpx
-
-async def main():
-    async with httpx.AsyncClient() as client:
-        response = await client.get("https://jsonplaceholder.typicode.com/todos/1")
-        response.raise_for_status()
-        print(response.json())
-
-asyncio.run(main())
+async with httpx.AsyncClient() as client:
+    ...
 ```
 
-### Wiele requestów z limitem
+### Wiele requestów
 
 ```python
-import asyncio
-import httpx
-
-URLS = [f"https://jsonplaceholder.typicode.com/todos/{i}" for i in range(1, 11)]
-semafor = asyncio.Semaphore(3)
-
-async def fetch(client, url):
-    async with semafor:
-        response = await client.get(url)
-        response.raise_for_status()
-        return response.json()
-
-async def main():
-    async with httpx.AsyncClient(timeout=5.0) as client:
-        wyniki = await asyncio.gather(*(fetch(client, url) for url in URLS))
-        print(len(wyniki))
-
-asyncio.run(main())
+await asyncio.gather(...)
 ```
 
----
-
-## Dobre praktyki
-
-- używaj jednego klienta lub sesji na wiele żądań,
-- zawsze ustawiaj timeouty,
-- obsługuj błędy transportowe i błędne statusy,
-- ograniczaj współbieżność,
-- loguj nieudane wywołania do zewnętrznych API.
-
----
-
-## Podsumowanie
-
-Async HTTP to jeden z najbardziej praktycznych powodów używania `asyncio`.
-
-`aiohttp` i `httpx` pozwalają budować szybkie integracje sieciowe, ale wymagają dyscypliny:
-
-- klient wielokrotnego użytku,
-- timeouty,
-- limity współbieżności,
-- dobra obsługa błędów.
-
----
-
-## Mini ściąga
+### Timeout
 
 ```python
-import asyncio
-import httpx
-
-async def main():
-    async with httpx.AsyncClient(timeout=5.0) as client:
-        response = await client.get("https://example.com")
-        response.raise_for_status()
-        print(response.text)
-
-asyncio.run(main())
+httpx.AsyncClient(timeout=5.0)
 ```
 
-Najważniejsze:
+### Limit współbieżności
 
-- `AsyncClient` lub `ClientSession` twórz raz,
-- używaj `await client.get(...)`,
-- ustawiaj timeouty,
-- przy wielu requestach używaj `gather()`,
-- kontroluj liczbę równoległych wywołań.
+```python
+asyncio.Semaphore(10)
+```
 
 ---
 
 ## Ćwiczenia
 
-1. Pobierz jeden endpoint JSON asynchronicznie przez `httpx`.
-2. Pobierz 5 endpointów współbieżnie.
-3. Dodaj timeout do klienta.
-4. Obsłuż błąd `404` lub inny błąd HTTP.
-5. Ogranicz liczbę jednoczesnych requestów do 2.
+1. Pobierz jeden endpoint przez `httpx.AsyncClient`.
+2. Pobierz kilka endpointów współbieżnie.
+3. Dodaj timeout.
+4. Obsłuż błąd `404` albo błąd transportowy.
+5. Dodaj semafor ograniczający liczbę jednoczesnych requestów.
+6. Wyjaśnij, czemu klient HTTP warto współdzielić.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Jeden endpoint
-
-```python
-import asyncio
-import httpx
-
-async def main():
-    async with httpx.AsyncClient() as client:
-        response = await client.get("https://jsonplaceholder.typicode.com/posts/1")
-        print(response.json())
-
-asyncio.run(main())
-```
-
-### 2. Pięć endpointów
-
-```python
-import asyncio
-import httpx
-
-async def fetch(client, post_id):
-    response = await client.get(f"https://jsonplaceholder.typicode.com/posts/{post_id}")
-    return response.json()
-
-async def main():
-    async with httpx.AsyncClient() as client:
-        wyniki = await asyncio.gather(*(fetch(client, i) for i in range(1, 6)))
-        print(wyniki)
-
-asyncio.run(main())
-```
-
-### 3. Timeout
-
-```python
-import asyncio
-import httpx
-
-async def main():
-    async with httpx.AsyncClient(timeout=2.0) as client:
-        response = await client.get("https://example.com")
-        print(response.status_code)
-
-asyncio.run(main())
-```
-
-### 4. Obsługa błędu
-
-```python
-import asyncio
-import httpx
-
-async def main():
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get("https://example.com/nie-ma")
-            response.raise_for_status()
-    except httpx.HTTPError as e:
-        print("blad:", e)
-
-asyncio.run(main())
-```
-
-### 5. Limit 2
-
-```python
-import asyncio
-import httpx
-
-semafor = asyncio.Semaphore(2)
-
-async def fetch(client, url):
-    async with semafor:
-        response = await client.get(url)
-        return response.status_code
-```
+- Async HTTP ma największy sens, gdy requestów jest dużo i są niezależne.
+- Klienta albo sesję zwykle tworzysz raz i używasz wielokrotnie.
+- Timeouty i obsługa błędów są obowiązkowe.
+- `gather()` i semafory to bardzo częste narzędzia praktyczne.

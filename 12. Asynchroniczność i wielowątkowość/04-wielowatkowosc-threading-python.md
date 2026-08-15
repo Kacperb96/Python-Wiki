@@ -8,21 +8,17 @@
 4. [Kiedy `threading` ma sens](#kiedy-threading-ma-sens)
 5. [GIL i jego znaczenie](#gil-i-jego-znaczenie)
 6. [Tworzenie wątku](#tworzenie-wątku)
-7. [`Thread` i `target`](#thread-i-target)
-8. [`start()` i `join()`](#start-i-join)
+7. [`start()` i `join()`](#start-i-join)
+8. [Przykład z outputem](#przykład-z-outputem)
 9. [Współdzielona pamięć](#współdzielona-pamięć)
 10. [Race condition](#race-condition)
 11. [`Lock`](#lock)
-12. [`RLock`, `Event`, `Semaphore`](#rlock-event-semaphore)
-13. [Wątki daemon](#wątki-daemon)
-14. [`ThreadPoolExecutor`](#threadpoolexecutor)
-15. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-16. [Praktyczne przykłady](#praktyczne-przykłady)
-17. [Dobre praktyki](#dobre-praktyki)
-18. [Podsumowanie](#podsumowanie)
-19. [Mini ściąga](#mini-ściąga)
-20. [Ćwiczenia](#ćwiczenia)
-21. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+12. [`Event`, `Semaphore`, `ThreadPoolExecutor`](#event-semaphore-threadpoolexecutor)
+13. [Kiedy nie używać wątków](#kiedy-nie-używać-wątków)
+14. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+15. [Praktyczna ściąga](#praktyczna-ściąga)
+16. [Ćwiczenia](#ćwiczenia)
+17. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -48,11 +44,10 @@ Wątki pomagają wtedy, gdy jedna część programu czeka, a inna może w tym cz
 
 Przykłady:
 
-- pobieranie plików,
+- pobieranie plików blokującą biblioteką,
 - obsługa wielu klientów,
-- praca z kolejkami,
 - zadania w tle w aplikacji desktopowej,
-- równoległe wywołania bibliotek blokujących.
+- integracje z kodem, który nie ma wersji async.
 
 ---
 
@@ -81,7 +76,7 @@ Na przykład:
 - requesty sieciowe blokującą biblioteką,
 - operacje na plikach,
 - czekanie na urządzenia zewnętrzne,
-- integracje z kodem, który nie ma wersji async.
+- biblioteki, które nie mają API async.
 
 ---
 
@@ -91,9 +86,9 @@ W CPythonie istnieje GIL, czyli Global Interpreter Lock.
 
 W uproszczeniu oznacza to, że w danym momencie tylko jeden wątek wykonuje kod Pythona w interpreterze.
 
-Skutek:
+Skutek praktyczny:
 
-- wątki nie dają zwykle realnego przyspieszenia dla czysto CPU-bound kodu Pythona,
+- wątki zwykle nie dają dużego zysku dla czysto CPU-bound kodu Pythona,
 - ale nadal są bardzo użyteczne dla I/O-bound.
 
 To jedna z najważniejszych rzeczy do zapamiętania.
@@ -107,29 +102,12 @@ Najprostszy przykład:
 ```python
 import threading
 
+
 def praca():
     print("watek dziala")
 
+
 t = threading.Thread(target=praca)
-t.start()
-t.join()
-```
-
----
-
-## `Thread` i `target`
-
-`target` to funkcja, którą ma wykonać wątek.
-
-Możesz przekazać argumenty:
-
-```python
-import threading
-
-def powitanie(imie):
-    print(f"Czesc, {imie}")
-
-t = threading.Thread(target=powitanie, args=("Anna",))
 t.start()
 t.join()
 ```
@@ -146,7 +124,50 @@ t.join()
 
 - każe głównemu wątkowi poczekać, aż tamten się skończy.
 
-Bez `join()` program może pójść dalej i zakończyć się wcześniej, niż oczekujesz.
+Bez `join()` program może pójść dalej szybciej, niż oczekujesz.
+
+---
+
+## Przykład z outputem
+
+```python
+import threading
+import time
+
+
+def worker(nazwa, delay):
+    print(f"start {nazwa}")
+    time.sleep(delay)
+    print(f"koniec {nazwa}")
+
+
+t1 = threading.Thread(target=worker, args=("A", 1))
+t2 = threading.Thread(target=worker, args=("B", 1))
+
+t1.start()
+t2.start()
+
+t1.join()
+t2.join()
+
+print("wszystkie watki zakonczone")
+```
+
+Przykładowy output:
+
+```text
+start A
+start B
+koniec A
+koniec B
+wszystkie watki zakonczone
+```
+
+Najważniejsze:
+
+- oba wątki mogły działać przeplatanie,
+- główny wątek czeka przez `join()`,
+- to nie oznacza jeszcze pełnego przyspieszenia CPU-bound.
 
 ---
 
@@ -162,34 +183,28 @@ Jeśli kilka wątków modyfikuje wspólny stan, łatwo o błędy trudne do odtwo
 
 ## Race condition
 
-Race condition to sytuacja, gdy wynik zależy od niekontrolowanej kolejności wykonania wątków.
+Race condition pojawia się wtedy, gdy wynik zależy od niekontrolowanej kolejności działań kilku wątków.
 
-Przykład problemu:
+Przykład mentalny:
 
-```python
-import threading
-
-licznik = 0
-
-def zwieksz():
-    global licznik
-    for _ in range(100000):
-        licznik += 1
-```
-
-Jeśli wiele wątków robi to naraz, wynik może być nieprzewidywalny.
+- dwa wątki zwiększają ten sam licznik,
+- oba czytają starą wartość,
+- oba zapisują nową,
+- część aktualizacji może zniknąć.
 
 ---
 
 ## `Lock`
 
-`Lock` pozwala zabezpieczyć sekcję krytyczną.
+`Lock` pozwala chronić fragment krytyczny.
 
 ```python
 import threading
 
+
 licznik = 0
 lock = threading.Lock()
+
 
 def zwieksz():
     global licznik
@@ -198,238 +213,89 @@ def zwieksz():
             licznik += 1
 ```
 
-Dzięki temu tylko jeden wątek naraz modyfikuje chroniony fragment.
+To zmniejsza ryzyko race condition.
 
 ---
 
-## `RLock`, `Event`, `Semaphore`
-
-### `RLock`
-
-Wersja locka, którą ten sam wątek może zablokować wielokrotnie.
+## `Event`, `Semaphore`, `ThreadPoolExecutor`
 
 ### `Event`
 
-Służy do sygnalizacji między wątkami.
+Pomaga sygnalizować między wątkami, że coś już się wydarzyło.
 
 ### `Semaphore`
 
-Pozwala ograniczyć liczbę wątków wchodzących jednocześnie do danego obszaru.
+Pozwala ograniczać liczbę jednoczesnych wejść do jakiegoś zasobu.
 
-To bardzo praktyczne narzędzia synchronizacji.
+### `ThreadPoolExecutor`
 
----
+To wygodniejszy sposób uruchamiania wielu zadań niż ręczne tworzenie każdego wątku osobno.
 
-## Wątki daemon
-
-Wątek daemon działa w tle i nie blokuje zakończenia programu.
-
-```python
-t = threading.Thread(target=praca, daemon=True)
-```
-
-Użyteczne dla pomocniczych zadań, ale trzeba uważać, bo taki wątek może zostać brutalnie przerwany przy zamykaniu procesu.
+Jest bardzo praktyczny w codziennej pracy.
 
 ---
 
-## `ThreadPoolExecutor`
+## Kiedy nie używać wątków
 
-W praktyce często wygodniej używać puli wątków niż ręcznie zarządzać każdym wątkiem.
+Wątki nie są najlepszym wyborem, gdy:
 
-```python
-from concurrent.futures import ThreadPoolExecutor
-
-def kwadrat(x):
-    return x * x
-
-with ThreadPoolExecutor(max_workers=4) as executor:
-    wyniki = list(executor.map(kwadrat, [1, 2, 3, 4]))
-    print(wyniki)
-```
-
-To częsty wzorzec w realnych projektach.
+- problem jest czysto CPU-bound,
+- potrzebujesz realnego wykorzystania wielu rdzeni dla kodu Pythona,
+- łatwiej byłoby użyć async albo procesów,
+- synchronizacja stanu robi się bardzo złożona.
 
 ---
 
 ## Typowe błędy początkujących
 
-- używanie wątków do ciężkich obliczeń CPU-bound z oczekiwaniem dużego przyspieszenia,
-- brak synchronizacji wspólnego stanu,
-- tworzenie zbyt wielu wątków,
-- zapominanie o `join()`,
-- trudne do debugowania side effecty między wątkami.
+- oczekiwanie, że wątki zawsze przyspieszą program,
+- ignorowanie GIL,
+- brak `join()`,
+- modyfikowanie wspólnego stanu bez synchronizacji,
+- używanie wątków tam, gdzie procesy albo async pasują lepiej.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Dwa wątki
+### Prosty wątek
 
 ```python
-import threading
-import time
-
-def praca(nazwa):
-    for i in range(3):
-        print(nazwa, i)
-        time.sleep(0.5)
-
-t1 = threading.Thread(target=praca, args=("A",))
-t2 = threading.Thread(target=praca, args=("B",))
-
-t1.start()
-t2.start()
-
-t1.join()
-t2.join()
-```
-
-### `Event`
-
-```python
-import threading
-import time
-
-event = threading.Event()
-
-def worker():
-    print("czekam na sygnal")
-    event.wait()
-    print("ruszam")
-
-t = threading.Thread(target=worker)
-t.start()
-
-time.sleep(1)
-event.set()
-t.join()
-```
-
----
-
-## Dobre praktyki
-
-- używaj wątków głównie do I/O-bound,
-- minimalizuj współdzielony stan,
-- sekcje krytyczne chroń lockami,
-- rozważ `ThreadPoolExecutor` zamiast ręcznej orkiestracji,
-- projektuj kod tak, by dało się go debugować i testować.
-
----
-
-## Podsumowanie
-
-`threading` jest bardzo przydatny, ale wymaga ostrożności.
-
-Najważniejsze rzeczy to:
-
-- rozumieć GIL,
-- wiedzieć, kiedy wątki pomagają,
-- umieć synchronizować dostęp do wspólnego stanu,
-- nie komplikować rozwiązania bardziej, niż to potrzebne.
-
----
-
-## Mini ściąga
-
-```python
-import threading
-
-def praca():
-    print("dzialam")
-
 t = threading.Thread(target=praca)
 t.start()
 t.join()
 ```
 
-Pamiętaj:
+### Ochrona stanu
 
-- `start()` uruchamia wątek,
-- `join()` czeka na jego koniec,
-- `Lock` chroni wspólny stan,
-- GIL ogranicza zysk dla CPU-bound,
-- `ThreadPoolExecutor` bywa wygodniejszy.
+```python
+with lock:
+    ...
+```
+
+### Kiedy warto
+
+- I/O-bound,
+- blokujące biblioteki,
+- zadania w tle.
 
 ---
 
 ## Ćwiczenia
 
 1. Uruchom dwie funkcje w osobnych wątkach.
-2. Przekaż argument do funkcji uruchamianej w wątku.
-3. Zaimplementuj licznik współdzielony przez dwa wątki i zabezpiecz go lockiem.
-4. Użyj `Event`, aby jeden wątek czekał na sygnał od drugiego.
-5. Zastosuj `ThreadPoolExecutor` do przetworzenia listy liczb.
+2. Dodaj `join()`.
+3. Zaimplementuj współdzielony licznik.
+4. Zabezpiecz go przez `Lock`.
+5. Użyj `ThreadPoolExecutor` do kilku prostych zadań.
+6. Wyjaśnij własnymi słowami, czemu GIL ma znaczenie.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Dwa wątki
-
-```python
-import threading
-
-def praca(nazwa):
-    print(f"pracuje {nazwa}")
-
-t1 = threading.Thread(target=praca, args=("A",))
-t2 = threading.Thread(target=praca, args=("B",))
-
-t1.start()
-t2.start()
-t1.join()
-t2.join()
-```
-
-### 2. Argument
-
-```python
-import threading
-
-def powitaj(imie):
-    print(f"Czesc {imie}")
-
-t = threading.Thread(target=powitaj, args=("Ola",))
-t.start()
-t.join()
-```
-
-### 3. Licznik z lockiem
-
-```python
-import threading
-
-licznik = 0
-lock = threading.Lock()
-
-def zwieksz():
-    global licznik
-    for _ in range(10000):
-        with lock:
-            licznik += 1
-```
-
-### 4. `Event`
-
-```python
-import threading
-
-event = threading.Event()
-
-def worker():
-    event.wait()
-    print("start")
-```
-
-### 5. `ThreadPoolExecutor`
-
-```python
-from concurrent.futures import ThreadPoolExecutor
-
-def kwadrat(x):
-    return x * x
-
-with ThreadPoolExecutor(max_workers=3) as executor:
-    print(list(executor.map(kwadrat, [1, 2, 3, 4])))
-```
+- Wątki są szczególnie przydatne przy I/O-bound.
+- Współdzielą pamięć, więc łatwo o problemy synchronizacyjne.
+- GIL ogranicza sens wątków przy CPU-bound w CPythonie.
+- `Lock` pomaga chronić wspólny stan.
+- Nie każdy problem współbieżności powinien być rozwiązywany przez `threading`.

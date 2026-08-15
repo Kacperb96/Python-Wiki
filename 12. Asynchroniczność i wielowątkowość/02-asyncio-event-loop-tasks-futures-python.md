@@ -11,19 +11,15 @@
 7. [Task](#task)
 8. [Future](#future)
 9. [`asyncio.run()`](#asynciorun)
-10. [`await` i oddawanie sterowania](#await-i-oddawanie-sterowania)
-11. [`create_task()`](#create_task)
-12. [Uruchamianie wielu zadań naraz](#uruchamianie-wielu-zadań-naraz)
-13. [`gather()`](#gather)
-14. [Anulowanie zadań](#anulowanie-zadań)
-15. [Timeouty](#timeouty)
-16. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-17. [Praktyczne przykłady](#praktyczne-przykłady)
-18. [Dobre praktyki](#dobre-praktyki)
-19. [Podsumowanie](#podsumowanie)
-20. [Mini ściąga](#mini-ściąga)
-21. [Ćwiczenia](#ćwiczenia)
-22. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+10. [`create_task()`](#create_task)
+11. [`gather()`](#gather)
+12. [Przykład z outputem](#przykład-z-outputem)
+13. [Anulowanie zadań](#anulowanie-zadań)
+14. [Timeouty](#timeouty)
+15. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+16. [Praktyczna ściąga](#praktyczna-ściąga)
+17. [Ćwiczenia](#ćwiczenia)
+18. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -55,15 +51,13 @@ Na przykład:
 - każde czeka 200 ms na odpowiedź,
 - ale samo liczenie trwa bardzo krótko.
 
-Gdyby robić to sekwencyjnie, program długo stoi bezczynnie.
-
-`asyncio` pozwala wykorzystać ten czas lepiej.
+`asyncio` pozwala lepiej wykorzystać czas oczekiwania.
 
 ---
 
 ## Asynchroniczność a współbieżność
 
-To nie jest dokładnie to samo co równoległość.
+To nie jest dokładnie to samo co równoległość na wielu rdzeniach.
 
 W `asyncio` zwykle masz:
 
@@ -71,7 +65,7 @@ W `asyncio` zwykle masz:
 - jedną pętlę zdarzeń,
 - wiele zadań przełączanych wtedy, gdy któreś czeka.
 
-Czyli program nie robi wszystkiego naraz na wielu rdzeniach, ale potrafi bardzo sprawnie przeplatać oczekujące operacje.
+Czyli program nie robi wszystkiego naraz na wielu rdzeniach, ale bardzo sprawnie przeplata oczekujące operacje.
 
 ---
 
@@ -81,10 +75,10 @@ Event loop to serce `asyncio`.
 
 To pętla, która:
 
-- uruchamia coroutines,
-- pilnuje zadań,
+- uruchamia coroutine,
+- pilnuje tasków,
 - sprawdza, które operacje są gotowe do wznowienia,
-- przekazuje sterowanie odpowiednim fragmentom kodu.
+- oddaje sterowanie właściwym fragmentom kodu.
 
 Można myśleć o niej jak o koordynatorze ruchu.
 
@@ -94,12 +88,12 @@ Można myśleć o niej jak o koordynatorze ruchu.
 
 W uproszczeniu:
 
-1. uruchamiasz program asynchroniczny,
+1. uruchamiasz program async,
 2. event loop startuje,
 3. uruchamia coroutine,
 4. coroutine dochodzi do `await`,
 5. oddaje sterowanie,
-6. event loop w tym czasie uruchamia inne zadania,
+6. event loop uruchamia inne zadania,
 7. gdy wynik jest gotowy, coroutine zostaje wznowiona.
 
 To właśnie daje efekt współbieżności.
@@ -127,13 +121,13 @@ Zwraca obiekt coroutine.
 
 Task to coroutine opakowana tak, aby event loop mógł ją planować i wykonywać.
 
-Najczęściej tworzy się ją przez:
+Najczęściej tworzysz go tak:
 
 ```python
 task = asyncio.create_task(moja_coroutine())
 ```
 
-Task działa jak jednostka pracy zarządzana przez `asyncio`.
+Task jest jednostką pracy zarządzaną przez `asyncio`.
 
 ---
 
@@ -141,386 +135,227 @@ Task działa jak jednostka pracy zarządzana przez `asyncio`.
 
 `Future` reprezentuje wynik, który będzie dostępny później.
 
-To obiekt niskiego poziomu.
+To obiekt bardziej niskiego poziomu.
 
-W praktyce początkujący częściej pracują z:
+W praktyce początkujący dużo częściej pracują z:
 
 - coroutine,
 - taskami,
 - `await`,
+- `gather()`.
 
-a rzadziej bezpośrednio z `Future`.
-
-Ważne jednak rozumieć, że `Task` jest szczególnym rodzajem `Future`.
+Ważne jednak wiedzieć, że `Task` jest szczególnym rodzajem `Future`.
 
 ---
 
 ## `asyncio.run()`
 
-Najprostszy sposób uruchomienia programu asynchronicznego:
+Najprostszy sposób uruchomienia programu async:
 
 ```python
 import asyncio
 
+
 async def main():
-    print("start")
+    print("hello async")
+
 
 asyncio.run(main())
 ```
 
-`asyncio.run()`:
-
-- tworzy event loop,
-- uruchamia `main()`,
-- zamyka wszystko po zakończeniu.
-
----
-
-## `await` i oddawanie sterowania
-
-`await` oznacza:
-
-"poczekaj na wynik tej operacji i w międzyczasie pozwól event loop robić inne rzeczy".
-
-Przykład:
-
-```python
-import asyncio
-
-async def main():
-    print("przed")
-    await asyncio.sleep(1)
-    print("po")
-```
-
-`asyncio.sleep(1)` nie blokuje całego programu tak jak `time.sleep(1)`.
+To najczęstszy punkt wejścia do programu asynchronicznego.
 
 ---
 
 ## `create_task()`
 
-Jeśli napiszesz:
-
-```python
-await funkcja()
-```
-
-to po prostu czekasz na nią w tym miejscu.
-
-Jeśli chcesz uruchomić zadanie współbieżnie:
-
-```python
-task = asyncio.create_task(funkcja())
-```
-
-To zadanie zacznie działać niezależnie, a ty możesz później zrobić:
-
-```python
-wynik = await task
-```
-
----
-
-## Uruchamianie wielu zadań naraz
+`create_task()` pozwala uruchomić coroutine jako task zarządzany przez event loop.
 
 Przykład:
 
 ```python
 import asyncio
 
-async def praca(n):
+
+async def praca():
     await asyncio.sleep(1)
-    return f"zadanie {n}"
+    return "gotowe"
+
 
 async def main():
-    task1 = asyncio.create_task(praca(1))
-    task2 = asyncio.create_task(praca(2))
+    task = asyncio.create_task(praca())
+    print("task uruchomiony")
+    wynik = await task
+    print(wynik)
 
-    wynik1 = await task1
-    wynik2 = await task2
-
-    print(wynik1, wynik2)
 
 asyncio.run(main())
 ```
-
-Oba zadania śpią współbieżnie, więc całość trwa około 1 sekundy, a nie 2.
 
 ---
 
 ## `gather()`
 
-`asyncio.gather()` pozwala wygodnie czekać na wiele zadań jednocześnie.
+`asyncio.gather()` pozwala poczekać na wiele awaitable naraz.
+
+```python
+wyniki = await asyncio.gather(a(), b(), c())
+```
+
+To bardzo częsta konstrukcja przy niezależnych requestach, pobieraniach i innych operacjach I/O.
+
+---
+
+## Przykład z outputem
 
 ```python
 import asyncio
 
-async def praca(n):
-    await asyncio.sleep(1)
-    return n * 10
+
+async def worker(nazwa, delay):
+    print(f"start {nazwa}")
+    await asyncio.sleep(delay)
+    print(f"koniec {nazwa}")
+    return nazwa
+
 
 async def main():
-    wyniki = await asyncio.gather(
-        praca(1),
-        praca(2),
-        praca(3),
-    )
+    task1 = asyncio.create_task(worker("A", 1))
+    task2 = asyncio.create_task(worker("B", 2))
+
+    print("taski utworzone")
+
+    wyniki = await asyncio.gather(task1, task2)
     print(wyniki)
+
 
 asyncio.run(main())
 ```
 
-Wynik:
+Przykładowy output:
 
-```python
-[10, 20, 30]
+```text
+taski utworzone
+start A
+start B
+koniec A
+koniec B
+['A', 'B']
 ```
+
+Co tu warto zauważyć:
+
+- oba taski zostały uruchomione,
+- event loop przeplata ich wykonanie,
+- końcowy wynik wraca jako lista.
 
 ---
 
 ## Anulowanie zadań
 
-Czasem zadanie trzeba zatrzymać.
-
-```python
-task.cancel()
-```
-
-W coroutine warto obsłużyć anulowanie:
+Task można anulować.
 
 ```python
 import asyncio
 
-async def worker():
+
+async def wolne_zadanie():
     try:
         await asyncio.sleep(10)
     except asyncio.CancelledError:
         print("zadanie anulowane")
         raise
+
+
+async def main():
+    task = asyncio.create_task(wolne_zadanie())
+    await asyncio.sleep(1)
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        print("main potwierdza anulowanie")
+
+
+asyncio.run(main())
 ```
 
-To ważne przy sprzątaniu zasobów.
+Przykładowy output:
+
+```text
+zadanie anulowane
+main potwierdza anulowanie
+```
 
 ---
 
 ## Timeouty
 
-Nie każda operacja powinna czekać w nieskończoność.
+Czasem nie chcesz czekać zbyt długo.
 
 ```python
-import asyncio
-
-async def wolna_operacja():
-    await asyncio.sleep(5)
-
-async def main():
-    try:
-        await asyncio.wait_for(wolna_operacja(), timeout=1)
-    except asyncio.TimeoutError:
-        print("przekroczono limit czasu")
+await asyncio.wait_for(zadanie(), timeout=2)
 ```
+
+Jeśli zadanie nie skończy się w czasie, dostaniesz błąd timeoutu.
+
+To bardzo przydatne przy sieci, bazach i integracjach.
 
 ---
 
 ## Typowe błędy początkujących
 
-- mylenie `time.sleep()` z `asyncio.sleep()`,
-- zapominanie o `await`,
-- tworzenie tasków i nigdy na nie nieczekanie,
-- mieszanie kodu blokującego z asynchronicznym,
-- oczekiwanie, że `asyncio` przyspieszy kod CPU-bound.
+- tworzenie coroutine bez ich uruchomienia,
+- mylenie taska z gotowym wynikiem,
+- przekonanie, że `asyncio` daje automatycznie wiele rdzeni CPU,
+- wrzucanie blokującego kodu do event loopa,
+- tworzenie zbyt wielu tasków bez kontroli współbieżności.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Prosty współbieżny licznik
+### Start programu async
 
 ```python
-import asyncio
-
-async def licz(nazwa):
-    for i in range(3):
-        print(nazwa, i)
-        await asyncio.sleep(0.5)
-
-async def main():
-    await asyncio.gather(
-        licz("A"),
-        licz("B"),
-    )
-
 asyncio.run(main())
 ```
 
-### Tło i główna praca
+### Task
 
 ```python
-import asyncio
-
-async def monitor():
-    for _ in range(3):
-        print("monitor dziala")
-        await asyncio.sleep(1)
-
-async def main():
-    task = asyncio.create_task(monitor())
-    print("glowna praca")
-    await asyncio.sleep(2)
-    await task
-
-asyncio.run(main())
+task = asyncio.create_task(praca())
 ```
 
----
-
-## Dobre praktyki
-
-- używaj `asyncio` głównie do I/O-bound,
-- trzymaj punkt wejścia w `asyncio.run(main())`,
-- pilnuj, by długie operacje blokujące nie trafiały do event loop,
-- stosuj timeouty dla operacji sieciowych,
-- anulowanie traktuj jako normalny scenariusz działania.
-
----
-
-## Podsumowanie
-
-`asyncio` pozwala pisać wydajne programy współbieżne bez mnożenia wątków.
-
-Najważniejsze pojęcia to:
-
-- event loop,
-- coroutine,
-- `await`,
-- task,
-- future.
-
-Jeśli dobrze rozumiesz te elementy, dużo łatwiej wejść potem w `aiohttp`, `httpx`, asynchroniczne bazy danych i bardziej zaawansowane systemy.
-
----
-
-## Mini ściąga
+### Wiele wyników
 
 ```python
-import asyncio
-
-async def praca():
-    await asyncio.sleep(1)
-    return "ok"
-
-async def main():
-    task = asyncio.create_task(praca())
-    wynik = await task
-    print(wynik)
-
-asyncio.run(main())
+wyniki = await asyncio.gather(a(), b())
 ```
 
-Najważniejsze:
+### Timeout
 
-- `async def` tworzy coroutine,
-- `await` czeka bez blokowania całego programu,
-- `create_task()` uruchamia pracę współbieżnie,
-- `gather()` zbiera wiele wyników,
-- `wait_for()` dodaje timeout.
+```python
+await asyncio.wait_for(zadanie(), timeout=2)
+```
 
 ---
 
 ## Ćwiczenia
 
-1. Napisz dwie coroutine, które wypisują liczby z opóźnieniem, i uruchom je współbieżnie.
-2. Napisz funkcję `pobierz(n)`, która czeka `n` sekund i zwraca komunikat.
-3. Użyj `asyncio.gather()`, aby uruchomić trzy zadania jednocześnie.
-4. Dodaj timeout do wolnej operacji.
-5. Utwórz task w tle przez `create_task()` i odbierz jego wynik później.
+1. Napisz prosty program uruchamiany przez `asyncio.run()`.
+2. Utwórz dwa taski przez `create_task()`.
+3. Odbierz ich wyniki przez `gather()`.
+4. Dodaj anulowanie zadania.
+5. Dodaj timeout do wolnego zadania.
+6. Wyjaśnij własnymi słowami rolę event loopa.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Dwie coroutine
-
-```python
-import asyncio
-
-async def a():
-    for i in range(3):
-        print("A", i)
-        await asyncio.sleep(0.3)
-
-async def b():
-    for i in range(3):
-        print("B", i)
-        await asyncio.sleep(0.3)
-
-async def main():
-    await asyncio.gather(a(), b())
-
-asyncio.run(main())
-```
-
-### 2. Funkcja `pobierz`
-
-```python
-import asyncio
-
-async def pobierz(n):
-    await asyncio.sleep(n)
-    return f"gotowe po {n} s"
-```
-
-### 3. Trzy zadania
-
-```python
-import asyncio
-
-async def pobierz(n):
-    await asyncio.sleep(n)
-    return n
-
-async def main():
-    wyniki = await asyncio.gather(
-        pobierz(1),
-        pobierz(2),
-        pobierz(3),
-    )
-    print(wyniki)
-
-asyncio.run(main())
-```
-
-### 4. Timeout
-
-```python
-import asyncio
-
-async def wolna():
-    await asyncio.sleep(5)
-
-async def main():
-    try:
-        await asyncio.wait_for(wolna(), timeout=1)
-    except asyncio.TimeoutError:
-        print("timeout")
-
-asyncio.run(main())
-```
-
-### 5. Task w tle
-
-```python
-import asyncio
-
-async def praca():
-    await asyncio.sleep(1)
-    return "wynik"
-
-async def main():
-    task = asyncio.create_task(praca())
-    print("robi sie cos innego")
-    wynik = await task
-    print(wynik)
-
-asyncio.run(main())
-```
+- Event loop zarządza wykonywaniem tasków async.
+- Coroutine to nie to samo co task ani gotowy wynik.
+- `create_task()` pozwala uruchomić coroutine jako jednostkę pracy event loopa.
+- `gather()` służy do czekania na wiele zadań naraz.
+- `asyncio` świetnie nadaje się do I/O-bound, ale nie rozwiązuje CPU-bound przez samą magię.

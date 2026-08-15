@@ -9,20 +9,14 @@
 5. [Dlaczego procesy omijają problem GIL](#dlaczego-procesy-omijają-problem-gil)
 6. [Podstawy modułu `multiprocessing`](#podstawy-modułu-multiprocessing)
 7. [`Process`](#process)
-8. [`start()` i `join()`](#start-i-join)
-9. [Przekazywanie danych do procesu](#przekazywanie-danych-do-procesu)
-10. [`Queue` i `Pipe`](#queue-i-pipe)
-11. [Współdzielenie stanu](#współdzielenie-stanu)
-12. [`Pool`](#pool)
-13. [`map()` w puli procesów](#map-w-puli-procesów)
-14. [Pułapki platformowe i `if __name__ == '__main__'`](#pułapki-platformowe-i-if-__name__--__main__)
-15. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-16. [Praktyczne przykłady](#praktyczne-przykłady)
-17. [Dobre praktyki](#dobre-praktyki)
-18. [Podsumowanie](#podsumowanie)
-19. [Mini ściąga](#mini-ściąga)
-20. [Ćwiczenia](#ćwiczenia)
-21. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [`Queue` i `Pool`](#queue-i-pool)
+9. [Przykład z outputem](#przykład-z-outputem)
+10. [Pułapki platformowe i `if __name__ == "__main__"`](#pułapki-platformowe-i-if-__name__--__main__)
+11. [Kiedy nie używać procesów](#kiedy-nie-używać-procesów)
+12. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+13. [Praktyczna ściąga](#praktyczna-ściąga)
+14. [Ćwiczenia](#ćwiczenia)
+15. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -113,8 +107,10 @@ Przykład:
 ```python
 from multiprocessing import Process
 
+
 def praca():
     print("proces dziala")
+
 
 if __name__ == "__main__":
     p = Process(target=praca)
@@ -124,304 +120,130 @@ if __name__ == "__main__":
 
 ---
 
-## `start()` i `join()`
-
-`start()` uruchamia proces.
-
-`join()` czeka na jego zakończenie.
-
-To podstawowy mechanizm kontroli życia procesu.
-
----
-
-## Przekazywanie danych do procesu
-
-Podobnie jak przy wątkach możesz przekazać argumenty:
-
-```python
-from multiprocessing import Process
-
-def powitaj(imie):
-    print(f"Czesc, {imie}")
-
-if __name__ == "__main__":
-    p = Process(target=powitaj, args=("Anna",))
-    p.start()
-    p.join()
-```
-
-Trzeba pamiętać, że dane są kopiowane lub serializowane, a nie współdzielone w prosty sposób jak we wątkach.
-
----
-
-## `Queue` i `Pipe`
-
-To podstawowe sposoby komunikacji między procesami.
+## `Queue` i `Pool`
 
 ### `Queue`
 
-Bezpieczna kolejka do przekazywania danych.
+To prosty sposób komunikacji między procesami.
+
+### `Pool`
+
+Pozwala wygodnie rozdzielać wiele podobnych zadań między kilka procesów.
+
+To bardzo praktyczne, gdy masz listę danych do przeliczenia.
+
+---
+
+## Przykład z outputem
 
 ```python
 from multiprocessing import Process, Queue
 
-def worker(q):
-    q.put("wynik")
+
+def policz_kwadrat(x, q):
+    q.put(x * x)
+
 
 if __name__ == "__main__":
     q = Queue()
-    p = Process(target=worker, args=(q,))
+    p = Process(target=policz_kwadrat, args=(5, q))
     p.start()
-    print(q.get())
     p.join()
+    print(q.get())
 ```
 
-### `Pipe`
+Przykładowy output:
 
-Dwukierunkowy kanał komunikacji między dwoma procesami.
-
----
-
-## Współdzielenie stanu
-
-Procesy z natury nie współdzielą pamięci tak łatwo jak wątki.
-
-To zaleta i wada jednocześnie.
-
-Można używać:
-
-- `Value`,
-- `Array`,
-- managerów,
-- kolejek,
-
-ale zwykle warto preferować przekazywanie komunikatów zamiast skomplikowanego wspólnego stanu.
-
----
-
-## `Pool`
-
-Jeśli masz wiele podobnych zadań, bardzo wygodna jest pula procesów.
-
-```python
-from multiprocessing import Pool
-
-def kwadrat(x):
-    return x * x
-
-if __name__ == "__main__":
-    with Pool(4) as pool:
-        wyniki = pool.map(kwadrat, [1, 2, 3, 4])
-        print(wyniki)
+```text
+25
 ```
 
----
+To pokazuje prosty przepływ:
 
-## `map()` w puli procesów
-
-`pool.map()` działa podobnie do zwykłego `map()`, ale rozdziela pracę pomiędzy procesy.
-
-To bardzo wygodny punkt wejścia do prostego parallel computingu w Pythonie.
+- proces wykonuje pracę,
+- wynik trafia do kolejki,
+- proces główny go odbiera.
 
 ---
 
-## Pułapki platformowe i `if __name__ == '__main__'`
+## Pułapki platformowe i `if __name__ == "__main__"`
 
-To sekcja obowiązkowa.
+To bardzo ważne.
 
-Przy `multiprocessing` bardzo ważne jest:
+Przy `multiprocessing` często musisz chronić punkt wejścia programu:
 
 ```python
 if __name__ == "__main__":
     ...
 ```
 
-Bez tego na części systemów można dostać błędy lub zapętlenie tworzenia procesów.
+Bez tego na części systemów możesz dostać bardzo dziwne zachowanie albo zapętlenie tworzenia procesów.
 
-Trzeba to traktować jako standard.
+To nie jest drobiazg, tylko ważna reguła praktyczna.
+
+---
+
+## Kiedy nie używać procesów
+
+Procesy nie są zawsze najlepsze.
+
+Nie warto ich używać, gdy:
+
+- problem jest prosty i krótkotrwały,
+- narzut tworzenia procesów przewyższa zysk,
+- zadanie jest głównie I/O-bound,
+- prostsze rozwiązanie async albo wątkowe wystarczy.
 
 ---
 
 ## Typowe błędy początkujących
 
-- brak bloku `if __name__ == "__main__":`,
-- używanie procesów do bardzo małych zadań, gdzie narzut zjada korzyść,
-- przekazywanie trudnych do serializacji obiektów,
-- nadmierne współdzielenie stanu,
-- mylenie przypadków dla `threading` i `multiprocessing`.
+- używanie procesów do każdego problemu współbieżności,
+- brak `if __name__ == "__main__"`,
+- brak zrozumienia kosztu kopiowania i serializacji danych,
+- oczekiwanie współdzielonej pamięci jak w wątkach,
+- zbyt małe zadania, dla których narzut procesów jest nieopłacalny.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Dwa procesy
+### Jeden proces
 
 ```python
-from multiprocessing import Process
-import time
-
-def praca(nazwa):
-    for i in range(3):
-        print(nazwa, i)
-        time.sleep(0.5)
-
-if __name__ == "__main__":
-    p1 = Process(target=praca, args=("A",))
-    p2 = Process(target=praca, args=("B",))
-
-    p1.start()
-    p2.start()
-
-    p1.join()
-    p2.join()
+p = Process(target=praca)
+p.start()
+p.join()
 ```
 
-### Kolejka wyników
+### Wynik przez `Queue`
 
 ```python
-from multiprocessing import Process, Queue
-
-def policz_kwadrat(x, q):
-    q.put(x * x)
-
-if __name__ == "__main__":
-    q = Queue()
-    procesy = [Process(target=policz_kwadrat, args=(i, q)) for i in range(5)]
-
-    for p in procesy:
-        p.start()
-
-    wyniki = [q.get() for _ in procesy]
-
-    for p in procesy:
-        p.join()
-
-    print(wyniki)
+q = Queue()
 ```
 
----
+### Kiedy warto
 
-## Dobre praktyki
-
-- używaj procesów do CPU-bound,
-- pilnuj narzutu uruchamiania i komunikacji,
-- preferuj `Pool` przy wielu podobnych zadaniach,
-- przekazuj dane prostymi strukturami,
-- ograniczaj wspólny stan na rzecz komunikatów.
-
----
-
-## Podsumowanie
-
-`multiprocessing` jest podstawowym narzędziem do prawdziwej równoległości w Pythonie.
-
-Największy sens ma przy zadaniach obliczeniowych, gdzie:
-
-- wątki nie pomagają przez GIL,
-- async nie rozwiązuje problemu,
-- wiele rdzeni może realnie skrócić czas wykonania.
-
----
-
-## Mini ściąga
-
-```python
-from multiprocessing import Process
-
-def praca():
-    print("dzialam")
-
-if __name__ == "__main__":
-    p = Process(target=praca)
-    p.start()
-    p.join()
-```
-
-Pamiętaj:
-
-- procesy są dobre do CPU-bound,
-- `Queue` służy do komunikacji,
-- `Pool` upraszcza wiele podobnych zadań,
-- każdy proces ma własną pamięć,
-- `if __name__ == "__main__":` jest bardzo ważne.
+- CPU-bound,
+- wiele rdzeni,
+- odizolowane zadania.
 
 ---
 
 ## Ćwiczenia
 
 1. Uruchom jedną funkcję w osobnym procesie.
-2. Uruchom dwa procesy z różnymi argumentami.
-3. Przekaż wynik z procesu do procesu głównego przez `Queue`.
-4. Użyj `Pool`, aby policzyć kwadraty listy liczb.
-5. Porównaj mentalnie, czy dane zadanie lepiej pasuje do `threading` czy `multiprocessing`.
+2. Przekaż wynik przez `Queue`.
+3. Użyj `Pool` do policzenia kwadratów kilku liczb.
+4. Dodaj ochronę `if __name__ == "__main__"`.
+5. Wyjaśnij własnymi słowami, czemu procesy pomagają przy CPU-bound.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Jeden proces
-
-```python
-from multiprocessing import Process
-
-def hello():
-    print("hello z procesu")
-
-if __name__ == "__main__":
-    p = Process(target=hello)
-    p.start()
-    p.join()
-```
-
-### 2. Dwa procesy
-
-```python
-from multiprocessing import Process
-
-def wypisz(x):
-    print(x)
-
-if __name__ == "__main__":
-    p1 = Process(target=wypisz, args=("A",))
-    p2 = Process(target=wypisz, args=("B",))
-    p1.start()
-    p2.start()
-    p1.join()
-    p2.join()
-```
-
-### 3. `Queue`
-
-```python
-from multiprocessing import Process, Queue
-
-def licz(x, q):
-    q.put(x * 2)
-
-if __name__ == "__main__":
-    q = Queue()
-    p = Process(target=licz, args=(5, q))
-    p.start()
-    print(q.get())
-    p.join()
-```
-
-### 4. `Pool`
-
-```python
-from multiprocessing import Pool
-
-def kwadrat(x):
-    return x * x
-
-if __name__ == "__main__":
-    with Pool(4) as pool:
-        print(pool.map(kwadrat, [1, 2, 3, 4, 5]))
-```
-
-### 5. Dobór narzędzia
-
-Jeśli zadanie:
-
-- dużo czeka na sieć lub pliki, zwykle pasują wątki albo async,
-- intensywnie liczy, zwykle lepiej pasują procesy.
+- `multiprocessing` jest szczególnie przydatne przy CPU-bound.
+- Procesy omijają problem GIL przez osobne interpretery.
+- Są cięższe od wątków i mają większy narzut.
+- `Queue` i `Pool` to bardzo praktyczne narzędzia tego modułu.
+- `if __name__ == "__main__"` jest tu bardzo ważne.
