@@ -10,19 +10,17 @@
 6. [Zależności a testowalność](#zależności-a-testowalność)
 7. [Zależności a autoryzacja](#zależności-a-autoryzacja)
 8. [Zależności a baza danych](#zależności-a-baza-danych)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+9. [Przykład z outputem](#przykład-z-outputem)
+10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+11. [Praktyczna ściąga](#praktyczna-ściąga)
+12. [Ćwiczenia](#ćwiczenia)
+13. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
 ## Wprowadzenie
 
-Dependency injection w FastAPI to jeden z mechanizmów, który bardzo pomaga utrzymać porządek w większych aplikacjach.
+Dependency injection w FastAPI to mechanizm, który bardzo pomaga utrzymać porządek w większych aplikacjach.
 
 Pozwala dostarczać potrzebne zależności do endpointów w kontrolowany sposób.
 
@@ -32,7 +30,7 @@ Pozwala dostarczać potrzebne zależności do endpointów w kontrolowany sposób
 
 W uproszczeniu:
 
-zamiast tworzyć wszystko ręcznie w środku funkcji, przekazujesz lub dostarczasz potrzebne obiekty z zewnątrz.
+zamiast tworzyć wszystko ręcznie w środku funkcji, deklarujesz, czego potrzebujesz, a framework dostarcza Ci tę wartość.
 
 To poprawia:
 
@@ -47,11 +45,12 @@ To poprawia:
 Bo endpointy często potrzebują:
 
 - aktualnego użytkownika,
-- połączenia lub sesji bazy,
+- sesji bazy danych,
 - konfiguracji,
+- wspólnej logiki requestowej,
 - walidacji tokenu.
 
-Zależności pozwalają obsłużyć to elegancko.
+Zależności pozwalają obsłużyć to elegancko i powtarzalnie.
 
 ---
 
@@ -63,7 +62,24 @@ Podstawowy mechanizm FastAPI:
 from fastapi import Depends
 ```
 
-Przykład mentalny:
+Przykład:
+
+```python
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+
+def get_settings():
+    return {"debug": True}
+
+
+@app.get("/info")
+def info(settings=Depends(get_settings)):
+    return settings
+```
+
+Mentalny model:
 
 endpoint deklaruje, czego potrzebuje, a framework dostarcza tę wartość.
 
@@ -90,13 +106,19 @@ Jeśli zależność jest jawna i wydzielona, dużo łatwiej:
 - zamockować,
 - kontrolować zachowanie endpointu.
 
+To jeden z powodów, dla których DI jest tak przydatne w backendzie.
+
 ---
 
 ## Zależności a autoryzacja
 
-FastAPI często wykorzystuje zależności do pobierania aktualnego użytkownika lub sprawdzania uprawnień.
+FastAPI bardzo często wykorzystuje zależności do pobierania aktualnego użytkownika albo sprawdzania uprawnień.
 
-To naturalny i czytelny wzorzec.
+To naturalny wzorzec, bo endpoint może po prostu zadeklarować:
+
+- potrzebuję aktualnego użytkownika,
+- potrzebuję administratora,
+- potrzebuję poprawnego tokenu.
 
 ---
 
@@ -106,7 +128,36 @@ Bardzo częsty przypadek:
 
 endpoint potrzebuje sesji bazy danych.
 
-Lepiej dostać ją przez zależność niż tworzyć "na dziko" w każdej funkcji.
+Lepiej dostać ją przez zależność niż tworzyć ją ręcznie w każdej funkcji.
+
+To ogranicza chaos i ułatwia testy.
+
+---
+
+## Przykład z outputem
+
+```python
+from fastapi import Depends, FastAPI
+
+app = FastAPI()
+
+
+def get_settings():
+    return {"debug": True, "env": "dev"}
+
+
+@app.get("/info")
+def info(settings=Depends(get_settings)):
+    return settings
+```
+
+Przykładowa odpowiedź HTTP:
+
+```json
+{"debug": true, "env": "dev"}
+```
+
+To prosty przykład, ale dobrze pokazuje mechanikę działania.
 
 ---
 
@@ -115,94 +166,48 @@ Lepiej dostać ją przez zależność niż tworzyć "na dziko" w każdej funkcji
 - tworzenie wszystkiego bezpośrednio w endpointach,
 - brak wydzielonych zależności,
 - zbyt ciężkie zależności robiące wiele rzeczy naraz,
-- mieszanie DI z globalnym stanem bez planu.
+- mieszanie DI z globalnym stanem bez planu,
+- traktowanie zależności jak miejsca na całą logikę biznesową.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
 ### Prosta zależność
 
 ```python
-from fastapi import Depends, FastAPI
-
-app = FastAPI()
-
 def get_settings():
     return {"debug": True}
+```
 
-@app.get("/info")
+### Użycie
+
+```python
 def info(settings=Depends(get_settings)):
     return settings
 ```
 
-### Mentalny wzorzec
+### Typowe wzorce
 
-- `get_db`
-- `get_current_user`
-- `get_settings`
-
----
-
-## Dobre praktyki
-
-- utrzymuj zależności małe i czytelne,
-- używaj ich do współdzielonych potrzeb,
-- nie pakuj całej logiki biznesowej do funkcji zależności,
-- projektuj je tak, by łatwo było je podmieniać w testach.
-
----
-
-## Podsumowanie
-
-Dependency injection w FastAPI to bardzo praktyczny mechanizm, który pomaga budować czystsze i bardziej testowalne API.
-
-W większych aplikacjach to jedna z rzeczy, które naprawdę robią różnicę.
-
----
-
-## Mini ściąga
-
-```python
-from fastapi import Depends
-```
-
-Najważniejsze:
-
-- zależności dostarczają wspólne obiekty lub logikę,
-- `Depends` jest podstawowym mechanizmem,
-- DI poprawia testowalność i organizację kodu.
+- `get_db`,
+- `get_current_user`,
+- `get_settings`.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij, czym jest dependency injection.
-2. Podaj przykład zależności dla sesji bazy.
-3. Podaj przykład zależności dla aktualnego użytkownika.
-4. Wyjaśnij, czemu DI poprawia testowalność.
-5. Wyjaśnij, czemu nie warto tworzyć sesji bazy osobno w każdym endpointzie.
+1. Napisz zależność `get_settings`.
+2. Dodaj ją do prostego endpointu.
+3. Napisz uproszczoną zależność `get_current_user`.
+4. Zastanów się, jakie obiekty w backendzie warto dostarczać przez `Depends`.
+5. Wyjaśnij własnymi słowami, czemu DI poprawia testowalność.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. DI
-
-To sposób dostarczania potrzebnych obiektów i usług z zewnątrz zamiast tworzenia ich ręcznie w środku funkcji.
-
-### 2. Sesja bazy
-
-Na przykład funkcja `get_db`, która zwraca sesję.
-
-### 3. Użytkownik
-
-Na przykład funkcja `get_current_user`.
-
-### 4. Testowalność
-
-Bo zależności łatwiej podmieniać i mockować.
-
-### 5. Czemu nie tworzyć w każdym endpointzie
-
-Bo prowadzi to do duplikacji i gorszej kontroli nad cyklem życia zasobów.
+- Dependency injection pomaga utrzymać porządek w backendzie.
+- FastAPI używa `Depends`, żeby dostarczać potrzebne obiekty do endpointów.
+- DI poprawia testowalność, czytelność i separację odpowiedzialności.
+- Najczęstsze zastosowania to użytkownik, baza i konfiguracja.

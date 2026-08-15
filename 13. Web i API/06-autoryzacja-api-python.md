@@ -10,13 +10,11 @@
 6. [Uprawnienia i role](#uprawnienia-i-role)
 7. [Typowe statusy błędów](#typowe-statusy-błędów)
 8. [Autoryzacja a FastAPI](#autoryzacja-a-fastapi)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+9. [Przykład mentalny chronionego endpointu](#przykład-mentalny-chronionego-endpointu)
+10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+11. [Praktyczna ściąga](#praktyczna-ściąga)
+12. [Ćwiczenia](#ćwiczenia)
+13. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -51,6 +49,8 @@ Bo nie każdy klient powinien mieć dostęp do:
 - zasobów prywatnych,
 - modyfikacji danych.
 
+Brak sensownej autoryzacji bardzo szybko prowadzi do realnych problemów bezpieczeństwa.
+
 ---
 
 ## Tokeny i nagłówek `Authorization`
@@ -60,6 +60,12 @@ W praktyce często spotkasz:
 - token dostępu,
 - nagłówek `Authorization`,
 - schemat `Bearer`.
+
+Przykład:
+
+```http
+Authorization: Bearer TOKEN
+```
 
 To bardzo powszechny wzorzec w API.
 
@@ -75,6 +81,8 @@ W uproszczeniu:
 4. serwer sprawdza token,
 5. serwer sprawdza uprawnienia.
 
+To prosty model, ale bardzo ważny do zrozumienia.
+
 ---
 
 ## Uprawnienia i role
@@ -86,6 +94,8 @@ Często trzeba jeszcze rozróżniać:
 - zwykłego użytkownika,
 - moderatora,
 - administratora.
+
+To właśnie już jest autoryzacja, a nie sama autentykacja.
 
 ---
 
@@ -110,6 +120,31 @@ Na przykład zależność może:
 - zwalidować użytkownika,
 - zwrócić aktualnego użytkownika endpointowi.
 
+To bardzo naturalny wzorzec projektowy.
+
+---
+
+## Przykład mentalny chronionego endpointu
+
+Mentalnie wygląda to tak:
+
+- endpoint wymaga aktualnego użytkownika,
+- zależność pobiera użytkownika z tokenu,
+- jeśli to się nie uda, request kończy się błędem,
+- jeśli użytkownik istnieje, można jeszcze sprawdzić rolę albo uprawnienia.
+
+Przykład odpowiedzi przy braku tokenu może wyglądać tak:
+
+```json
+{"detail": "Not authenticated"}
+```
+
+Przy braku uprawnień np.:
+
+```json
+{"detail": "Not enough permissions"}
+```
+
 ---
 
 ## Typowe błędy początkujących
@@ -117,82 +152,45 @@ Na przykład zależność może:
 - mylenie `401` i `403`,
 - brak testów uprawnień,
 - sprawdzanie tylko "czy token istnieje", zamiast "czy naprawdę daje dostęp",
-- rozlewanie logiki bezpieczeństwa po całym kodzie bez jednego wzorca.
+- rozlewanie logiki bezpieczeństwa po całym kodzie bez jednego wzorca,
+- zbyt uproszczone podejście typu "jak ktoś ma token, to wolno mu wszystko".
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Chroniony endpoint
+### Najważniejsze rozróżnienie
 
-Mentalnie:
+- autentykacja: kim jesteś,
+- autoryzacja: co możesz zrobić.
 
-- endpoint wymaga aktualnego użytkownika,
-- zależność pobiera użytkownika z tokenu,
-- jeśli to się nie uda, endpoint nie powinien działać.
+### Najczęstsze statusy
 
-### Rola administratora
+- `401` -> brak poprawnej autentykacji,
+- `403` -> brak uprawnień.
 
-Nie każdy zalogowany użytkownik powinien móc usuwać innych użytkowników.
+### Częsty wzorzec w FastAPI
 
----
-
-## Dobre praktyki
-
-- rozróżniaj autentykację i autoryzację,
-- jasno modeluj role i uprawnienia,
-- trzymaj logikę bezpieczeństwa w przewidywalnych miejscach,
-- testuj scenariusze braku dostępu.
-
----
-
-## Podsumowanie
-
-Autoryzacja API to jeden z kluczowych filarów bezpiecznego backendu.
-
-Nie chodzi tylko o token, ale o poprawny model dostępu do zasobów.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- autentykacja mówi, kim jesteś,
-- autoryzacja mówi, co możesz zrobić,
-- `401` i `403` to nie to samo,
-- tokeny i role to częsty wzorzec pracy z API.
+- zależność `get_current_user`,
+- zależność `require_admin`.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij różnicę między autentykacją a autoryzacją.
-2. Wyjaśnij, kiedy użyć `401`.
-3. Wyjaśnij, kiedy użyć `403`.
-4. Podaj przykład endpointu tylko dla admina.
-5. Wyjaśnij, czemu sama obecność tokenu nie wystarcza.
+1. Wyjaśnij różnicę między autentykacją i autoryzacją.
+2. Rozpisz prosty przepływ logowanie -> token -> kolejne requesty.
+3. Opisz endpoint dostępny tylko dla zalogowanego użytkownika.
+4. Opisz endpoint dostępny tylko dla administratora.
+5. Dopasuj poprawnie `401` i `403` do scenariuszy.
+6. Wyjaśnij własnymi słowami, czemu sama obecność tokenu to za mało.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Różnica
-
-Autentykacja identyfikuje użytkownika, a autoryzacja sprawdza jego uprawnienia.
-
-### 2. `401`
-
-Gdy brak poprawnej autentykacji, np. brak lub zły token.
-
-### 3. `403`
-
-Gdy użytkownik jest rozpoznany, ale nie ma prawa wykonać operacji.
-
-### 4. Admin
-
-Na przykład endpoint usuwający użytkownika z systemu.
-
-### 5. Czemu token nie wystarcza
-
-Bo trzeba jeszcze ustalić, czy ten użytkownik ma dostęp do danego zasobu lub operacji.
+- Autentykacja i autoryzacja to nie to samo.
+- Token zwykle trafia do nagłówka `Authorization`.
+- `401` i `403` oznaczają różne problemy.
+- Dobre API musi sprawdzać nie tylko tożsamość, ale i uprawnienia.
+- W FastAPI autoryzację bardzo często modeluje się przez zależności.

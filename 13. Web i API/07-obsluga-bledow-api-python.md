@@ -10,13 +10,11 @@
 6. [Walidacja i błędy wejścia](#walidacja-i-błędy-wejścia)
 7. [Logowanie błędów](#logowanie-błędów)
 8. [Błędy domenowe](#błędy-domenowe)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+9. [Przykład odpowiedzi błędu](#przykład-odpowiedzi-błędu)
+10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+11. [Praktyczna ściąga](#praktyczna-ściąga)
+12. [Ćwiczenia](#ćwiczenia)
+13. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -42,23 +40,29 @@ Bo klient API musi wiedzieć:
 - czy może spróbować ponownie,
 - czy problem leży po stronie serwera.
 
+API z chaotycznymi błędami jest trudniejsze do integracji i dużo trudniejsze do utrzymania.
+
 ---
 
 ## Błąd klienta vs błąd serwera
 
 To podstawowe rozróżnienie.
 
-Błąd klienta:
+### Błąd klienta
 
 - złe dane,
 - brak autoryzacji,
-- brak zasobu.
+- brak zasobu,
+- złamane reguły wejścia.
 
-Błąd serwera:
+### Błąd serwera
 
 - nieoczekiwana awaria,
 - błąd integracji,
-- błąd infrastruktury.
+- błąd infrastruktury,
+- wewnętrzny wyjątek aplikacji.
+
+To rozróżnienie powinno być widoczne i w statusach, i w sposobie logowania.
 
 ---
 
@@ -66,13 +70,17 @@ Błąd serwera:
 
 Najczęściej:
 
-- `400 Bad Request`
-- `401 Unauthorized`
-- `403 Forbidden`
-- `404 Not Found`
-- `409 Conflict`
-- `422 Unprocessable Entity`
-- `500 Internal Server Error`
+- `400 Bad Request`,
+- `401 Unauthorized`,
+- `403 Forbidden`,
+- `404 Not Found`,
+- `409 Conflict`,
+- `422 Unprocessable Entity`,
+- `500 Internal Server Error`.
+
+Nie każdy błąd to `500`.
+
+Właśnie to jest jedna z najczęstszych słabości źle zaprojektowanego backendu.
 
 ---
 
@@ -87,6 +95,8 @@ Na przykład:
 - szczegóły,
 - ewentualnie identyfikator zdarzenia.
 
+To pomaga klientom API pisać czytelniejszą obsługę błędów po swojej stronie.
+
 ---
 
 ## Walidacja i błędy wejścia
@@ -96,7 +106,10 @@ Błędy walidacji powinny być czytelne i pomocne.
 Klient powinien dostać informację:
 
 - które pole jest błędne,
-- co było oczekiwane.
+- co było oczekiwane,
+- czy problem dotyczy formatu, czy brakującej wartości.
+
+To ważniejsze niż ogólny komunikat typu "bad request" bez szczegółów.
 
 ---
 
@@ -108,7 +121,9 @@ Ale serwer powinien:
 
 - logować problem,
 - zachować kontekst,
-- nie ujawniać zbędnych sekretów w odpowiedzi.
+- nie ujawniać zbędnych sekretów w odpowiedzi HTTP.
+
+To ważna granica między diagnostyką wewnętrzną a kontraktem API.
 
 ---
 
@@ -120,9 +135,29 @@ Na przykład:
 
 - brak dostępnego limitu,
 - próba wykonania niedozwolonej operacji,
-- konflikt stanu zasobu.
+- konflikt stanu zasobu,
+- zakup produktu niedostępnego w magazynie.
 
-One też powinny mieć sensowną reprezentację HTTP.
+To nie jest awaria serwera.
+
+To przewidywalna sytuacja biznesowa, która też powinna mieć sensowną reprezentację HTTP.
+
+---
+
+## Przykład odpowiedzi błędu
+
+Przykład czytelnej odpowiedzi:
+
+```json
+{
+  "error": {
+    "code": "USER_NOT_FOUND",
+    "message": "User with given id does not exist"
+  }
+}
+```
+
+Taka struktura jest dużo lepsza niż przypadkowe komunikaty zwracane raz tak, raz inaczej.
 
 ---
 
@@ -131,78 +166,45 @@ One też powinny mieć sensowną reprezentację HTTP.
 - wszędzie `500`,
 - brak spójnego formatu błędów,
 - zbyt lakoniczne albo zbyt techniczne komunikaty,
-- ujawnianie zbyt wielu szczegółów wewnętrznych klientowi.
+- ujawnianie zbyt wielu szczegółów wewnętrznych klientowi,
+- brak rozróżnienia błędu walidacyjnego od domenowego.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Błąd klienta
+### Najważniejsze pytanie
 
-Request bez wymaganego pola powinien zwrócić błąd walidacji, a nie `500`.
+Czy problem jest po stronie klienta, czy po stronie serwera?
 
-### Błąd domenowy
+### Częste statusy
 
-Próba kupna produktu niedostępnego w magazynie nie jest awarią serwera, tylko przewidywalnym błędem biznesowym.
+- `400`, `401`, `403`, `404`, `409`, `422`, `500`.
 
----
+### Dobra odpowiedź błędu powinna być
 
-## Dobre praktyki
-
-- rozróżniaj błędy klienta i serwera,
-- utrzymuj spójny format odpowiedzi błędów,
-- loguj szczegóły po stronie serwera,
-- klientowi pokazuj tyle, ile trzeba, ale nie za dużo.
-
----
-
-## Podsumowanie
-
-Obsługa błędów API to ważna część kontraktu aplikacji.
-
-Dobrze zaprojektowane błędy bardzo poprawiają jakość integracji i utrzymania systemu.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- `4xx` zwykle oznaczają problem po stronie klienta,
-- `5xx` zwykle oznaczają problem po stronie serwera,
-- błędy powinny być spójne i czytelne,
-- nie ujawniaj niepotrzebnych szczegółów wewnętrznych.
+- spójna,
+- czytelna,
+- pomocna,
+- bez ujawniania zbyt wielu sekretów.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij różnicę między `4xx` i `5xx`.
-2. Podaj przykład błędu walidacji.
-3. Podaj przykład błędu domenowego.
-4. Wyjaśnij, po co logować błędy po stronie serwera.
-5. Wyjaśnij, czemu nie każdy problem powinien kończyć się `500`.
+1. Rozpisz kilka scenariuszy błędów klienta i serwera.
+2. Dopasuj statusy HTTP do tych scenariuszy.
+3. Zaprojektuj spójny format odpowiedzi błędu.
+4. Opisz przykład błędu domenowego.
+5. Wyjaśnij własnymi słowami, czemu nie każdy błąd powinien kończyć się `500`.
+6. Zastanów się, jakich szczegółów nie warto pokazywać klientowi.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. `4xx` vs `5xx`
-
-`4xx` zwykle oznaczają błąd klienta, a `5xx` problem po stronie serwera.
-
-### 2. Walidacja
-
-Brak wymaganego pola `email` w request body.
-
-### 3. Domena
-
-Próba złożenia zamówienia na niedostępny produkt.
-
-### 4. Po co logować
-
-Żeby móc diagnozować problemy bez ujawniania całych szczegółów klientowi.
-
-### 5. Czemu nie `500`
-
-Bo wiele błędów jest przewidywalnych i powinno mieć bardziej precyzyjny status.
+- Dobre API powinno sensownie komunikować błędy.
+- Trzeba rozróżniać błąd klienta, domeny i serwera.
+- Status code i format odpowiedzi błędu powinny być spójne.
+- Serwer powinien logować więcej niż pokazuje klientowi.
+- Chaos w błędach bardzo utrudnia integracje i utrzymanie systemu.

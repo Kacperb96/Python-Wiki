@@ -12,13 +12,11 @@
 8. [Czym jest REST](#czym-jest-rest)
 9. [Endpointy i zasoby](#endpointy-i-zasoby)
 10. [Idempotencja i semantyka metod](#idempotencja-i-semantyka-metod)
-11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-12. [Praktyczne przykłady](#praktyczne-przykłady)
-13. [Dobre praktyki](#dobre-praktyki)
-14. [Podsumowanie](#podsumowanie)
-15. [Mini ściąga](#mini-ściąga)
-16. [Ćwiczenia](#ćwiczenia)
-17. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+11. [Przykład requestu i odpowiedzi](#przykład-requestu-i-odpowiedzi)
+12. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+13. [Praktyczna ściąga](#praktyczna-ściąga)
+14. [Ćwiczenia](#ćwiczenia)
+15. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -49,11 +47,14 @@ Klientem może być:
 - przeglądarka,
 - frontend,
 - skrypt Python,
-- aplikacja mobilna.
+- aplikacja mobilna,
+- inna usługa backendowa.
 
 ---
 
 ## Request i response
+
+### Request
 
 Request zwykle zawiera:
 
@@ -62,11 +63,15 @@ Request zwykle zawiera:
 - nagłówki,
 - opcjonalne body.
 
+### Response
+
 Response zwykle zawiera:
 
 - status code,
 - nagłówki,
 - body z danymi.
+
+To jest absolutna podstawa czytania i projektowania API.
 
 ---
 
@@ -80,7 +85,11 @@ Najważniejsze:
 - `PATCH` częściowa aktualizacja,
 - `DELETE` usuwanie.
 
-To absolutna podstawa pracy z API.
+Bardzo ważne:
+
+metoda HTTP nie powinna być przypadkowa.
+
+To część kontraktu API.
 
 ---
 
@@ -88,14 +97,15 @@ To absolutna podstawa pracy z API.
 
 Najczęściej spotkasz:
 
-- `200 OK`
-- `201 Created`
-- `204 No Content`
-- `400 Bad Request`
-- `401 Unauthorized`
-- `403 Forbidden`
-- `404 Not Found`
-- `500 Internal Server Error`
+- `200 OK`,
+- `201 Created`,
+- `204 No Content`,
+- `400 Bad Request`,
+- `401 Unauthorized`,
+- `403 Forbidden`,
+- `404 Not Found`,
+- `422 Unprocessable Entity`,
+- `500 Internal Server Error`.
 
 Kod statusu mówi klientowi, jak zakończyło się żądanie.
 
@@ -107,11 +117,16 @@ Nagłówki przenoszą dodatkowe informacje.
 
 Przykłady:
 
-- `Content-Type`
-- `Authorization`
-- `Accept`
+- `Content-Type`,
+- `Authorization`,
+- `Accept`.
 
-To bardzo ważne przy autoryzacji i formacie danych.
+Są bardzo ważne przy:
+
+- autoryzacji,
+- formacie danych,
+- cachowaniu,
+- negocjacji treści.
 
 ---
 
@@ -125,7 +140,7 @@ Przykład:
 {"id": 1, "name": "Anna"}
 ```
 
-To dziś praktyczny standard w wielu aplikacjach webowych.
+To praktyczny standard w wielu aplikacjach webowych.
 
 ---
 
@@ -138,7 +153,8 @@ W praktyce najczęściej oznacza:
 - sensowne endpointy,
 - poprawne metody HTTP,
 - czytelne statusy,
-- stateless communication.
+- stateless communication,
+- myślenie w kategoriach zasobów.
 
 ---
 
@@ -149,9 +165,16 @@ Przykłady:
 - `GET /users`
 - `GET /users/1`
 - `POST /users`
+- `PATCH /users/1`
 - `DELETE /users/1`
 
 Tu zasobem są użytkownicy.
+
+To dużo bardziej przewidywalne niż np. chaotyczne ścieżki w stylu:
+
+- `/getAllUsers`
+- `/createUserNow`
+- `/removeUserById`
 
 ---
 
@@ -159,115 +182,98 @@ Tu zasobem są użytkownicy.
 
 To ważne pojęcie.
 
-W uproszczeniu:
+Idempotentna operacja to taka, której wielokrotne wykonanie daje ten sam efekt końcowy.
 
-- wielokrotne `GET` nie powinno zmieniać stanu,
-- `DELETE` zwykle powinno być idempotentne,
+W praktyce często:
+
+- `GET` jest bezpieczny i nie powinien zmieniać stanu,
+- `PUT` bywa idempotentny,
+- `DELETE` też zwykle projektuje się jako idempotentny,
 - `POST` zwykle nie jest idempotentny.
 
-To wpływa na poprawny projekt API.
+To ważne dla klientów, retry i sensownego modelu API.
+
+---
+
+## Przykład requestu i odpowiedzi
+
+Request:
+
+```http
+POST /users HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Authorization: Bearer TOKEN
+
+{"name": "Anna", "email": "anna@example.com"}
+```
+
+Przykładowa odpowiedź:
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{"id": 1, "name": "Anna", "email": "anna@example.com"}
+```
+
+Jak to czytać:
+
+- klient tworzy nowy zasób,
+- serwer zwraca `201 Created`,
+- odpowiedź zawiera reprezentację nowo utworzonego użytkownika.
 
 ---
 
 ## Typowe błędy początkujących
 
-- używanie `POST` do wszystkiego,
-- brak rozróżnienia `PUT` i `PATCH`,
-- ignorowanie kodów statusu,
-- słabe nazewnictwo endpointów,
-- mieszanie akcji i zasobów w chaotyczny sposób.
+- traktowanie metod HTTP jak rzeczy wymiennej,
+- złe używanie status codes,
+- projektowanie endpointów bardziej pod funkcje niż pod zasoby,
+- brak konsekwencji w adresach i semantyce,
+- brak rozróżnienia między błędem klienta a błędem serwera.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Pobranie listy użytkowników
+### Najczęstsze mapowanie
 
-```http
-GET /users
-```
+- `GET /users` -> lista,
+- `GET /users/{id}` -> jeden zasób,
+- `POST /users` -> utworzenie,
+- `PATCH /users/{id}` -> częściowa zmiana,
+- `DELETE /users/{id}` -> usunięcie.
 
-### Utworzenie użytkownika
+### Najczęstsze statusy
 
-```http
-POST /users
-Content-Type: application/json
-
-{"name": "Anna"}
-```
-
-### Odpowiedź
-
-```http
-201 Created
-Content-Type: application/json
-
-{"id": 1, "name": "Anna"}
-```
-
----
-
-## Dobre praktyki
-
-- projektuj API wokół zasobów,
-- dobieraj poprawne metody HTTP,
-- używaj sensownych statusów,
-- trzymaj spójny format odpowiedzi,
-- rozdzielaj błędy klienta od błędów serwera.
-
----
-
-## Podsumowanie
-
-HTTP i REST to fundament nowoczesnych aplikacji backendowych.
-
-Zanim wejdziesz głębiej w FastAPI, Django czy Flask, warto mieć te pojęcia naprawdę dobrze poukładane.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- `GET` pobiera,
-- `POST` tworzy,
-- `PUT` zastępuje,
-- `PATCH` aktualizuje częściowo,
-- `DELETE` usuwa,
-- status code opisuje wynik żądania.
+- `200`,
+- `201`,
+- `204`,
+- `400`,
+- `401`,
+- `403`,
+- `404`,
+- `422`,
+- `500`.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij różnicę między requestem a response.
-2. Wskaż, kiedy użyć `GET`, a kiedy `POST`.
-3. Wskaż poprawny status dla utworzenia zasobu.
-4. Zaprojektuj endpoint do pobrania jednego produktu.
-5. Wyjaśnij, czym jest REST w prostych słowach.
+1. Rozpisz REST endpointy dla `users`.
+2. Rozpisz REST endpointy dla `orders`.
+3. Dobierz metodę HTTP dla pobrania, utworzenia, aktualizacji i usunięcia.
+4. Dopasuj status code do kilku scenariuszy.
+5. Wyjaśnij różnicę między `PUT` i `PATCH`.
+6. Wyjaśnij własnymi słowami, czemu `GET` nie powinien zmieniać danych.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Request vs response
-
-Request to żądanie klienta, a response to odpowiedź serwera.
-
-### 2. `GET` vs `POST`
-
-`GET` służy do pobrania danych, a `POST` do utworzenia nowego zasobu.
-
-### 3. Status tworzenia
-
-Najczęściej `201 Created`.
-
-### 4. Produkt
-
-```http
-GET /products/123
-```
-
-### 5. REST
-
-To styl projektowania API, w którym operujesz na zasobach i poprawnie używasz mechanizmów HTTP.
+- HTTP to kontrakt między klientem a serwerem.
+- Metoda HTTP i status code mają znaczenie semantyczne.
+- REST najczęściej projektuje API wokół zasobów.
+- JSON to najczęstszy format danych w nowoczesnym API.
+- Dobre API jest przewidywalne dla klienta, a nie tylko „działa”.

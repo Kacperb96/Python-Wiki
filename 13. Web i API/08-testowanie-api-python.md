@@ -10,13 +10,11 @@
 6. [Walidacja danych wejściowych](#walidacja-danych-wejściowych)
 7. [Autoryzacja i uprawnienia](#autoryzacja-i-uprawnienia)
 8. [Warstwa HTTP vs logika biznesowa](#warstwa-http-vs-logika-biznesowa)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+9. [Przykład testu endpointu](#przykład-testu-endpointu)
+10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+11. [Praktyczna ściąga](#praktyczna-ściąga)
+12. [Ćwiczenia](#ćwiczenia)
+13. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -36,6 +34,8 @@ Bo API musi zachowywać się przewidywalnie dla:
 - innych usług,
 - partnerów integracyjnych,
 - testów automatycznych.
+
+Dobre testy API chronią przed regresją nie tylko logiki, ale też samego kontraktu HTTP.
 
 ---
 
@@ -60,24 +60,28 @@ Test powinien sprawdzać nie tylko, że endpoint "odpowiedział", ale że zrobi�
 
 - `200`, `201`, `404`, `422` itd.,
 - poprawny JSON,
-- potrzebne pola.
+- potrzebne pola,
+- sensowny komunikat błędu.
 
 ---
 
 ## Scenariusze pozytywne i negatywne
 
-Pozytywne:
+### Pozytywne
 
 - poprawne dane,
 - poprawna autoryzacja,
 - oczekiwany wynik.
 
-Negatywne:
+### Negatywne
 
 - brak danych,
 - błędny format,
 - brak uprawnień,
-- brak zasobu.
+- brak zasobu,
+- konflikt stanu.
+
+To bardzo ważne, bo początkujący często testują tylko happy path.
 
 ---
 
@@ -86,6 +90,12 @@ Negatywne:
 API powinno odrzucać błędne dane na wejściu.
 
 To bardzo ważny obszar testów.
+
+Musisz sprawdzać nie tylko poprawne requesty, ale też:
+
+- brak wymaganych pól,
+- złe typy,
+- niepoprawne formaty.
 
 ---
 
@@ -97,7 +107,8 @@ Trzeba też sprawdzić:
 
 - kto może wykonać daną operację,
 - co dzieje się bez tokenu,
-- co dzieje się z błędnym tokenem.
+- co dzieje się z błędnym tokenem,
+- co dzieje się bez właściwej roli.
 
 ---
 
@@ -111,94 +122,82 @@ Dobrze rozdzielać:
 - testy logiki biznesowej,
 - testy integracyjne.
 
+To pozwala budować testy szybsze, czytelniejsze i mniej kruche.
+
+---
+
+## Przykład testu endpointu
+
+Mentalny przykład:
+
+- `POST /users` powinien zwrócić `201`,
+- odpowiedź powinna mieć `id`,
+- przy błędnych danych powinien pojawić się np. `422`.
+
+Przykład testu stylu FastAPI/TestClient:
+
+```python
+def test_create_user(client):
+    response = client.post(
+        "/users",
+        json={"name": "Anna", "email": "anna@example.com"},
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "Anna"
+    assert "id" in data
+```
+
+To prosty, ale bardzo realistyczny kształt testu API.
+
 ---
 
 ## Typowe błędy początkujących
 
-- testowanie tylko "happy path",
+- testowanie tylko happy path,
 - brak sprawdzania kodów błędów,
 - ignorowanie walidacji wejścia,
-- mieszanie zbyt wielu odpowiedzialności w jednym teście.
+- brak testów autoryzacji,
+- mieszanie zbyt wielu odpowiedzialności w jednym teście,
+- testowanie samego `200`, bez patrzenia na body.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Pozytywny test
+### W testach API najczęściej sprawdzasz
 
-Sprawdza, że:
+- status code,
+- body odpowiedzi,
+- strukturę JSON,
+- scenariusze negatywne,
+- autoryzację.
 
-- `POST /users` zwraca `201`,
-- odpowiedź zawiera `id`,
-- dane zostały zapisane.
+### Dobre pytania do testu
 
-### Negatywny test
-
-Sprawdza, że:
-
-- brak wymaganego pola kończy się błędem walidacji.
-
----
-
-## Dobre praktyki
-
-- testuj statusy i treść odpowiedzi,
-- pokrywaj scenariusze negatywne,
-- trzymaj testy czytelne i jednoznaczne,
-- nie testuj wszystkiego wyłącznie przez HTTP, jeśli logikę można sensownie testować niżej.
-
----
-
-## Podsumowanie
-
-Testowanie API to ważna część profesjonalnego backendu.
-
-Dobre testy API dają bezpieczeństwo refaktoryzacji i stabilność integracji.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- sprawdzaj status code,
-- sprawdzaj body odpowiedzi,
-- testuj błędne dane,
-- testuj autoryzację,
-- rozdzielaj poziomy testów.
+- Czy endpoint zwraca właściwy status?
+- Czy JSON ma właściwy kształt?
+- Co dzieje się przy błędnych danych?
+- Co dzieje się bez uprawnień?
 
 ---
 
 ## Ćwiczenia
 
-1. Wypisz 3 rzeczy, które warto sprawdzać w teście endpointu.
-2. Podaj przykład scenariusza negatywnego.
-3. Wyjaśnij, po co testować brak autoryzacji.
-4. Wyjaśnij różnicę między testem endpointu a testem logiki biznesowej.
-5. Wskaż ryzyko testowania tylko "happy path".
+1. Napisz test dla `GET /health`.
+2. Napisz test dla poprawnego `POST /users`.
+3. Napisz test dla błędnych danych wejściowych.
+4. Napisz test dla braku autoryzacji.
+5. Napisz test dla braku zasobu.
+6. Wyjaśnij własnymi słowami, czym różni się test logiki biznesowej od testu samego endpointu.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. 3 rzeczy
-
-- status code,
-- struktura JSON,
-- poprawność danych w odpowiedzi.
-
-### 2. Negatywny scenariusz
-
-Wysłanie requestu bez wymaganego pola.
-
-### 3. Brak autoryzacji
-
-Żeby upewnić się, że nieuprawniony klient nie ma dostępu do chronionych zasobów.
-
-### 4. Różnica
-
-Test endpointu sprawdza warstwę HTTP, a test logiki biznesowej sprawdza reguły aplikacji bez koniecznego udziału HTTP.
-
-### 5. Ryzyko
-
-Można przeoczyć błędy w walidacji, obsłudze wyjątków i uprawnieniach.
+- Testy API sprawdzają kontrakt HTTP, a nie tylko sam kod funkcji.
+- Trzeba testować zarówno scenariusze poprawne, jak i błędne.
+- Status code i body odpowiedzi są równie ważne.
+- Walidacja wejścia i autoryzacja to obowiązkowe obszary testów API.
+- Nie wszystko trzeba testować wyłącznie przez warstwę HTTP.

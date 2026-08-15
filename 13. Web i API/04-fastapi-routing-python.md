@@ -11,13 +11,11 @@
 7. [`APIRouter`](#apirouter)
 8. [Dzielenie endpointów na moduły](#dzielenie-endpointów-na-moduły)
 9. [Prefix i tagi](#prefix-i-tagi)
-10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-11. [Praktyczne przykłady](#praktyczne-przykłady)
-12. [Dobre praktyki](#dobre-praktyki)
-13. [Podsumowanie](#podsumowanie)
-14. [Mini ściąga](#mini-ściąga)
-15. [Ćwiczenia](#ćwiczenia)
-16. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+10. [Przykład struktury projektu](#przykład-struktury-projektu)
+11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+12. [Praktyczna ściąga](#praktyczna-ściąga)
+13. [Ćwiczenia](#ćwiczenia)
+14. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -37,9 +35,9 @@ Routing odpowiada na pytanie:
 
 Na przykład:
 
-- `GET /users`
-- `POST /users`
-- `GET /orders/10`
+- `GET /users`,
+- `POST /users`,
+- `GET /orders/10`.
 
 ---
 
@@ -52,7 +50,8 @@ Dobry routing pomaga:
 - czytać projekt,
 - utrzymywać porządek,
 - rozdzielać obszary domenowe,
-- łatwiej testować endpointy.
+- łatwiej testować endpointy,
+- lepiej ogarniać dokumentację.
 
 ---
 
@@ -94,7 +93,11 @@ def list_users(limit: int = 10):
     return {"limit": limit}
 ```
 
-To częsty wzorzec dla filtrowania, paginacji i wyszukiwania.
+To częsty wzorzec dla:
+
+- filtrowania,
+- paginacji,
+- wyszukiwania.
 
 ---
 
@@ -106,6 +109,7 @@ Gdy projekt rośnie, warto wydzielać routery.
 from fastapi import APIRouter
 
 router = APIRouter()
+
 
 @router.get("/users")
 def list_users():
@@ -120,11 +124,13 @@ To dużo lepsze niż trzymanie wszystkiego w `main.py`.
 
 Popularny układ:
 
-- `routes/users.py`
-- `routes/orders.py`
-- `routes/auth.py`
+- `routes/users.py`,
+- `routes/orders.py`,
+- `routes/auth.py`.
 
 Każdy moduł ma swój router.
+
+To bardzo poprawia czytelność projektu.
 
 ---
 
@@ -136,7 +142,48 @@ Router może mieć wspólny prefiks:
 router = APIRouter(prefix="/users", tags=["users"])
 ```
 
-To upraszcza strukturę i dokumentację.
+To upraszcza:
+
+- strukturę ścieżek,
+- dokumentację,
+- grupowanie endpointów.
+
+---
+
+## Przykład struktury projektu
+
+```text
+app/
+    main.py
+    routes/
+        users.py
+        orders.py
+```
+
+`users.py`:
+
+```python
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.get("/")
+def list_users():
+    return []
+```
+
+`main.py`:
+
+```python
+from fastapi import FastAPI
+from app.routes.users import router as users_router
+
+app = FastAPI()
+app.include_router(users_router)
+```
+
+To już jest dużo bliższe realnemu projektowi niż wszystko w jednym pliku.
 
 ---
 
@@ -145,115 +192,47 @@ To upraszcza strukturę i dokumentację.
 - wszystkie endpointy w jednym pliku,
 - brak podziału na obszary domenowe,
 - chaotyczne adresy URL,
-- mieszanie logiki routingu z logiką biznesową.
+- mieszanie logiki routingu z logiką biznesową,
+- brak konsekwencji w nazewnictwie ścieżek.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
 ### Prosty router
 
 ```python
-from fastapi import APIRouter
-
 router = APIRouter(prefix="/users", tags=["users"])
-
-@router.get("/")
-def list_users():
-    return []
-
-@router.get("/{user_id}")
-def get_user(user_id: int):
-    return {"id": user_id}
 ```
 
-### Włączenie routera do aplikacji
+### Wpięcie routera
 
 ```python
-from fastapi import FastAPI
-from routes.users import router as users_router
-
-app = FastAPI()
 app.include_router(users_router)
 ```
 
----
+### Dobra praktyka
 
-## Dobre praktyki
-
-- grupuj trasy domenowo,
-- używaj `APIRouter`,
-- trzymaj spójne nazewnictwo URL,
-- oddziel routing od logiki biznesowej i dostępu do danych.
-
----
-
-## Podsumowanie
-
-Dobry routing w FastAPI to nie tylko składnia dekoratorów, ale też świadoma organizacja API.
-
-To jeden z fundamentów większego, czytelnego backendu.
-
----
-
-## Mini ściąga
-
-```python
-from fastapi import APIRouter
-
-router = APIRouter(prefix="/users")
-```
-
-Najważniejsze:
-
-- dekoratory mapują ścieżki na funkcje,
-- `APIRouter` pomaga organizować większe API,
-- parametry ścieżki i query są obsługiwane bardzo wygodnie.
+- dziel routery według domen,
+- trzymaj spójne prefiksy,
+- nie ładuj wszystkiego do `main.py`.
 
 ---
 
 ## Ćwiczenia
 
-1. Napisz endpoint `GET /products`.
-2. Napisz endpoint `GET /products/{product_id}`.
-3. Dodaj query parameter `limit`.
-4. Utwórz prosty `APIRouter` z prefiksem.
-5. Wyjaśnij, czemu nie warto trzymać wszystkiego w `main.py`.
+1. Zrób router `users`.
+2. Zrób router `orders`.
+3. Dodaj prefiksy i tagi.
+4. Połącz routery w `main.py`.
+5. Rozpisz prostą strukturę katalogów dla małego API.
+6. Wyjaśnij, czemu dobry routing poprawia czytelność projektu.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. `GET /products`
-
-```python
-@app.get("/products")
-def list_products():
-    return []
-```
-
-### 2. `product_id`
-
-```python
-@app.get("/products/{product_id}")
-def get_product(product_id: int):
-    return {"id": product_id}
-```
-
-### 3. `limit`
-
-```python
-@app.get("/products")
-def list_products(limit: int = 10):
-    return {"limit": limit}
-```
-
-### 4. Router
-
-```python
-router = APIRouter(prefix="/products", tags=["products"])
-```
-
-### 5. Czemu nie wszystko w `main.py`
-
-Bo projekt szybko robi się trudny do czytania i rozwijania.
+- Routing mapuje request na konkretną funkcję.
+- W małym projekcie może być prosty, ale w większym trzeba go organizować świadomie.
+- `APIRouter` pomaga porządkować endpointy.
+- Dobry routing wspiera czytelność, testowalność i rozwój API.

@@ -9,14 +9,13 @@
 5. [Parsowanie i walidacja](#parsowanie-i-walidacja)
 6. [Typy i konwersje](#typy-i-konwersje)
 7. [Błędy walidacji](#błędy-walidacji)
-8. [Pydantic a FastAPI](#pydantic-a-fastapi)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Przykład z outputem](#przykład-z-outputem)
+9. [Modele wejściowe i wyjściowe](#modele-wejściowe-i-wyjściowe)
+10. [Pydantic a FastAPI](#pydantic-a-fastapi)
+11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+12. [Praktyczna ściąga](#praktyczna-ściąga)
+13. [Ćwiczenia](#ćwiczenia)
+14. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -24,7 +23,7 @@
 
 `Pydantic` to biblioteka do modelowania i walidacji danych.
 
-Jest bardzo ważna w nowoczesnym Pythonie, szczególnie przy API i konfiguracji.
+Jest bardzo ważna w nowoczesnym Pythonie, szczególnie przy API, konfiguracji i pracy z danymi wejściowymi z zewnątrz.
 
 ---
 
@@ -37,10 +36,13 @@ Przykład:
 ```python
 from pydantic import BaseModel
 
+
 class User(BaseModel):
     name: str
     age: int
 ```
+
+To jest bardzo czytelny sposób zdefiniowania kontraktu danych.
 
 ---
 
@@ -53,7 +55,7 @@ Bo dane wejściowe z zewnątrz często są:
 - błędne,
 - niebezpieczne biznesowo.
 
-Walidacja pomaga to wcześnie wychwycić.
+Walidacja pomaga wychwycić to wcześnie, zanim dane trafią głębiej do systemu.
 
 ---
 
@@ -64,24 +66,35 @@ Modele `Pydantic` definiujesz jako klasy.
 ```python
 from pydantic import BaseModel
 
+
 class Product(BaseModel):
     name: str
     price: float
 ```
 
-To jest bardzo czytelny sposób opisu danych.
+To dużo czytelniejsze niż ręczne sprawdzanie wielu pól przez `if` i `try/except` rozrzucone po kodzie.
 
 ---
 
 ## Parsowanie i walidacja
 
 ```python
+from pydantic import BaseModel
+
+
+class Product(BaseModel):
+    name: str
+    price: float
+
+
 data = {"name": "Kawa", "price": 19.99}
 product = Product(**data)
 print(product)
 ```
 
-Jeśli dane są niepoprawne, dostaniesz błąd walidacji.
+Jeśli dane są poprawne, model zostanie utworzony.
+
+Jeśli są niepoprawne, dostaniesz błąd walidacji.
 
 ---
 
@@ -89,17 +102,77 @@ Jeśli dane są niepoprawne, dostaniesz błąd walidacji.
 
 `Pydantic` potrafi wykonać część sensownych konwersji.
 
-Na przykład string `"123"` może zostać zamieniony na `int`, jeśli to ma sens dla modelu.
+Na przykład string `"123"` może zostać zamieniony na `int`, jeśli to pasuje do modelu.
 
-To wygodne, ale trzeba rozumieć, że nadal chodzi o walidację kontraktu danych.
+To wygodne, ale ważne jest rozumienie, że nadal chodzi o walidację kontraktu danych, a nie o zgadywanie wszystkiego za programistę.
 
 ---
 
 ## Błędy walidacji
 
-Przy błędnych danych model zgłosi wyjątek walidacyjny.
+Przy błędnych danych model zgłosi błąd walidacyjny.
 
 To bardzo ważne, bo zamiast cichego psucia danych masz jasny sygnał problemu.
+
+---
+
+## Przykład z outputem
+
+```python
+from pydantic import BaseModel, ValidationError
+
+
+class UserCreate(BaseModel):
+    name: str
+    age: int
+
+
+try:
+    user = UserCreate(name="Anna", age="abc")
+except ValidationError as e:
+    print(e)
+```
+
+Przykładowy output:
+
+```text
+1 validation error for UserCreate
+age
+  Input should be a valid integer, unable to parse string as an integer
+```
+
+Najważniejsze:
+
+- dokładnie wiesz, które pole jest błędne,
+- dostajesz czytelny sygnał, co poszło nie tak.
+
+---
+
+## Modele wejściowe i wyjściowe
+
+Bardzo dobra praktyka:
+
+nie zawsze używaj jednego modelu do wszystkiego.
+
+Przykład:
+
+```python
+class UserCreate(BaseModel):
+    name: str
+    email: str
+
+
+class UserRead(BaseModel):
+    id: int
+    name: str
+    email: str
+```
+
+Dlaczego to ma sens:
+
+- model wejściowy opisuje dane, które klient wysyła,
+- model wyjściowy opisuje dane, które API zwraca,
+- możesz nie chcieć przyjmować `id` od klienta przy tworzeniu użytkownika.
 
 ---
 
@@ -113,109 +186,59 @@ FastAPI używa modeli `Pydantic` do:
 - serializacji odpowiedzi,
 - generowania dokumentacji API.
 
+Dlatego dobre zrozumienie `Pydantic` bardzo pomaga w pracy z FastAPI.
+
 ---
 
 ## Typowe błędy początkujących
 
 - brak walidacji danych przy API,
-- traktowanie modelu jak zwykłego słownika,
+- traktowanie modelu jak zwykłego słownika bez zrozumienia kontraktu,
 - zbyt luźne typy,
-- brak rozróżnienia modeli wejściowych i wyjściowych.
+- brak rozróżnienia modeli wejściowych i wyjściowych,
+- próba wrzucania całej logiki biznesowej do modelu danych.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Model użytkownika
+### Prosty model
 
 ```python
-from pydantic import BaseModel
-
 class UserCreate(BaseModel):
     name: str
     email: str
 ```
 
-### Walidacja
+### Tworzenie modelu
 
 ```python
 user = UserCreate(name="Anna", email="anna@example.com")
-print(user.email)
 ```
 
----
-
-## Dobre praktyki
-
-- twórz jasne modele danych,
-- waliduj dane wejściowe jak najwcześniej,
-- rozdzielaj modele do tworzenia, odczytu i aktualizacji, gdy ma to sens,
-- używaj typów, które naprawdę opisują kontrakt danych.
-
----
-
-## Podsumowanie
-
-`Pydantic` to jedno z najważniejszych narzędzi nowoczesnego backendu Python.
-
-Bardzo poprawia bezpieczeństwo danych i czytelność API.
-
----
-
-## Mini ściąga
+### Obsługa błędu walidacji
 
 ```python
-from pydantic import BaseModel
-
-class User(BaseModel):
-    name: str
-    age: int
+except ValidationError as e:
+    print(e)
 ```
-
-Najważniejsze:
-
-- model opisuje strukturę danych,
-- `Pydantic` waliduje wejście,
-- świetnie współpracuje z FastAPI.
 
 ---
 
 ## Ćwiczenia
 
-1. Zdefiniuj model `User` z polami `name` i `age`.
-2. Utwórz instancję modelu z poprawnych danych.
-3. Podaj przykład błędnych danych wejściowych.
-4. Wyjaśnij, po co walidować requesty API.
-5. Wyjaśnij relację `Pydantic` i FastAPI.
+1. Napisz model `UserCreate`.
+2. Napisz model `ProductCreate`.
+3. Utwórz model z poprawnych danych.
+4. Wywołaj model z błędnymi danymi i przeanalizuj błąd.
+5. Rozdziel model wejściowy i model wyjściowy dla jednego zasobu.
+6. Wyjaśnij własnymi słowami, po co backendowi walidacja danych.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Model
-
-```python
-from pydantic import BaseModel
-
-class User(BaseModel):
-    name: str
-    age: int
-```
-
-### 2. Instancja
-
-```python
-user = User(name="Ola", age=22)
-```
-
-### 3. Błędne dane
-
-Na przykład brak wymaganego pola albo wartość w kompletnie złym formacie.
-
-### 4. Po co walidować
-
-Żeby nie wpuszczać błędnych danych do logiki aplikacji i bazy.
-
-### 5. Relacja
-
-FastAPI używa modeli `Pydantic` do walidacji i dokumentowania danych API.
+- `Pydantic` pomaga modelować i walidować dane.
+- Dane wejściowe z zewnątrz powinny być walidowane jak najwcześniej.
+- Modele wejściowe i wyjściowe często warto rozdzielać.
+- Czytelny błąd walidacji to duża zaleta w API i backendzie.
