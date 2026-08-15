@@ -9,13 +9,11 @@
 5. [Małe kroki](#małe-kroki)
 6. [Rola testów](#rola-testów)
 7. [Typowe cele refaktoryzacji](#typowe-cele-refaktoryzacji)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Przykład mentalny](#przykład-mentalny)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -51,6 +49,10 @@ Bez refaktoryzacji rośnie:
 - lęk przed zmianą,
 - koszt utrzymania.
 
+Refaktoryzacja nie jest luksusem.
+
+To normalne narzędzie utrzymania jakości.
+
 ---
 
 ## Refaktoryzacja a zmiana zachowania
@@ -64,6 +66,11 @@ Refaktoryzacja:
 
 Jeśli zmieniasz strukturę i zachowanie naraz, ryzyko rośnie dużo bardziej.
 
+Dlatego warto mentalnie oddzielać:
+
+- "sprzątanie",
+- od "wprowadzania nowej funkcjonalności".
+
 ---
 
 ## Małe kroki
@@ -72,7 +79,7 @@ Najbezpieczniejsza refaktoryzacja jest zwykle:
 
 - mała,
 - iteracyjna,
-- łatwa do cofnięcia lub sprawdzenia.
+- łatwa do cofnięcia albo sprawdzenia.
 
 Duże "wielkie sprzątanie" często kończy się problemami.
 
@@ -83,6 +90,8 @@ Duże "wielkie sprzątanie" często kończy się problemami.
 Testy są siatką bezpieczeństwa dla refaktoryzacji.
 
 Bez nich dużo trudniej mieć pewność, że uporządkowanie kodu niczego nie zepsuło.
+
+To właśnie dlatego dobra refaktoryzacja bardzo często idzie w parze z dobrymi testami.
 
 ---
 
@@ -99,93 +108,65 @@ Najczęściej:
 
 ---
 
+## Przykład mentalny
+
+Masz funkcję, która:
+
+- odbiera dane,
+- waliduje je,
+- liczy wynik,
+- zapisuje coś do bazy,
+- buduje odpowiedź.
+
+Lepszy kierunek po refaktoryzacji:
+
+- funkcja walidująca,
+- funkcja licząca,
+- warstwa zapisu osobno,
+- budowa odpowiedzi osobno.
+
+Efekt biznesowy zostaje ten sam, ale struktura robi się dużo zdrowsza.
+
+---
+
 ## Typowe błędy początkujących
 
 - przepisywanie wszystkiego naraz,
 - brak testów przed zmianą,
 - mieszanie refaktoryzacji z nowym featurem w jednym ruchu,
-- poprawianie stylu bez rozwiązania realnego problemu strukturalnego.
+- poprawianie stylu bez rozwiązania realnego problemu strukturalnego,
+- "refaktoryzacja dla sportu" bez realnej potrzeby.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Długa funkcja
+### Dobre pytania przed refaktoryzacją
 
-Jedna funkcja:
+- Co dokładnie jest problemem?
+- Czy mam testy albo inny sposób weryfikacji?
+- Czy mogę rozbić zmianę na małe kroki?
+- Czy zmieniam strukturę, czy także zachowanie?
 
-- pobiera dane,
-- waliduje,
-- liczy,
-- zapisuje,
-- loguje.
+### Dobra zasada
 
-To dobry kandydat do rozbicia.
-
-### Lepszy kierunek
-
-- funkcja walidująca,
-- funkcja licząca,
-- warstwa zapisu osobno.
-
----
-
-## Dobre praktyki
-
-- refaktoryzuj małymi krokami,
-- zaczynaj od miejsc, które realnie bolą,
-- trzymaj testy blisko zmian,
-- nie myl refaktoryzacji z przepisywaniem dla sportu.
-
----
-
-## Podsumowanie
-
-Refaktoryzacja to nie luksus, tylko podstawowe narzędzie utrzymania jakości kodu.
-
-Najlepsza refaktoryzacja upraszcza życie zespołu, zamiast tylko zmieniać układ plików.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- refaktoryzacja poprawia strukturę,
-- nie powinna zmieniać zachowania,
-- najlepiej robić ją małymi krokami,
-- testy są kluczowe.
+Najpierw zrozum kod, potem go poprawiaj.
 
 ---
 
 ## Ćwiczenia
 
-1. Wyjaśnij różnicę między refaktoryzacją a nowym featurem.
-2. Podaj przykład długiej funkcji do rozbicia.
-3. Wyjaśnij, czemu testy pomagają w refaktoryzacji.
-4. Podaj przykład duplikacji, którą warto usunąć.
-5. Wyjaśnij, czemu małe kroki są bezpieczniejsze.
+1. Rozbij długą funkcję na mniejsze części.
+2. Usuń prostą duplikację.
+3. Zmień złe nazwy na bardziej opisowe.
+4. Rozdziel walidację, liczenie i zapis do osobnych elementów.
+5. Wyjaśnij własnymi słowami, czemu małe refaktoryzacje są bezpieczniejsze.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Różnica
-
-Refaktoryzacja poprawia strukturę bez zmiany zachowania, a nowy feature dodaje nowe zachowanie.
-
-### 2. Długa funkcja
-
-Na przykład funkcja obsługująca cały proces zamówienia od walidacji po zapis i mail.
-
-### 3. Testy
-
-Bo pozwalają szybko sprawdzić, czy po zmianie struktury system nadal działa tak samo.
-
-### 4. Duplikacja
-
-Ten sam kod walidacyjny skopiowany w trzech endpointach.
-
-### 5. Małe kroki
-
-Bo łatwiej znaleźć źródło problemu i mniejsze jest ryzyko dużej regresji.
+- Refaktoryzacja poprawia strukturę kodu bez zmiany zachowania.
+- Najlepiej robić ją małymi krokami.
+- Testy bardzo zwiększają bezpieczeństwo zmian.
+- Celem refaktoryzacji jest uproszczenie i obniżenie kosztu przyszłych zmian.

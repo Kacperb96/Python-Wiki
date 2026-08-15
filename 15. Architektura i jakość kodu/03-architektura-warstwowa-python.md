@@ -9,13 +9,11 @@
 5. [Warstwa HTTP, biznesowa i danych](#warstwa-http-biznesowa-i-danych)
 6. [Korzyści dla testowania](#korzyści-dla-testowania)
 7. [Korzyści dla utrzymania](#korzyści-dla-utrzymania)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Przykład mentalny](#przykład-mentalny)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -35,7 +33,9 @@ Najczęściej jedna warstwa:
 
 - odbiera wejście,
 - inna wykonuje logikę,
-- inna rozmawia z bazą lub infrastrukturą.
+- inna rozmawia z bazą albo infrastrukturą.
+
+To po prostu sposób ograniczania chaosu przez czytelne granice odpowiedzialności.
 
 ---
 
@@ -46,7 +46,8 @@ Bo pomaga:
 - zapanować nad złożonością,
 - ograniczyć chaos,
 - łatwiej testować kod,
-- łatwiej wymieniać elementy infrastruktury.
+- łatwiej wymieniać elementy infrastruktury,
+- lepiej rozumieć przepływ danych.
 
 ---
 
@@ -54,28 +55,33 @@ Bo pomaga:
 
 W backendzie Python często pojawiają się:
 
-- warstwa HTTP lub prezentacji,
-- warstwa aplikacyjna lub biznesowa,
-- warstwa danych lub infrastruktury.
+- warstwa HTTP albo prezentacji,
+- warstwa aplikacyjna albo biznesowa,
+- warstwa danych albo infrastruktury.
+
+Nie każdy projekt musi nazywać je tak samo, ale sens zwykle jest podobny.
 
 ---
 
 ## Warstwa HTTP, biznesowa i danych
 
-Warstwa HTTP:
+### Warstwa HTTP
 
 - odbiera request,
-- zwraca response.
+- zwraca response,
+- mapuje dane wejścia i wyjścia.
 
-Warstwa biznesowa:
+### Warstwa biznesowa
 
 - realizuje reguły domenowe,
-- koordynuje przepływ.
+- koordynuje przepływ,
+- podejmuje decyzje biznesowe.
 
-Warstwa danych:
+### Warstwa danych
 
 - pobiera i zapisuje dane,
-- komunikuje się z bazą.
+- komunikuje się z bazą,
+- ukrywa szczegóły trwałości danych.
 
 ---
 
@@ -83,7 +89,11 @@ Warstwa danych:
 
 To ogromna zaleta.
 
-Jeśli logika biznesowa nie zależy twardo od frameworka i bazy, da się ją testować szybciej i czyściej.
+Jeśli logika biznesowa nie zależy twardo od frameworka i bazy, da się ją testować:
+
+- szybciej,
+- czyściej,
+- z mniejszą ilością setupu.
 
 ---
 
@@ -95,7 +105,32 @@ To daje:
 
 - lepszą modularność,
 - mniejszy chaos zmian,
-- łatwiejsze code review.
+- łatwiejsze code review,
+- lepszą przewidywalność projektu.
+
+---
+
+## Przykład mentalny
+
+Dobry podział:
+
+- endpoint `POST /orders`,
+- serwis `create_order`,
+- repozytorium `save_order`.
+
+Zły podział:
+
+endpoint, który:
+
+- waliduje,
+- liczy,
+- odpytuje bazę,
+- wysyła mail,
+- buduje odpowiedź.
+
+Technicznie może działać.
+
+Architektonicznie zwykle szybko robi się trudny do utrzymania.
 
 ---
 
@@ -104,88 +139,41 @@ To daje:
 - wrzucanie wszystkiego do endpointów,
 - brak rozróżnienia między logiką biznesową a bazą,
 - sztuczne mnożenie warstw w bardzo małym projekcie,
-- nazwanie katalogów "services" i "utils" bez realnego podziału odpowiedzialności.
+- nazwanie katalogów `services` i `utils` bez realnego podziału odpowiedzialności.
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
+
+### Dobre pytanie
+
+Która warstwa powinna za to odpowiadać?
 
 ### Dobry podział
 
-- endpoint `POST /orders`
-- serwis `create_order`
-- repozytorium `save_order`
+- HTTP odbiera i zwraca,
+- biznes decyduje,
+- dane zapisują i pobierają.
 
-### Zły podział
+### Uwaga
 
-Endpoint, który:
-
-- waliduje,
-- liczy,
-- odpytuje bazę,
-- wysyła mail,
-- buduje odpowiedź.
-
----
-
-## Dobre praktyki
-
-- buduj warstwy wokół odpowiedzialności,
-- trzymaj logikę biznesową poza frameworkiem, jeśli to sensowne,
-- nie komplikuj małych projektów ponad potrzebę,
-- pilnuj, by warstwy miały czytelne granice.
-
----
-
-## Podsumowanie
-
-Architektura warstwowa to praktyczne narzędzie porządkowania backendu Python.
-
-Najlepiej działa wtedy, gdy rzeczywiście upraszcza projekt, a nie gdy jest tylko modnym hasłem.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- warstwa HTTP odbiera i zwraca,
-- warstwa biznesowa podejmuje decyzje,
-- warstwa danych rozmawia z bazą,
-- rozdział poprawia testowalność i utrzymanie.
+Warstwy mają upraszczać projekt, a nie być ozdobą architektury.
 
 ---
 
 ## Ćwiczenia
 
-1. Rozdziel prosty endpoint na trzy warstwy.
-2. Wyjaśnij rolę warstwy biznesowej.
-3. Wyjaśnij rolę warstwy danych.
-4. Wskaż przykład mieszania odpowiedzialności.
-5. Wyjaśnij, czemu nie każdy mały projekt potrzebuje pełnej rozbudowanej architektury.
+1. Rozdziel prosty endpoint na warstwę HTTP, biznesową i danych.
+2. Opisz przepływ danych przez te warstwy.
+3. Wskaż przykład endpointu, który robi za dużo.
+4. Wyjaśnij własnymi słowami, czemu rozdział warstw poprawia testowalność.
+5. Podaj przykład projektu, w którym zbyt wiele warstw byłoby przerostem formy nad treścią.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Trzy warstwy
-
-- endpoint przyjmuje dane,
-- serwis wykonuje logikę,
-- repozytorium zapisuje do bazy.
-
-### 2. Warstwa biznesowa
-
-Zawiera reguły i decyzje aplikacji.
-
-### 3. Warstwa danych
-
-Obsługuje dostęp do bazy i innych trwałych źródeł danych.
-
-### 4. Mieszanie
-
-Endpoint robiący jednocześnie walidację, logikę i zapytania SQL.
-
-### 5. Czemu nie zawsze
-
-Bo nadmiar warstw w małym projekcie może tylko zwiększyć złożoność.
+- Architektura warstwowa porządkuje system przez rozdział odpowiedzialności.
+- Warstwa HTTP nie powinna być centrum logiki biznesowej.
+- Rozdział warstw poprawia testowalność i utrzymanie.
+- Dobra architektura ma upraszczać projekt, a nie go komplikować.

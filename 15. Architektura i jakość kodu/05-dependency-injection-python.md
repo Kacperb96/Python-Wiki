@@ -1,192 +1,386 @@
 # Dependency Injection w Pythonie
 
-## Spis treści
+## O co tutaj chodzi?
 
-1. [Wprowadzenie](#wprowadzenie)
-2. [Czym jest dependency injection](#czym-jest-dependency-injection)
-3. [Po co stosować DI](#po-co-stosować-di)
-4. [Zależności jawne vs ukryte](#zależności-jawne-vs-ukryte)
-5. [DI a testowalność](#di-a-testowalność)
-6. [DI a luźne powiązania](#di-a-luźne-powiązania)
-7. [Jak DI wygląda w Pythonie](#jak-di-wygląda-w-pythonie)
-8. [Kiedy nie przesadzać](#kiedy-nie-przesadzać)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+Dependency Injection, czyli wstrzykiwanie zależności, to sposób budowania kodu, w którym obiekt **nie tworzy sam swoich współpracowników**, tylko **dostaje ich z zewnątrz**.
 
----
+Brzmi technicznie, ale idea jest bardzo praktyczna.
 
-## Wprowadzenie
+Bez DI klasa często robi coś takiego:
 
-Dependency injection, czyli wstrzykiwanie zależności, to sposób organizacji kodu, w którym potrzebne obiekty są dostarczane z zewnątrz zamiast tworzone "na sztywno" w środku.
+- sama tworzy połączenie do bazy,
+- sama tworzy klienta API,
+- sama tworzy logger,
+- sama decyduje, z jakiej implementacji korzysta.
 
-To bardzo ważny temat dla testowalności i architektury.
+Wtedy kod staje się:
 
----
+- trudniejszy do testowania,
+- mocno powiązany z konkretną implementacją,
+- mniej elastyczny,
+- trudniejszy do rozbudowy.
 
-## Czym jest dependency injection
+Z DI robimy odwrotnie:
 
-Jeśli obiekt potrzebuje:
+- klasa dostaje zależności w parametrze konstruktora lub funkcji,
+- nie interesuje jej, **jak** dana zależność została utworzona,
+- interesuje ją tylko to, że może z niej korzystać.
 
-- repozytorium,
-- klienta HTTP,
-- loggera,
-- konfiguracji,
+## Intuicja życiowa
 
-to może je dostać jako zależności zamiast samemu je tworzyć.
+Wyobraź sobie klasę `OrderService`, która ma wysłać e-mail po złożeniu zamówienia.
 
----
+Złe podejście:
 
-## Po co stosować DI
+- `OrderService` sama tworzy `EmailSender()`.
 
-Bo pomaga:
+Lepsze podejście:
 
-- podmieniać implementacje,
-- uprościć testy,
-- ograniczyć twarde powiązania,
-- czytelniej budować warstwy systemu.
+- `OrderService` dostaje gotowy obiekt `email_sender`.
 
----
+Dzięki temu:
 
-## Zależności jawne vs ukryte
+- możesz podmienić prawdziwy sender na testowy,
+- możesz łatwo zmienić implementację,
+- `OrderService` zajmuje się tylko logiką zamówienia.
 
-Jawna zależność:
+## Problem bez Dependency Injection
 
-- widać ją w konstruktorze lub argumencie funkcji.
+### Słaby przykład mentalny
 
-Ukryta zależność:
+```python
+class EmailSender:
+    def send(self, to, subject, body):
+        print(f"Wysylam e-mail do {to}")
 
-- obiekt sam coś importuje, tworzy lub pobiera globalnie.
 
-Jawne zależności zwykle dużo łatwiej zrozumieć i testować.
+class OrderService:
+    def complete_order(self, user_email):
+        email_sender = EmailSender()
+        email_sender.send(user_email, "Zamowienie", "Dziekujemy")
+```
 
----
+Na pierwszy rzut oka to działa. Problem pojawia się później.
 
-## DI a testowalność
+### Co tu jest nie tak?
 
-To jedna z największych zalet.
+`OrderService`:
 
-Zamiast prawdziwej bazy czy klienta API możesz w testach podstawić:
+- zna konkretną klasę `EmailSender`,
+- sama ją tworzy,
+- nie da się jej łatwo przetestować z atrapą,
+- trudno zmienić sposób wysyłki.
 
-- fake,
-- mock,
-- stub.
+Jeżeli później zechcesz:
 
----
+- wysyłać SMS zamiast e-maila,
+- użyć innej biblioteki,
+- testować bez wysyłania prawdziwej wiadomości,
 
-## DI a luźne powiązania
+musisz modyfikować `OrderService`.
 
-Jeśli logika biznesowa zależy od abstrakcji lub prostego kontraktu, a nie od konkretnego szczegółu, system jest mniej kruchy.
+To znak zbyt silnego sprzężenia.
 
-To bardzo cenna właściwość większych projektów.
+## Lepsze podejście: zależność z zewnątrz
 
----
+```python
+class EmailSender:
+    def send(self, to, subject, body):
+        print(f"Wysylam e-mail do {to}")
 
-## Jak DI wygląda w Pythonie
 
-W Pythonie DI często jest prostsze niż w niektórych innych językach.
+class OrderService:
+    def __init__(self, email_sender):
+        self.email_sender = email_sender
 
-Często wystarczy:
+    def complete_order(self, user_email):
+        self.email_sender.send(user_email, "Zamowienie", "Dziekujemy")
+```
 
-- przekazanie obiektu do konstruktora,
-- przekazanie funkcji jako argumentu,
-- użycie zależności w FastAPI.
+Teraz:
 
-Nie zawsze potrzebujesz ciężkiego kontenera DI.
+- `OrderService` nie tworzy zależności samodzielnie,
+- dostaje ją z zewnątrz,
+- można podać dowolny obiekt z metodą `send()`.
 
----
+To jest właśnie sedno Dependency Injection.
 
-## Kiedy nie przesadzać
+## Formy wstrzykiwania zależności
 
-W małym skrypcie lub bardzo prostym projekcie nadmiar abstrakcji może bardziej przeszkadzać niż pomagać.
+Najczęściej spotkasz kilka form.
 
-DI ma sens tam, gdzie rzeczywiście daje elastyczność i testowalność.
+### 1. Constructor Injection
 
----
+Zależność trafia do konstruktora `__init__`.
 
-## Typowe błędy początkujących
+```python
+class UserService:
+    def __init__(self, repository):
+        self.repository = repository
+```
 
-- tworzenie wszystkiego globalnie,
-- ukryte zależności wewnątrz metod,
-- przesadna abstrakcja w małych projektach,
-- mylenie DI z "robieniem wszystkiego przez interfejsy" nawet bez potrzeby.
+To najczęściej najlepszy i najczytelniejszy wariant.
 
----
+Dobrze działa, gdy zależność jest wymagana do działania obiektu.
 
-## Praktyczne przykłady
+### 2. Parameter Injection
 
-### Zależność repozytorium
+Zależność jest przekazywana bezpośrednio do metody.
 
-Serwis użytkowników nie musi wiedzieć, jak działa baza.
+```python
+def generate_report(data, formatter):
+    return formatter.format(data)
+```
 
-Wystarczy, że dostanie obiekt repozytorium.
+Dobre, gdy zależność potrzebna jest tylko w jednej operacji.
 
-### Zależność klienta HTTP
+### 3. Setter Injection
 
-Klasa integracyjna może dostać klienta API z zewnątrz zamiast sama go tworzyć.
+Zależność jest ustawiana po utworzeniu obiektu.
 
----
+```python
+class Service:
+    def set_logger(self, logger):
+        self.logger = logger
+```
 
-## Dobre praktyki
+Możliwe, ale zwykle mniej bezpieczne, bo obiekt może istnieć chwilowo w niepełnym stanie.
 
-- utrzymuj zależności jawne,
-- wstrzykuj to, co realnie warto podmieniać,
-- nie komplikuj małych projektów nadmiarem warstw,
-- używaj DI tam, gdzie poprawia testowalność i czytelność.
+## Dlaczego DI pomaga?
 
----
+### 1. Testowalność
 
-## Podsumowanie
+Możesz podstawić atrapę lub fake.
 
-Dependency injection to jedna z najbardziej praktycznych technik porządkowania kodu.
+```python
+class FakeEmailSender:
+    def __init__(self):
+        self.sent_messages = []
 
-W Pythonie da się ją stosować lekko i skutecznie, bez niepotrzebnej ciężkości.
+    def send(self, to, subject, body):
+        self.sent_messages.append((to, subject, body))
 
----
 
-## Mini ściąga
+fake_sender = FakeEmailSender()
+service = OrderService(fake_sender)
+service.complete_order("anna@example.com")
 
-Najważniejsze:
+print(fake_sender.sent_messages)
+```
 
-- zależności warto dostarczać z zewnątrz,
-- jawne zależności są czytelniejsze,
-- DI poprawia testowalność,
-- nie zawsze potrzebujesz rozbudowanego frameworka DI.
+Przykładowy output:
 
----
+```python
+[("anna@example.com", "Zamowienie", "Dziekujemy")]
+```
+
+Nie musisz odpalać prawdziwej wysyłki. Test jest szybki i przewidywalny.
+
+### 2. Mniejsze sprzężenie
+
+Klasa zależy od zachowania, a nie od szczegółów tworzenia obiektu.
+
+### 3. Łatwiejsza wymiana implementacji
+
+Możesz dziś używać `EmailSender`, a jutro `SmsSender` lub `NotificationSender`.
+
+### 4. Czytelniejsza architektura
+
+Od razu widać, od czego klasa zależy.
+
+## Python i duck typing a DI
+
+W Pythonie DI jest wygodne, bo język nie wymaga sztywnych interfejsów jak część innych języków.
+
+Jeśli obiekt ma potrzebną metodę, to często już wystarczy.
+
+```python
+class ConsoleLogger:
+    def log(self, message):
+        print(message)
+
+
+class FileLogger:
+    def log(self, message):
+        print(f"Zapis do pliku: {message}")
+
+
+class AppService:
+    def __init__(self, logger):
+        self.logger = logger
+
+    def run(self):
+        self.logger.log("Start aplikacji")
+```
+
+Oba loggery mogą działać z `AppService`, jeśli mają metodę `log()`.
+
+## Kiedy warto dodać Protocol?
+
+W większych projektach można doprecyzować oczekiwany interfejs przez `Protocol`.
+
+```python
+from typing import Protocol
+
+
+class LoggerProtocol(Protocol):
+    def log(self, message: str) -> None:
+        ...
+
+
+class AppService:
+    def __init__(self, logger: LoggerProtocol):
+        self.logger = logger
+```
+
+To daje:
+
+- czytelniejszy kontrakt,
+- lepsze wsparcie narzędzi typu mypy,
+- większą jasność dla innych programistów.
+
+## Czego DI nie oznacza?
+
+Dependency Injection nie oznacza, że:
+
+- trzeba używać skomplikowanego frameworka,
+- trzeba wszędzie tworzyć fabryki i kontenery,
+- każda funkcja musi przyjmować 10 zależności.
+
+Na początku DI to po prostu zdrowa zasada:
+
+- nie twórz wszystkiego wewnątrz klasy,
+- przekazuj zależności jawnie.
+
+## Zły i dobry przykład
+
+### Zły przykład
+
+```python
+class ReportService:
+    def generate(self):
+        db = DatabaseConnection()
+        logger = FileLogger()
+        data = db.get_data()
+        logger.log("Pobrano dane")
+        return data
+```
+
+Problemy:
+
+- klasa sama tworzy zależności,
+- trudno ją testować,
+- trudno podmienić bazę lub logger.
+
+### Lepszy przykład
+
+```python
+class ReportService:
+    def __init__(self, db, logger):
+        self.db = db
+        self.logger = logger
+
+    def generate(self):
+        data = self.db.get_data()
+        self.logger.log("Pobrano dane")
+        return data
+```
+
+Teraz konfiguracja dzieje się na zewnątrz, a klasa skupia się na swojej pracy.
+
+## Gdzie tworzyć zależności?
+
+To ważne pytanie.
+
+Zwykle:
+
+- obiekty tworzymy na poziomie „wejścia” do aplikacji,
+- a potem przekazujemy je dalej.
+
+Przykład:
+
+```python
+repository = UserRepository()
+logger = ConsoleLogger()
+service = UserService(repository, logger)
+```
+
+Czyli:
+
+- na brzegu aplikacji składamy obiekty,
+- wewnątrz aplikacji używamy już gotowych zależności.
+
+To często nazywa się **composition root**.
+
+## Najczęstsze błędy
+
+### 1. Udawane DI
+
+```python
+class Service:
+    def __init__(self, repo=None):
+        self.repo = repo or UserRepository()
+```
+
+To jest częściowo lepsze niż nic, ale nadal klasa zna konkretną implementację.
+
+### 2. Zbyt wiele zależności
+
+Jeśli konstruktor ma 9 parametrów, to często znak, że klasa robi za dużo.
+
+### 3. Wstrzykiwanie wszystkiego na siłę
+
+Nie każda drobna rzecz potrzebuje osobnej abstrakcji.
+
+### 4. Mylenie DI z globalami
+
+```python
+logger = ConsoleLogger()
+
+class Service:
+    def run(self):
+        logger.log("hello")
+```
+
+To nie jest DI. To ukryta zależność globalna.
+
+## Praktyczne wskazówki
+
+- Wymagane zależności podawaj przez `__init__`.
+- Staraj się zależeć od zachowania, nie od konkretnej implementacji.
+- Konfiguruj obiekty na brzegu aplikacji.
+- Jeśli klasa ma za dużo zależności, sprawdź, czy nie robi za dużo.
+- W testach podmieniaj zależności na fake lub mock.
+
+## Szybka ściąga
+
+DI oznacza:
+
+- obiekt nie tworzy sam zależności,
+- zależności dostaje z zewnątrz,
+- kod jest bardziej elastyczny i testowalny.
+
+Najczęściej używaj:
+
+- constructor injection.
+
+Największa korzyść:
+
+- łatwe testy i mniejsze sprzężenie.
 
 ## Ćwiczenia
 
-1. Wyjaśnij, czym jest dependency injection.
-2. Podaj przykład ukrytej zależności.
-3. Podaj przykład jawnej zależności.
-4. Wyjaśnij, czemu DI poprawia testowalność.
-5. Wyjaśnij, czemu nie warto przesadzać z DI w małym skrypcie.
+1. Napisz klasę `MessageService`, która bez DI sama tworzy `ConsoleSender`.
+2. Przerób ją tak, aby `sender` był przekazywany przez `__init__`.
+3. Dodaj drugą implementację wysyłki, np. `FileSender`.
+4. Napisz fake sender do testów, który zapisuje wiadomości do listy.
+5. Zbuduj `OrderService`, która korzysta z repozytorium i loggera przekazywanych z zewnątrz.
+6. Zastanów się, czy klasa z 7 zależnościami nie łamie zasady jednej odpowiedzialności.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. DI
-
-To dostarczanie zależności z zewnątrz zamiast tworzenia ich na sztywno w środku obiektu.
-
-### 2. Ukryta zależność
-
-Metoda, która sama tworzy klienta bazy lub API bez pokazania tego w interfejsie.
-
-### 3. Jawna zależność
-
-Repozytorium przekazane do konstruktora serwisu.
-
-### 4. Testowalność
-
-Bo można łatwo podstawić fake lub mock zamiast prawdziwego systemu zewnętrznego.
-
-### 5. Mały skrypt
-
-Bo dodatkowa abstrakcja może tylko obniżyć czytelność bez realnej korzyści.
+- Dependency Injection zmniejsza sprzężenie między klasami.
+- Klasa nie powinna sama tworzyć wszystkich swoich współpracowników.
+- Najwygodniej przekazywać zależności przez konstruktor.
+- DI bardzo ułatwia testowanie.
+- W Pythonie DI dobrze współgra z duck typing i `Protocol`.

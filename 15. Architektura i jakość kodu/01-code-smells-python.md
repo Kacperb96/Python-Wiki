@@ -11,21 +11,21 @@
 7. [Ukryte efekty uboczne](#ukryte-efekty-uboczne)
 8. [Chaotyczne nazwy](#chaotyczne-nazwy)
 9. [Feature envy i mieszanie odpowiedzialności](#feature-envy-i-mieszanie-odpowiedzialności)
-10. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-11. [Praktyczne przykłady](#praktyczne-przykłady)
-12. [Dobre praktyki](#dobre-praktyki)
-13. [Podsumowanie](#podsumowanie)
-14. [Mini ściąga](#mini-ściąga)
-15. [Ćwiczenia](#ćwiczenia)
-16. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+10. [Przykład mentalny](#przykład-mentalny)
+11. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+12. [Praktyczna ściąga](#praktyczna-ściąga)
+13. [Ćwiczenia](#ćwiczenia)
+14. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
 ## Wprowadzenie
 
-Code smell to sygnał ostrzegawczy, że w kodzie może być problem projektowy lub utrzymaniowy.
+Code smell to sygnał ostrzegawczy, że w kodzie może być problem projektowy albo utrzymaniowy.
 
-To nie zawsze jest błąd wykonania, ale często zapowiedź przyszłych kłopotów.
+To nie zawsze jest błąd wykonania.
+
+Ale bardzo często jest zapowiedzią przyszłych kłopotów.
 
 ---
 
@@ -36,7 +36,12 @@ To wzorce, które sugerują:
 - nadmierną złożoność,
 - zły podział odpowiedzialności,
 - niską czytelność,
-- trudność w rozwijaniu kodu.
+- trudność w rozwijaniu kodu,
+- rosnący koszt zmian.
+
+Bardzo ważne:
+
+code smell to heurystyka, a nie automatyczny wyrok.
 
 ---
 
@@ -46,7 +51,10 @@ Bo szybkie zauważenie takich sygnałów pomaga:
 
 - refaktoryzować wcześniej,
 - obniżać koszt utrzymania,
-- nie dopuszczać do narastania chaosu.
+- nie dopuszczać do narastania chaosu,
+- łatwiej planować zmiany.
+
+To trochę jak wczesne wykrywanie długu technicznego.
 
 ---
 
@@ -61,13 +69,19 @@ Jeśli jedna funkcja ma:
 
 to zwykle jest kandydatem do rozbicia.
 
+Długa funkcja nie zawsze jest zła sama w sobie, ale bardzo często ukrywa wiele problemów naraz.
+
 ---
 
 ## Duplikacja
 
-Jeśli ten sam kod lub bardzo podobna logika pojawiają się w wielu miejscach, to sygnał ostrzegawczy.
+Jeśli ten sam kod albo bardzo podobna logika pojawiają się w wielu miejscach, to sygnał ostrzegawczy.
 
-Duplikacja zwiększa koszt zmian i ryzyko niespójności.
+Duplikacja zwiększa:
+
+- koszt zmian,
+- ryzyko niespójności,
+- ryzyko że poprawisz jedno miejsce, a zapomnisz o drugim.
 
 ---
 
@@ -77,17 +91,28 @@ Klasa, która wie i robi za dużo, często jest trudna do utrzymania.
 
 To klasyczny zapach projektu.
 
+Często objawia się klasami typu:
+
+- `AppManager`,
+- `UserServiceManager`,
+- `SystemController`.
+
+Nazwy już same często sugerują zbyt szeroką odpowiedzialność.
+
 ---
 
 ## Ukryte efekty uboczne
 
-Funkcja o nazwie sugerującej "obliczenie", która:
+Funkcja o nazwie sugerującej „obliczenie”, która:
 
 - zapisuje do pliku,
 - modyfikuje globalny stan,
 - wysyła request,
+- robi zapis do bazy,
 
 jest niebezpieczna dla czytelności i przewidywalności.
+
+Takie rzeczy bardzo utrudniają testy i debugowanie.
 
 ---
 
@@ -99,14 +124,36 @@ Nazwy typu:
 - `handle`,
 - `process`,
 - `tmp`,
+- `manager`,
 
 często sygnalizują, że autor sam nie nazwał jasno odpowiedzialności.
+
+Zła nazwa to często sygnał głębszego problemu projektowego.
 
 ---
 
 ## Feature envy i mieszanie odpowiedzialności
 
-Jeśli funkcja lub klasa zbyt mocno interesuje się danymi innego obiektu albo logika jest rozlana po złych miejscach, to często znak słabej architektury.
+Jeśli funkcja albo klasa zbyt mocno interesuje się danymi innego obiektu albo logika jest rozlana po złych miejscach, to często znak słabej architektury.
+
+To zwykle oznacza, że odpowiedzialności są źle podzielone.
+
+---
+
+## Przykład mentalny
+
+Masz endpoint, który:
+
+- waliduje wejście,
+- sprawdza uprawnienia,
+- pobiera dane z bazy,
+- liczy rabat,
+- wysyła mail,
+- buduje odpowiedź HTTP.
+
+To bardzo prawdopodobny code smell.
+
+Kod działa, ale odpowiedzialności są sklejone w jedno miejsce.
 
 ---
 
@@ -119,79 +166,37 @@ Jeśli funkcja lub klasa zbyt mocno interesuje się danymi innego obiektu albo l
 
 ---
 
-## Praktyczne przykłady
+## Praktyczna ściąga
 
-### Long method
-
-Funkcja 150-liniowa obsługująca cały proces biznesowy.
-
-### Duplikacja
-
-Ta sama walidacja emaila skopiowana do pięciu miejsc.
-
-### God object
-
-Klasa `AppManager`, która robi wszystko.
-
----
-
-## Dobre praktyki
-
-- ucz się rozpoznawać zapachy wcześnie,
-- reaguj małymi refaktoryzacjami,
-- nie przesadzaj z polowaniem na ideał,
-- traktuj code smells jako sygnały do myślenia.
-
----
-
-## Podsumowanie
-
-Code smells pomagają widzieć problemy wcześniej, zanim staną się drogimi awariami utrzymaniowymi.
-
-To bardzo praktyczna umiejętność profesjonalna.
-
----
-
-## Mini ściąga
-
-Najważniejsze sygnały:
+### Najczęstsze sygnały
 
 - długa funkcja,
 - duplikacja,
 - zbyt duża klasa,
-- ukryte side effecty,
-- słabe nazewnictwo.
+- ukryte efekty uboczne,
+- mieszanie odpowiedzialności.
+
+### Dobra reakcja
+
+Nie panikuj.
+
+Zacznij od małej refaktoryzacji i popraw najważniejszy problem.
 
 ---
 
 ## Ćwiczenia
 
-1. Podaj przykład długiej funkcji jako code smell.
-2. Wyjaśnij, czemu duplikacja boli.
-3. Podaj przykład ukrytego efektu ubocznego.
-4. Wyjaśnij, czemu zła nazwa też jest sygnałem problemu.
-5. Wyjaśnij, czemu code smell nie zawsze oznacza bug.
+1. Wskaż przykład długiej funkcji.
+2. Znajdź przykład duplikacji.
+3. Wskaż klasę, która może robić za dużo.
+4. Znajdź przykład ukrytego efektu ubocznego.
+5. Wyjaśnij własnymi słowami, czemu code smell nie zawsze oznacza natychmiastowy błąd.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Długa funkcja
-
-Na przykład funkcja obsługująca cały checkout, płatność i mail w jednym miejscu.
-
-### 2. Duplikacja
-
-Bo trzeba poprawiać tę samą logikę w wielu miejscach i łatwo coś pominąć.
-
-### 3. Side effect
-
-Funkcja `calculate_total`, która przy okazji zapisuje coś do bazy.
-
-### 4. Zła nazwa
-
-Bo utrudnia zrozumienie odpowiedzialności kodu.
-
-### 5. Nie zawsze bug
-
-Bo to raczej sygnał projektowy, że kod może być trudniejszy do dalszego utrzymania.
+- Code smell to sygnał ostrzegawczy, nie automatyczny wyrok.
+- Najczęściej mówi o trudności utrzymania, testowania albo rozwijania kodu.
+- Warto je rozpoznawać wcześnie.
+- Najlepsza reakcja to małe, sensowne refaktoryzacje.

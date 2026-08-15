@@ -1,204 +1,380 @@
 # SOLID w Pythonie
 
-## Spis treści
+## Czym jest SOLID?
 
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co znać SOLID](#po-co-znać-solid)
-3. [Single Responsibility Principle](#single-responsibility-principle)
-4. [Open Closed Principle](#open-closed-principle)
-5. [Liskov Substitution Principle](#liskov-substitution-principle)
-6. [Interface Segregation Principle](#interface-segregation-principle)
-7. [Dependency Inversion Principle](#dependency-inversion-principle)
-8. [SOLID a Python](#solid-a-python)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+SOLID to zestaw pięciu zasad projektowania kodu obiektowego, które pomagają pisać kod:
 
----
+- czytelniejszy,
+- łatwiejszy do rozbudowy,
+- mniej kruchy,
+- prostszy w testowaniu,
+- bardziej odporny na zmiany.
 
-## Wprowadzenie
+To nie są magiczne przepisy. To raczej zestaw pytań kontrolnych, które pomagają zauważyć, że architektura zaczyna się psuć.
 
-SOLID to zestaw zasad projektowania, które pomagają pisać kod łatwiejszy do utrzymania, testowania i rozwijania.
+Skrót SOLID oznacza:
 
-To nie są magiczne reguły, ale bardzo przydatne heurystyki.
+- `S` – Single Responsibility Principle,
+- `O` – Open/Closed Principle,
+- `L` – Liskov Substitution Principle,
+- `I` – Interface Segregation Principle,
+- `D` – Dependency Inversion Principle.
+
+W Pythonie trzeba do tego podejść rozsądnie.
+
+Python jest językiem dynamicznym, więc nie wszystko wdraża się tak samo jak np. w Javie czy C#. Nie chodzi o produkowanie dziesiątek klas i interfejsów, tylko o budowanie kodu, który dobrze się rozwija.
 
 ---
 
-## Po co znać SOLID
+## S – Single Responsibility Principle
 
-Bo wraz ze wzrostem projektu zaczynają boleć:
+### Jedna klasa lub funkcja powinna mieć jeden główny powód do zmiany
 
-- zbyt duże klasy,
-- zbyt mocne powiązania,
-- trudne testowanie,
-- lęk przed zmianą kodu.
+To chyba najważniejsza zasada na start.
 
-SOLID pomaga to ograniczać.
+Jeśli jedna klasa:
 
----
-
-## Single Responsibility Principle
-
-Jedna klasa lub moduł powinny mieć jedną główną odpowiedzialność.
-
-Jeśli jeden obiekt:
-
-- liczy,
+- liczy dane,
 - zapisuje do bazy,
-- wysyła maile,
-- formatuje raport,
+- generuje PDF,
+- wysyła e-mail,
+- loguje błędy,
 
-to zwykle robi za dużo.
+to prawdopodobnie robi za dużo.
+
+### Zły przykład
+
+```python
+class InvoiceService:
+    def calculate_total(self, items):
+        return sum(item["price"] for item in items)
+
+    def save_to_database(self, invoice):
+        print("Zapis do bazy")
+
+    def send_email(self, email):
+        print(f"Wysylka e-mail do {email}")
+```
+
+Ta klasa miesza:
+
+- logikę biznesową,
+- persystencję,
+- komunikację.
+
+### Lepszy kierunek
+
+```python
+class InvoiceCalculator:
+    def calculate_total(self, items):
+        return sum(item["price"] for item in items)
+
+
+class InvoiceRepository:
+    def save(self, invoice):
+        print("Zapis do bazy")
+
+
+class EmailSender:
+    def send(self, email):
+        print(f"Wysylka e-mail do {email}")
+```
+
+Teraz każda część ma wyraźniejszą odpowiedzialność.
+
+### Pytanie kontrolne
+
+Czy potrafisz jednym zdaniem opisać, za co odpowiada dana klasa?
+
+Jeśli nie, to możliwe, że narusza SRP.
 
 ---
 
-## Open Closed Principle
+## O – Open/Closed Principle
 
-Kod powinien być otwarty na rozszerzanie, ale zamknięty na częste przerabianie istniejącego rdzenia.
+### Kod powinien być otwarty na rozszerzanie, ale zamknięty na modyfikację
 
-W praktyce często chodzi o to, by nowe zachowania dodawać przez:
+Idea jest taka:
 
-- nowe klasy,
-- strategie,
-- kompozycję,
+- gdy pojawia się nowy przypadek,
+- wolisz dopisać nową implementację,
+- niż stale rozgrzebywać starą klasę pełną `if`-ów.
 
-a nie przez dokładanie kolejnych `ifów` w jednym miejscu.
+### Zły przykład
+
+```python
+class DiscountCalculator:
+    def calculate(self, customer_type, price):
+        if customer_type == "regular":
+            return price
+        if customer_type == "vip":
+            return price * 0.8
+        if customer_type == "student":
+            return price * 0.9
+```
+
+Za każdym nowym typem klienta trzeba modyfikować klasę.
+
+### Lepszy kierunek
+
+```python
+class RegularDiscount:
+    def calculate(self, price):
+        return price
+
+
+class VipDiscount:
+    def calculate(self, price):
+        return price * 0.8
+
+
+class StudentDiscount:
+    def calculate(self, price):
+        return price * 0.9
+```
+
+Kod używający zniżki może dostać odpowiednią strategię z zewnątrz.
+
+Wtedy nowy typ zniżki oznacza zwykle dodanie nowej klasy, a nie psucie starej.
+
+### Uwaga praktyczna
+
+Nie każdy `if` łamie OCP. Jeśli masz 2 proste przypadki i kod jest mały, nie trzeba od razu budować całego systemu strategii.
 
 ---
 
-## Liskov Substitution Principle
+## L – Liskov Substitution Principle
 
-Jeśli coś dziedziczy po czymś innym, powinno dać się używać zamiennie bez psucia oczekiwań.
+### Klasy potomne powinny dać się podstawiać za klasę bazową bez psucia programu
 
-Jeśli podklasa łamie kontrakt klasy bazowej, projekt zaczyna się chwiać.
+Brzmi abstrakcyjnie, ale chodzi o prostą rzecz:
+
+- jeśli coś jest „rodzajem” czegoś innego,
+- to powinno zachowywać się zgodnie z oczekiwaniami wobec typu bazowego.
+
+### Klasyczny zły przykład
+
+```python
+class Bird:
+    def fly(self):
+        print("Lecę")
+
+
+class Penguin(Bird):
+    def fly(self):
+        raise NotImplementedError("Pingwin nie lata")
+```
+
+Tu dziedziczenie jest złe, bo `Penguin` nie spełnia obietnicy typu `Bird` z metodą `fly()`.
+
+### Co zrobić lepiej?
+
+Można rozdzielić model:
+
+```python
+class Bird:
+    pass
+
+
+class FlyingBird(Bird):
+    def fly(self):
+        print("Lecę")
+
+
+class Penguin(Bird):
+    def swim(self):
+        print("Płynę")
+```
+
+### Jak rozpoznawać naruszenia LSP?
+
+Jeśli klasa potomna:
+
+- rzuca wyjątek dla bazowej operacji,
+- ignoruje ważne zachowanie,
+- zmienia sens metody,
+- wymaga innych warunków wejścia,
+
+to możliwe, że projekt jest zły.
 
 ---
 
-## Interface Segregation Principle
+## I – Interface Segregation Principle
 
-Lepiej mieć mniejsze, sensowne interfejsy niż jeden wielki interfejs robiący wszystko.
+### Lepiej mieć kilka małych interfejsów niż jeden wielki
 
-W Pythonie często przekłada się to na:
+W Pythonie rzadziej używa się klasycznych interfejsów, ale idea nadal jest bardzo cenna.
 
-- małe protokoły,
+Jeśli obiekt musi implementować metody, których nie potrzebuje, to coś jest nie tak.
+
+### Zły przykład mentalny
+
+Wyobraź sobie interfejs:
+
+- `print_document()`
+- `scan_document()`
+- `fax_document()`
+
+A potem masz klasę prostego urządzenia, które tylko drukuje. Musi udawać, że wspiera skanowanie i faks.
+
+To zły projekt.
+
+### Lepszy kierunek
+
+Rozdziel zachowania:
+
+- osobny kontrakt dla drukowania,
+- osobny dla skanowania,
+- osobny dla wysyłki.
+
+### W Pythonie często realizujesz to przez:
+
 - małe klasy,
-- czytelne API metod.
+- kompozycję,
+- `Protocol`,
+- wstrzykiwanie tylko potrzebnych zależności.
+
+Przykład z `Protocol`:
+
+```python
+from typing import Protocol
+
+
+class Printer(Protocol):
+    def print_document(self, text: str) -> None:
+        ...
+```
+
+Jeśli jakaś funkcja potrzebuje tylko drukowania, nie powinna wymagać jeszcze skanowania i eksportu PDF.
 
 ---
 
-## Dependency Inversion Principle
+## D – Dependency Inversion Principle
 
-Wyższe warstwy nie powinny być twardo przyklejone do szczegółów niższych warstw.
+### Wysokopoziomowe moduły nie powinny zależeć od niskopoziomowych szczegółów
 
-Na przykład logika biznesowa nie powinna znać bezpośrednio wszystkich szczegółów konkretnej bazy czy frameworka.
+To zasada mocno związana z Dependency Injection.
 
----
+Chodzi o to, żeby logika biznesowa nie była przywiązana do konkretnej technologii.
 
-## SOLID a Python
+### Zły przykład
 
-Python jest elastyczny i dynamiczny, więc SOLID nie wygląda tu zawsze tak samo jak w językach bardziej sztywnych.
+```python
+class MySQLDatabase:
+    def save(self, data):
+        print("Zapis do MySQL")
 
-W Pythonie ważniejsze od "ceremonii" są:
 
-- sensowny podział odpowiedzialności,
-- luźne powiązania,
-- czytelność,
-- testowalność.
+class UserService:
+    def __init__(self):
+        self.database = MySQLDatabase()
 
----
+    def register(self, user):
+        self.database.save(user)
+```
 
-## Typowe błędy początkujących
+Problem:
 
-- traktowanie SOLID jak religii,
-- przesadne mnożenie abstrakcji,
-- brak zrozumienia problemu, który zasada rozwiązuje,
-- kopiowanie wzorców z innych języków bez dopasowania do Pythona.
+- `UserService` zależy od konkretnej implementacji.
 
----
+### Lepszy kierunek
 
-## Praktyczne przykłady
+```python
+class UserService:
+    def __init__(self, repository):
+        self.repository = repository
 
-### Zła odpowiedzialność
+    def register(self, user):
+        self.repository.save(user)
+```
 
-Klasa `UserManager`, która:
+Teraz `UserService` zależy od zachowania repozytorium, a nie od szczegółu technologicznego.
 
-- pobiera użytkownika,
-- waliduje hasło,
-- zapisuje do bazy,
-- wysyła mail,
-- loguje zdarzenia.
+W Pythonie można to wspierać przez:
 
-To zwykle znak, że odpowiedzialności są zmieszane.
-
-### Lepszy podział
-
-- serwis użytkowników,
-- repozytorium,
-- osobna usługa mailowa.
+- duck typing,
+- `Protocol`,
+- Dependency Injection.
 
 ---
 
-## Dobre praktyki
+## Czy trzeba stosować wszystkie zasady zawsze?
 
-- używaj SOLID jako narzędzia myślenia, nie checklisty,
-- upraszczaj powiązania między modułami,
-- pilnuj odpowiedzialności klas i funkcji,
-- nie buduj abstrakcji wcześniej, niż naprawdę są potrzebne.
+Nie.
 
----
+To bardzo ważne.
 
-## Podsumowanie
+SOLID nie służy do tego, żeby:
 
-SOLID jest przydatny, jeśli pomaga pisać prostszy, czytelniejszy i bardziej utrzymywalny kod.
+- mnożyć klasy bez potrzeby,
+- komplikować mały skrypt,
+- udawać enterprise tam, gdzie wystarczy prosta funkcja.
 
-Największa wartość nie leży w skrócie, tylko w jakości decyzji projektowych.
+Jeśli masz mały plik i 30 linii kodu, to rozbudowana architektura może być gorsza niż prosty kod.
 
----
+Ale gdy projekt rośnie, SOLID pomaga zauważać problemy wcześniej.
 
-## Mini ściąga
+## SOLID w praktyce Pythona
 
-Najważniejsze:
+W Pythonie dobre praktyki związane z SOLID często wyglądają tak:
 
-- `S` jedna główna odpowiedzialność,
-- `O` rozszerzaj bez ciągłego przerabiania rdzenia,
-- `L` podtyp nie powinien psuć kontraktu,
-- `I` preferuj mniejsze interfejsy,
-- `D` wyższe warstwy niech nie zależą twardo od detali.
+- mniejsze klasy i funkcje,
+- kompozycja zamiast ciężkiego dziedziczenia,
+- zależności przekazywane z zewnątrz,
+- unikanie klas „wszystko w jednym”,
+- `Protocol` tam, gdzie kontrakt ma znaczenie,
+- sensowne rozdzielanie odpowiedzialności między moduły.
 
----
+## Jak nie popaść w przesadę?
+
+### Zły kierunek
+
+- 12 klas dla bardzo prostego zadania,
+- abstrakcje bez realnej potrzeby,
+- interfejsy tylko „bo SOLID”,
+- kod trudniejszy niż problem, który rozwiązuje.
+
+### Lepszy kierunek
+
+- najpierw prosty kod,
+- potem refaktoryzacja, gdy rośnie złożoność,
+- abstrakcje dopiero wtedy, gdy rzeczywiście coś upraszczają.
+
+## Szybka ściąga
+
+### SRP
+
+Jedna odpowiedzialność.
+
+### OCP
+
+Rozszerzaj przez dodawanie, nie ciągłe przerabianie istniejącego kodu.
+
+### LSP
+
+Typ potomny nie może łamać obietnic typu bazowego.
+
+### ISP
+
+Nie zmuszaj obiektów do implementowania rzeczy, których nie potrzebują.
+
+### DIP
+
+Logika wysokiego poziomu nie powinna zależeć od technologicznych detali.
 
 ## Ćwiczenia
 
-1. Podaj przykład klasy łamiącej SRP.
-2. Wyjaśnij OCP własnymi słowami.
-3. Wskaż przykład złego dziedziczenia łamiącego LSP.
-4. Wyjaśnij, czemu DIP pomaga testować kod.
-5. Wyjaśnij, czemu SOLID w Pythonie nie powinien oznaczać nadmiaru ceremonii.
+1. Weź klasę, która liczy, zapisuje i loguje, i rozbij ją zgodnie z SRP.
+2. Napisz kalkulator zniżek oparty na `if`, a potem przerób go na osobne strategie.
+3. Znajdź przykład złego dziedziczenia i zamień je na kompozycję lub lepszą hierarchię.
+4. Zdefiniuj `Protocol` dla repozytorium i użyj go w serwisie.
+5. Sprawdź klasę z projektu i odpowiedz, którą zasadę SOLID łamie najbardziej.
+6. Zbuduj prosty `NotificationService`, do którego można wstrzykiwać różne sposoby wysyłki.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. SRP
-
-Klasa, która jednocześnie generuje raport, zapisuje go do pliku i wysyła mail.
-
-### 2. OCP
-
-Nowe zachowanie lepiej dodać przez rozszerzenie niż przez przerabianie wielu starych miejsc.
-
-### 3. LSP
-
-Podklasa, która dziedziczy po bazie, ale przestaje spełniać oczekiwane zachowanie metod bazowych.
-
-### 4. DIP
-
-Bo logikę można testować z podmienionymi zależnościami zamiast z prawdziwą bazą czy API.
-
-### 5. Ceremonia
-
-Bo nadmiar abstrakcji może bardziej zaciemnić kod niż go poprawić.
+- SOLID to zestaw zasad pomagających projektować kod, który dobrze się rozwija.
+- Najbardziej praktyczne na początku są SRP i DIP.
+- W Pythonie często lepiej stawiać na kompozycję niż ciężkie dziedziczenie.
+- Nie chodzi o ślepe stosowanie wzorców, tylko o świadome upraszczanie architektury.
+- Dobra architektura ma pomagać, a nie imponować liczbą abstrakcji.

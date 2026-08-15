@@ -9,13 +9,11 @@
 5. [Logika biznesowa a baza danych](#logika-biznesowa-a-baza-danych)
 6. [Logika biznesowa a warstwa HTTP](#logika-biznesowa-a-warstwa-http)
 7. [Korzyści dla testów](#korzyści-dla-testów)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+8. [Przykład mentalny](#przykład-mentalny)
+9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
+10. [Praktyczna ściąga](#praktyczna-ściąga)
+11. [Ćwiczenia](#ćwiczenia)
+12. [Najważniejsze do zapamiętania](#najważniejsze-do-zapamiętania)
 
 ---
 
@@ -38,6 +36,10 @@ Na przykład:
 - kiedy wysłać powiadomienie,
 - jakie warunki musi spełnić użytkownik.
 
+To nie są szczegóły HTTP ani szczegóły bazy.
+
+To odpowiedź na pytanie: jak działa świat tego systemu.
+
 ---
 
 ## Po co ją separować
@@ -47,6 +49,7 @@ Bo gdy logika biznesowa jest rozlana po:
 - endpointach,
 - zapytaniach SQL,
 - callbackach frameworka,
+- klasach infrastrukturalnych,
 
 projekt szybko staje się trudny do testowania i rozwijania.
 
@@ -54,7 +57,7 @@ projekt szybko staje się trudny do testowania i rozwijania.
 
 ## Logika biznesowa a framework
 
-Framework HTTP nie powinien być centrum twojej domeny.
+Framework HTTP nie powinien być centrum domeny.
 
 Endpoint powinien raczej:
 
@@ -89,6 +92,8 @@ Jeśli warunki biznesowe są rozpisane wprost w endpointach, potem trudno je wyk
 - w testach,
 - w kolejce background jobs.
 
+To znak, że logika jest zbyt mocno przyklejona do transportu.
+
 ---
 
 ## Korzyści dla testów
@@ -101,22 +106,19 @@ Logikę biznesową można testować bez:
 - prawdziwej bazy,
 - całej infrastruktury.
 
----
+To zwykle daje testy:
 
-## Typowe błędy początkujących
-
-- cała logika w endpointach,
-- logika biznesowa w modelach ORM bez planu,
-- brak osobnej warstwy lub choćby modułu domenowego,
-- mieszanie walidacji HTTP z regułami biznesowymi.
+- szybsze,
+- prostsze,
+- bardziej odporne na zmiany techniczne.
 
 ---
 
-## Praktyczne przykłady
+## Przykład mentalny
 
-### Zły kierunek
+Zły kierunek:
 
-Endpoint:
+endpoint:
 
 - waliduje payload,
 - sprawdza warunki biznesowe,
@@ -124,70 +126,61 @@ Endpoint:
 - wysyła mail,
 - buduje odpowiedź.
 
-### Lepszy kierunek
+Lepszy kierunek:
 
 - endpoint odbiera request,
 - serwis domenowy podejmuje decyzję,
 - repozytorium zapisuje dane,
 - infrastruktura wysyła mail.
 
----
-
-## Dobre praktyki
-
-- utrzymuj logikę biznesową w osobnych funkcjach, serwisach lub modułach,
-- nie przyklejaj domeny do frameworka,
-- oddzielaj warstwę danych od decyzji biznesowych,
-- testuj reguły biznesowe niezależnie od transportu i infrastruktury.
+To dużo czytelniejszy podział odpowiedzialności.
 
 ---
 
-## Podsumowanie
+## Typowe błędy początkujących
 
-Separacja logiki biznesowej to jedna z najcenniejszych praktyk architektonicznych w backendzie Python.
-
-Im lepiej to zrobisz, tym mniej projekt będzie zależał od przypadkowej struktury frameworka.
+- cała logika w endpointach,
+- logika biznesowa w modelach ORM bez planu,
+- brak osobnej warstwy albo choćby modułu domenowego,
+- mieszanie walidacji HTTP z regułami biznesowymi,
+- przyklejanie domeny do frameworka.
 
 ---
 
-## Mini ściąga
+## Praktyczna ściąga
 
-Najważniejsze:
+### Logika biznesowa odpowiada na pytania
 
-- logika biznesowa to reguły domeny,
-- nie powinna być rozlana po endpointach i SQL,
-- jej separacja poprawia testowalność i utrzymanie.
+- czy wolno,
+- kiedy,
+- jak policzyć,
+- jakie są reguły.
+
+### Nie powinna być rozlana po
+
+- endpointach,
+- SQL,
+- callbackach frameworka.
+
+### Dobra zasada
+
+Oddziel to, co domenowe, od tego, co infrastrukturalne.
 
 ---
 
 ## Ćwiczenia
 
-1. Podaj przykład logiki biznesowej.
-2. Wyjaśnij, czemu nie warto trzymać jej całej w endpointach.
-3. Wyjaśnij, czemu oddzielenie od bazy pomaga.
-4. Wskaż różnicę między walidacją requestu a regułą biznesową.
-5. Wyjaśnij, czemu taka separacja pomaga testować.
+1. Wskaż fragment logiki biznesowej w prostym API.
+2. Wyjmij ją z endpointu do osobnej funkcji albo serwisu.
+3. Opisz, które elementy są domenowe, a które infrastrukturalne.
+4. Wyjaśnij, czemu logikę biznesową lepiej testować bez HTTP i bazy.
+5. Podaj przykład miejsca, gdzie logika biznesowa została zbyt mocno przyklejona do frameworka.
 
 ---
 
-## Przykładowe rozwiązania
+## Najważniejsze do zapamiętania
 
-### 1. Przykład
-
-Reguła mówiąca, że rabat VIP działa tylko dla aktywnego klienta.
-
-### 2. Czemu nie w endpointach
-
-Bo wtedy kod domenowy jest przyklejony do HTTP i trudniej go rozwijać oraz testować.
-
-### 3. Oddzielenie od bazy
-
-Bo logikę można uruchamiać i testować bez całej infrastruktury danych.
-
-### 4. Różnica
-
-Walidacja requestu sprawdza format i obecność danych, a reguła biznesowa sprawdza zasady domeny.
-
-### 5. Testowanie
-
-Bo nie trzeba podnosić całego stosu HTTP i bazy do sprawdzenia samych reguł.
+- Logika biznesowa to reguły domeny.
+- Nie powinna być rozlana po endpointach, SQL i infrastrukturze.
+- Jej separacja poprawia testowalność, czytelność i możliwość ponownego użycia.
+- Im czytelniejsze granice odpowiedzialności, tym zdrowszy projekt.
