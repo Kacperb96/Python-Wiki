@@ -1,176 +1,233 @@
 # Path traversal w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Czym jest path traversal](#czym-jest-path-traversal)
-3. [Skąd bierze się problem](#skąd-bierze-się-problem)
-4. [Niebezpieczne wejście użytkownika](#niebezpieczne-wejście-użytkownika)
-5. [Przykładowy scenariusz ataku](#przykładowy-scenariusz-ataku)
-6. [Jak się bronić](#jak-się-bronić)
-7. [`pathlib` i bezpieczniejsze podejście](#pathlib-i-bezpieczniejsze-podejście)
-8. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-9. [Praktyczne przykłady](#praktyczne-przykłady)
-10. [Dobre praktyki](#dobre-praktyki)
-11. [Podsumowanie](#podsumowanie)
-12. [Mini ściąga](#mini-ściąga)
-13. [Ćwiczenia](#ćwiczenia)
-14. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
-## Wprowadzenie
-
-Path traversal to błąd bezpieczeństwa związany z niekontrolowanym dostępem do plików poza dozwolonym katalogiem.
-
-W Pythonie łatwo go popełnić, gdy ścieżki buduje się bezmyślnie z danych użytkownika.
-
----
-
 ## Czym jest path traversal
 
-To sytuacja, gdy użytkownik potrafi wskazać ścieżkę wychodzącą poza przewidziany katalog.
+Path traversal to błąd bezpieczeństwa, w którym użytkownik wpływa na ścieżkę pliku i może wyjść poza dozwolony katalog.
 
-Na przykład przez fragmenty typu:
+Najczęściej kojarzy się z fragmentami takimi jak:
 
 - `../`
 - `..\\`
 
----
+ale problem jest szerszy niż same te ciągi.
 
-## Skąd bierze się problem
+Chodzi o to, że aplikacja:
 
-Najczęściej z kodu, który robi coś w stylu:
+- przyjmuje nazwę lub ścieżkę od użytkownika,
+- buduje na jej podstawie finalną ścieżkę,
+- a potem bez kontroli odczytuje lub zapisuje plik.
 
-- bierze nazwę pliku od użytkownika,
-- dokleja ją do katalogu bazowego,
-- otwiera plik bez sprawdzenia.
+## Typowy scenariusz problemu
 
----
+Aplikacja ma udostępniać pliki tylko z katalogu `uploads/`.
 
-## Niebezpieczne wejście użytkownika
+Programista pisze coś takiego:
 
-Jeśli użytkownik może podać nazwę pliku, nie można zakładać, że poda wyłącznie bezpieczne wartości.
+```python
+def read_user_file(filename):
+    path = f"uploads/{filename}"
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+```
 
-To znowu klasyczna zasada:
+Jeśli użytkownik poda:
 
-input jest nieufny.
+```python
+raport.txt
+```
 
----
+wszystko wygląda dobrze.
 
-## Przykładowy scenariusz ataku
+Ale jeśli poda:
 
-Aplikacja ma udostępniać pliki z katalogu `uploads/`.
-
-Użytkownik zamiast `raport.pdf` podaje:
-
-```text
+```python
 ../../sekrety.txt
 ```
 
-Jeśli aplikacja nie sprawdza ścieżki, może odczytać coś spoza `uploads/`.
+aplikacja może spróbować sięgnąć poza `uploads/`.
 
----
+## Dlaczego to jest groźne
 
-## Jak się bronić
+Taki błąd może prowadzić do:
 
-Najważniejsze:
+- odczytu wrażliwych plików,
+- nadpisania plików systemowych lub aplikacyjnych,
+- ujawnienia konfiguracji,
+- ujawnienia sekretów,
+- wycieku danych innych użytkowników.
 
-- nie ufaj ścieżkom od użytkownika,
-- canonicalizuj i sprawdzaj ścieżki,
-- ograniczaj dostęp do ustalonego katalogu bazowego,
-- waliduj dozwolone nazwy i formaty.
+## Problem nie kończy się na `../`
 
----
+Początkujący często myślą, że wystarczy sprawdzić, czy input nie zawiera `../`.
 
-## `pathlib` i bezpieczniejsze podejście
+To za mało.
 
-`pathlib` pomaga pracować czytelniej, ale sam z siebie nie rozwiązuje wszystkiego.
+Dlaczego?
 
-Trzeba nadal sprawdzić, czy wynikowa ścieżka naprawdę mieści się w dozwolonym katalogu.
+- istnieją różne reprezentacje ścieżek,
+- systemy operacyjne różnią się separatorami,
+- można próbować obejść proste filtry,
+- sama nazwa pliku może być problematyczna.
 
----
+Potrzebujesz bezpieczniejszego modelu, a nie tylko prostego `replace()`.
+
+## Zły przykład
+
+```python
+def get_path(filename):
+    return "uploads/" + filename
+```
+
+To jest zły wzorzec, bo:
+
+- ścieżka jest składana jako zwykły string,
+- brak normalizacji,
+- brak sprawdzenia katalogu bazowego,
+- brak ograniczenia do bezpiecznego zakresu.
+
+## Lepszy kierunek z `pathlib`
+
+```python
+from pathlib import Path
+
+BASE_DIR = Path("uploads").resolve()
+
+
+def get_safe_path(filename: str) -> Path:
+    candidate = (BASE_DIR / filename).resolve()
+
+    if BASE_DIR not in candidate.parents and candidate != BASE_DIR:
+        raise ValueError("Niedozwolona sciezka")
+
+    return candidate
+```
+
+Ta wersja:
+
+- pracuje na obiektach ścieżek,
+- normalizuje finalną ścieżkę przez `resolve()`,
+- sprawdza, czy wynik nadal znajduje się w dozwolonym katalogu bazowym.
+
+## Przykład działania
+
+```python
+print(get_safe_path("raport.txt"))
+```
+
+Przykładowy efekt:
+
+```python
+/home/user/project/uploads/raport.txt
+```
+
+A dla niedozwolonej ścieżki:
+
+```python
+get_safe_path("../../sekrety.txt")
+```
+
+Efekt:
+
+```python
+ValueError: Niedozwolona sciezka
+```
+
+## Jeszcze lepszy model: nie ufaj nazwie ścieżki wcale
+
+W wielu systemach najbezpieczniejsze jest to, żeby użytkownik nie podawał ścieżki pliku bezpośrednio.
+
+Lepszy model:
+
+- użytkownik podaje identyfikator pliku,
+- aplikacja sama mapuje ID na znaną ścieżkę.
+
+Przykład:
+
+- zamiast `../../sekrety.txt`, użytkownik podaje `file_id=42`,
+- a aplikacja sama znajduje plik przypisany do tego rekordu.
+
+To zwykle bezpieczniejsze niż przyjmowanie dowolnej nazwy ścieżki.
+
+## Walidacja nazw plików
+
+Dodatkowa warstwa ochrony może obejmować:
+
+- dozwolone rozszerzenia,
+- ograniczenie znaków w nazwie,
+- zakaz ścieżek absolutnych,
+- długość nazwy,
+- whitelistę formatów.
+
+Przykład prostego ograniczenia:
+
+```python
+def validate_filename(filename: str) -> str:
+    if "/" in filename or "\\" in filename:
+        raise ValueError("Nazwa pliku nie moze zawierac separatorow")
+
+    if not filename.endswith(".txt"):
+        raise ValueError("Dozwolone sa tylko pliki .txt")
+
+    return filename
+```
+
+To nie zastępuje kontroli katalogu bazowego, ale może być dodatkową warstwą ochrony.
+
+## Odczyt i zapis
+
+Path traversal dotyczy nie tylko odczytu.
+
+Może też dotyczyć zapisu.
+
+To znaczy, że użytkownik może próbować:
+
+- nadpisać ważny plik,
+- zapisać plik w nieautoryzowane miejsce,
+- przygotować grunt pod dalszy atak.
+
+Dlatego te same zasady stosują się także do operacji zapisu.
 
 ## Typowe błędy początkujących
 
-- proste sklejanie stringów ścieżek,
-- brak sprawdzenia katalogu bazowego,
-- założenie, że "użytkownik poda tylko nazwę pliku",
-- brak whitelisty dla akceptowalnych nazw i rozszerzeń.
+- sklejanie ścieżek jako stringów,
+- zaufanie nazwie pliku od użytkownika,
+- sprawdzanie tylko `../` i nic więcej,
+- brak jawnego katalogu bazowego,
+- brak walidacji rozszerzeń lub formatu nazwy,
+- nieodróżnianie nazwy pliku od pełnej ścieżki.
 
----
+## Checklista ochrony przed path traversal
 
-## Praktyczne przykłady
+- Czy użytkownik podaje nazwę pliku lub ścieżkę?
+- Czy mam katalog bazowy?
+- Czy normalizuję finalną ścieżkę?
+- Czy sprawdzam, że wynik nadal mieści się w dozwolonym katalogu?
+- Czy mogę użyć ID zamiast ścieżki?
+- Czy ograniczam format nazw i rozszerzenia?
 
-### Ryzykowny wzorzec
+## Szybka ściąga
 
-```python
-sciezka = "uploads/" + user_input
-```
+Przy plikach pamiętaj:
 
-### Lepszy kierunek
-
-- użyj katalogu bazowego,
-- znormalizuj ścieżkę,
-- sprawdź, czy końcowa ścieżka nadal leży w dozwolonym miejscu.
-
----
-
-## Dobre praktyki
-
-- nie traktuj ścieżki użytkownika jako zaufanej,
-- trzymaj jawny katalog bazowy,
-- stosuj walidację nazw,
-- minimalizuj liczbę miejsc, które mają dostęp do systemu plików.
-
----
-
-## Podsumowanie
-
-Path traversal to prosty do popełnienia, ale bardzo ważny błąd bezpieczeństwa.
-
-Dobra kontrola ścieżek jest obowiązkowa wszędzie tam, gdzie użytkownik wpływa na dostęp do plików.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- nie ufaj nazwom plików od użytkownika,
-- nie sklejaj ścieżek bez kontroli,
-- sprawdzaj, czy końcowa ścieżka nie wychodzi poza dozwolony katalog.
-
----
+- nie ufaj ścieżce od użytkownika,
+- nie sklejaj jej bezpośrednio jako stringa,
+- używaj katalogu bazowego,
+- normalizuj ścieżkę,
+- sprawdzaj, czy wynik nie wychodzi poza dozwolony obszar,
+- jeśli można, pracuj na ID zamiast ścieżkach od użytkownika.
 
 ## Ćwiczenia
 
-1. Wyjaśnij, czym jest path traversal.
-2. Podaj przykład niebezpiecznego inputu.
-3. Wyjaśnij, czemu `../` jest groźne.
-4. Wyjaśnij, jak ograniczyć dostęp do katalogu bazowego.
-5. Wyjaśnij, czemu `pathlib` pomaga, ale nie załatwia wszystkiego.
+1. Napisz podatną funkcję odczytującą plik po nazwie.
+2. Popraw ją przez `pathlib` i kontrolę katalogu bazowego.
+3. Dodaj walidację rozszerzenia `.txt`.
+4. Zaprojektuj model, w którym użytkownik podaje ID pliku zamiast ścieżki.
+5. Opisz ryzyko związane z zapisem pliku w niekontrolowane miejsce.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. Path traversal
-
-To możliwość wyjścia poza dozwolony katalog przy dostępie do plików.
-
-### 2. Niebezpieczny input
-
-`../../hasla.txt`
-
-### 3. Czemu `../`
-
-Bo pozwala cofać się po drzewie katalogów.
-
-### 4. Ograniczenie
-
-Przez sprawdzenie, czy wynikowa ścieżka nadal należy do ustalonego katalogu bazowego.
-
-### 5. `pathlib`
-
-Bo poprawia czytelność pracy ze ścieżkami, ale nadal trzeba robić walidację i kontrole bezpieczeństwa.
+- Path traversal to możliwość wyjścia poza dozwolony katalog przy pracy z plikami.
+- Samo filtrowanie `../` nie wystarcza.
+- Bezpieczniejszy model opiera się na katalogu bazowym i normalizacji ścieżek.
+- `pathlib` poprawia czytelność, ale bezpieczeństwo nadal wymaga jawnych kontroli.
+- W wielu przypadkach najlepiej nie przyjmować ścieżki od użytkownika wprost.

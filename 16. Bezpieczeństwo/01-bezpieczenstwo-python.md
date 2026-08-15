@@ -1,195 +1,291 @@
 # Bezpieczeństwo w Pythonie — podstawy
 
-## Spis treści
+## O co chodzi w tym rozdziale
 
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co Pythonowcowi bezpieczeństwo](#po-co-pythonowcowi-bezpieczeństwo)
-3. [Najczęstsze obszary ryzyka](#najczęstsze-obszary-ryzyka)
-4. [Dane wejściowe są nieufne](#dane-wejściowe-są-nieufne)
-5. [Sekrety i konfiguracja](#sekrety-i-konfiguracja)
-6. [Dostęp do plików i systemu](#dostęp-do-plików-i-systemu)
-7. [Bazy danych i zapytania](#bazy-danych-i-zapytania)
-8. [Autoryzacja i uprawnienia](#autoryzacja-i-uprawnienia)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
+Bezpieczeństwo w programowaniu to nie jest temat tylko dla pentesterów albo ludzi od infrastruktury.
 
----
+Programista Pythona też codziennie podejmuje decyzje, które wpływają na bezpieczeństwo aplikacji.
 
-## Wprowadzenie
+Przykłady:
 
-Bezpieczeństwo nie jest dodatkiem "na później".
+- czy ufasz danym wejściowym,
+- czy poprawnie walidujesz payload z API,
+- czy nie trzymasz sekretów w kodzie,
+- czy nie sklejasz SQL,
+- czy bezpiecznie korzystasz z plików i poleceń systemowych,
+- czy użytkownik może zrobić tylko to, co powinien.
 
-W praktyce to część jakości oprogramowania od samego początku projektu.
+Ten rozdział daje ogólny model myślenia, który będzie potrzebny w całym folderze.
 
----
+## Najważniejsza zmiana myślenia
 
-## Po co Pythonowcowi bezpieczeństwo
+Początkujący programista często pyta:
 
-Bo nawet mały błąd może prowadzić do:
+- czy kod działa?
 
-- wycieku danych,
-- nieautoryzowanego dostępu,
-- uszkodzenia systemu,
-- kosztownych incydentów.
+Bardziej doświadczony pyta też:
 
----
+- czy kod da się łatwo zepsuć,
+- czy ktoś może go nadużyć,
+- czy błędne dane zrobią bałagan,
+- czy użytkownik może uzyskać za dużo.
+
+W bezpieczeństwie chodzi właśnie o to drugie spojrzenie.
+
+## Co to znaczy, że dane są nieufne
+
+Nieufne dane to wszystkie dane, które przychodzą z zewnątrz i nad którymi aplikacja nie ma pełnej kontroli.
+
+To mogą być:
+
+- dane z formularza,
+- JSON z requestu HTTP,
+- parametr URL,
+- nazwa pliku,
+- dane z CLI,
+- dane z zewnętrznego API,
+- zawartość pliku CSV,
+- nagłówki HTTP,
+- dane z kolejki,
+- dane z bazy, jeśli wcześniej mogły zostać skażone.
+
+To bardzo ważne: „dane z naszej bazy” też nie zawsze są w 100% zaufane, jeśli kiedyś weszły do niej z inputu użytkownika.
 
 ## Najczęstsze obszary ryzyka
 
-Najczęściej:
+W praktyce aplikacje Python najczęściej mają problemy w kilku miejscach.
 
-- dane wejściowe,
-- sekrety,
-- zapytania do bazy,
-- wywołania systemowe,
-- dostęp do plików,
-- autoryzacja.
+### 1. Walidacja danych
 
----
+Aplikacja przyjmuje dane w złym typie, złym formacie albo z niedozwoloną wartością.
 
-## Dane wejściowe są nieufne
+### 2. Sekrety i konfiguracja
 
-Jedna z najważniejszych zasad:
+Hasła, tokeny albo klucze API trafiają do repo lub logów.
 
-nie ufaj danym z zewnątrz.
+### 3. Baza danych
 
-Dotyczy to:
+Zapytania są składane ręcznie i otwierają drogę do SQL injection.
 
-- formularzy,
-- JSON z API,
-- parametrów URL,
-- plików uploadowanych przez użytkownika.
+### 4. Operacje systemowe
 
----
+Kod uruchamia polecenia przez `subprocess` w sposób ryzykowny.
 
-## Sekrety i konfiguracja
+### 5. Pliki i ścieżki
 
-Hasła, tokeny i klucze API nie powinny być wpisywane na sztywno w kodzie.
+Użytkownik może wpłynąć na odczyt pliku spoza dozwolonego katalogu.
 
-To bardzo częsty i bardzo kosztowny błąd.
+### 6. Uprawnienia
 
----
+Użytkownik jest zalogowany, ale może wykonać operację, której nie powinien móc wykonać.
 
-## Dostęp do plików i systemu
+## Bezpieczeństwo a poprawność
 
-Każde operacje na ścieżkach i komendach systemowych trzeba projektować ostrożnie.
+To nie to samo.
 
-Tu pojawiają się ryzyka takie jak:
+Kod może być funkcjonalnie poprawny i jednocześnie niebezpieczny.
 
-- path traversal,
-- command injection.
+### Przykład
 
----
+```python
+def get_user_file(filename):
+    with open(f"uploads/{filename}", "r", encoding="utf-8") as f:
+        return f.read()
+```
 
-## Bazy danych i zapytania
+Funkcjonalnie to działa.
 
-Ręczne sklejanie SQL z danymi użytkownika to proszenie się o problemy.
+Jeśli podasz:
 
-Parametryzacja to standard bezpieczeństwa.
+```python
+get_user_file("raport.txt")
+```
 
----
+to program odczyta plik.
 
-## Autoryzacja i uprawnienia
+Ale jeśli podasz:
 
-Nie wystarczy wiedzieć, kim jest użytkownik.
+```python
+get_user_file("../../etc/passwd")
+```
 
-Trzeba jeszcze wiedzieć, czy wolno mu wykonać daną operację.
+to funkcjonalnie dalej „działa”, tylko robi coś bardzo niebezpiecznego.
 
----
+To właśnie różnica między:
+
+- działa,
+- działa bezpiecznie.
+
+## Najważniejsze zasady na start
+
+### Zasada 1: nie ufaj inputowi
+
+Nawet jeśli dane pochodzą z twojego frontendu.
+
+Frontend:
+
+- można obejść,
+- można podrobić request,
+- może mieć błąd,
+- może zostać zastąpiony innym klientem.
+
+### Zasada 2: ograniczaj uprawnienia
+
+Kod powinien mieć tylko taki dostęp, jaki jest naprawdę potrzebny.
+
+### Zasada 3: nie trzymaj sekretów w kodzie
+
+Sekrety trzymaj poza repo, najczęściej w env vars lub menedżerze sekretów.
+
+### Zasada 4: używaj bezpieczniejszych interfejsów
+
+Przykłady:
+
+- parametryzowane SQL zamiast sklejanych stringów,
+- lista argumentów w `subprocess.run()` zamiast `shell=True`,
+- jawny katalog bazowy przy pracy z plikami.
+
+### Zasada 5: myśl o nadużyciu, nie tylko o poprawnym użyciu
+
+Nie pytaj tylko: „jak użytkownik ma używać tej funkcji?”
+
+Pytaj też:
+
+- jak może ją źle użyć,
+- jak może ją obejść,
+- co się stanie przy danych złośliwych lub absurdalnych.
+
+## Autentykacja a autoryzacja
+
+To dwa różne pojęcia.
+
+### Autentykacja
+
+Odpowiada na pytanie:
+
+- kim jesteś?
+
+Przykład:
+
+- logowanie loginem i hasłem,
+- token JWT,
+- sesja użytkownika.
+
+### Autoryzacja
+
+Odpowiada na pytanie:
+
+- co wolno ci zrobić?
+
+Przykład:
+
+- czy użytkownik A może usunąć zasób użytkownika B,
+- czy zwykły user może wejść do panelu admina,
+- czy można odczytać dany raport.
+
+Bardzo częsty błąd: aplikacja poprawnie rozpoznaje użytkownika, ale źle ogranicza jego uprawnienia.
+
+## Przykład myślenia o ryzyku
+
+Wyobraź sobie endpoint:
+
+```python
+POST /orders
+```
+
+Na pierwszy rzut oka to tylko tworzenie zamówienia. Ale bezpieczeństwo każe zapytać:
+
+- czy pola są walidowane,
+- czy użytkownik może podać cudzy `user_id`,
+- czy kwota nie jest ujemna,
+- czy dane nie trafiają bezpiecznie do bazy,
+- czy logi nie zapiszą danych wrażliwych,
+- czy użytkownik nie może złożyć 1000 requestów naraz.
+
+To pokazuje, że bezpieczeństwo bardzo często jest po prostu uważniejszym projektowaniem.
 
 ## Typowe błędy początkujących
 
-- hardkodowanie sekretów,
-- brak walidacji inputu,
-- sklejanie SQL,
+- hardkodowanie tokenów i haseł,
+- brak walidacji danych wejściowych,
+- sklejanie SQL przez f-string,
 - używanie `shell=True` bez potrzeby,
-- zbyt szeroki dostęp do zasobów.
+- ufanie ścieżkom od użytkownika,
+- logowanie wrażliwych danych,
+- brak sprawdzania uprawnień,
+- przekonanie, że „to tylko lokalne narzędzie”.
 
----
+## Mini przykład: dobra i zła wersja
 
-## Praktyczne przykłady
+### Zła wersja
 
-### Zła praktyka
+```python
+API_TOKEN = "sekretny-token"
+query = f"SELECT * FROM users WHERE email = '{email}'"
+subprocess.run(f"echo {filename}", shell=True)
+```
 
-- token API wpisany w repo,
-- SQL składany przez f-string,
-- ścieżka pliku budowana bez walidacji.
+Problemy:
 
-### Dobra praktyka
+- sekret w kodzie,
+- ryzyko SQL injection,
+- ryzyko command injection.
 
-- env vars,
-- walidacja,
-- parametryzacja,
-- kontrola dostępu.
+### Lepsza wersja
 
----
+```python
+import os
+import sqlite3
+import subprocess
 
-## Dobre praktyki
+api_token = os.getenv("API_TOKEN")
 
-- traktuj input jako nieufny,
-- trzymaj sekrety poza kodem,
-- ograniczaj uprawnienia,
-- używaj bezpiecznych interfejsów do bazy i systemu,
-- testuj przypadki błędne i nieuprawnione.
+conn = sqlite3.connect("app.db")
+cur = conn.cursor()
+cur.execute("SELECT * FROM users WHERE email = ?", (email,))
 
----
+subprocess.run(["echo", filename], check=True)
+```
 
-## Podsumowanie
+To nie rozwiązuje wszystkiego, ale już ustawia kod na dużo bezpieczniejszym torze.
 
-Podstawy bezpieczeństwa to obowiązkowa kompetencja profesjonalnego Pythonowca.
+## Checklista bezpieczeństwa dla małego projektu
 
-Bardzo wiele problemów da się ograniczyć prostymi, dobrymi nawykami.
+Przy dowolnym małym projekcie Python przejdź przez takie pytania:
 
----
+- Skąd wchodzą dane do systemu?
+- Czy są walidowane?
+- Czy w kodzie są sekrety?
+- Czy gdzieś składam SQL ręcznie?
+- Czy używam `subprocess` z danymi od użytkownika?
+- Czy użytkownik wpływa na ścieżki plików?
+- Czy sprawdzam uprawnienia użytkownika?
+- Czy logi nie wyciekają danych wrażliwych?
 
-## Mini ściąga
+## Szybka ściąga
 
-Najważniejsze:
+Bezpieczeństwo na poziomie programisty to głównie dobre nawyki:
 
 - nie ufaj inputowi,
-- nie trzymaj sekretów w kodzie,
+- waliduj wcześnie,
+- trzymaj sekrety poza kodem,
 - nie sklejaj SQL,
-- ostrożnie uruchamiaj komendy systemowe,
-- pilnuj autoryzacji.
-
----
+- ostrożnie używaj `subprocess`,
+- kontroluj ścieżki plików,
+- odróżniaj autentykację od autoryzacji.
 
 ## Ćwiczenia
 
-1. Wymień 4 obszary ryzyka bezpieczeństwa w Pythonie.
-2. Wyjaśnij, czemu input jest nieufny.
-3. Wyjaśnij, czemu nie wolno trzymać sekretów w repo.
-4. Wskaż ryzyko sklejania SQL.
-5. Wyjaśnij, czemu autoryzacja to osobny temat od autentykacji.
+1. Wypisz 10 źródeł nieufnych danych w typowej aplikacji Python.
+2. Wyjaśnij różnicę między „błąd funkcjonalny” a „błąd bezpieczeństwa”.
+3. Podaj przykład sytuacji, w której użytkownik jest poprawnie zalogowany, ale nie powinien móc wykonać danej operacji.
+4. Znajdź w swoim kodzie przykład miejsca, gdzie input trafia do dalszej logiki bez walidacji.
+5. Zrób krótką checklistę bezpieczeństwa dla własnego mini projektu.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. Obszary
-
-- input,
-- sekrety,
-- baza danych,
-- komendy systemowe.
-
-### 2. Czemu nieufny
-
-Bo może być błędny, złośliwy lub niezgodny z oczekiwaniami aplikacji.
-
-### 3. Sekrety w repo
-
-Bo mogą wyciec i dać niepowołanym osobom dostęp do systemu.
-
-### 4. SQL
-
-Może prowadzić do SQL injection.
-
-### 5. Autoryzacja vs autentykacja
-
-Bo jedno ustala tożsamość, a drugie uprawnienia.
+- Bezpieczeństwo zaczyna się od sposobu myślenia, nie od jednej biblioteki.
+- Input z zewnątrz jest nieufny.
+- Kod może działać poprawnie funkcjonalnie i jednocześnie być niebezpieczny.
+- Najczęstsze ryzyka w Pythonie to walidacja, sekrety, SQL, `subprocess`, pliki i uprawnienia.
+- Dobre bezpieczeństwo to zwykle zbiór prostych, konsekwentnych nawyków.

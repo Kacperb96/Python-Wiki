@@ -1,196 +1,291 @@
 # Walidacja danych w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Po co walidować dane](#po-co-walidować-dane)
-3. [Walidacja a bezpieczeństwo](#walidacja-a-bezpieczeństwo)
-4. [Walidacja a logika biznesowa](#walidacja-a-logika-biznesowa)
-5. [Typy, format i zakres wartości](#typy-format-i-zakres-wartości)
-6. [Walidacja na granicy systemu](#walidacja-na-granicy-systemu)
-7. [Walidacja w API i formularzach](#walidacja-w-api-i-formularzach)
-8. [Walidacja a Pydantic](#walidacja-a-pydantic)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
-## Wprowadzenie
-
-Walidacja danych to jeden z podstawowych mechanizmów obrony jakości i bezpieczeństwa systemu.
-
-Jeśli aplikacja przyjmuje dane bez sensownej kontroli, problemy są tylko kwestią czasu.
-
----
-
 ## Po co walidować dane
 
-Bo dane wejściowe mogą być:
+Walidacja danych to jeden z najważniejszych fundamentów bezpiecznego i stabilnego programu.
 
-- błędne,
-- niepełne,
-- w złym typie,
-- złośliwe,
-- niezgodne z regułami biznesowymi.
+Jeśli aplikacja przyjmuje dane bez kontroli, problemy pojawiają się bardzo szybko:
 
----
+- wyjątki w nieoczekiwanych miejscach,
+- błędne rekordy w bazie,
+- niepoprawne decyzje biznesowe,
+- luki bezpieczeństwa,
+- trudne do diagnozowania błędy.
 
-## Walidacja a bezpieczeństwo
+Walidacja nie jest dodatkiem. To pierwsza linia obrony.
 
-Walidacja nie rozwiązuje całego bezpieczeństwa, ale jest bardzo ważną linią obrony.
+## Jakie dane wymagają walidacji
 
-Pomaga wcześniej odrzucić niepoprawne wejście.
+W praktyce prawie wszystkie dane zewnętrzne:
 
----
+- requesty HTTP,
+- formularze,
+- input z `input()`,
+- argumenty CLI,
+- pliki CSV i JSON,
+- dane z webhooków,
+- dane z zewnętrznych API,
+- rekordy importowane z innych systemów.
 
-## Walidacja a logika biznesowa
+## Najważniejsza zasada
 
-To nie to samo.
+Nie pytaj tylko:
 
-Walidacja odpowiada np.:
+- czy użytkownik podał to, czego oczekiwałem?
 
-- czy email ma poprawny format,
-- czy liczba jest dodatnia,
-- czy pole istnieje.
+Pytaj też:
 
-Logika biznesowa odpowiada np.:
+- co jeśli poda pustą wartość,
+- co jeśli poda zły typ,
+- co jeśli poda za długi tekst,
+- co jeśli poda wartość skrajną,
+- co jeśli poda coś złośliwego,
+- co jeśli pominie pole,
+- co jeśli poda poprawny technicznie format, ale bez sensu biznesowo.
 
-- czy użytkownik może kupić ten produkt,
-- czy limit został przekroczony.
+## Walidacja techniczna a biznesowa
 
----
+To rozróżnienie jest bardzo ważne.
 
-## Typy, format i zakres wartości
+### Walidacja techniczna
 
-Najczęściej sprawdzasz:
+Sprawdza, czy dane w ogóle mają poprawny kształt.
 
-- typ,
-- wymagane pola,
-- zakres liczbowy,
-- długość tekstu,
-- format danych.
+Przykłady:
 
----
+- czy pole istnieje,
+- czy `age` jest liczbą całkowitą,
+- czy `email` jest stringiem,
+- czy tekst nie jest pusty po `strip()`,
+- czy liczba mieści się w zakresie.
 
-## Walidacja na granicy systemu
+### Walidacja biznesowa
 
-Najlepiej walidować dane jak najbliżej wejścia do systemu.
+Sprawdza, czy dane mają sens w regułach domeny.
 
-Na przykład:
+Przykłady:
 
-- przy requestach HTTP,
-- przy odczycie pliku,
-- przy wejściu z CLI,
-- przy danych z zewnętrznego API.
+- czy użytkownik może kupić produkt,
+- czy kupon rabatowy nie wygasł,
+- czy limit przelewów nie został przekroczony,
+- czy liczba miejsc nie została już wyczerpana.
 
----
+Technicznie poprawne dane nadal mogą być biznesowo niedozwolone.
 
-## Walidacja w API i formularzach
+## Gdzie walidować
 
-To bardzo ważny obszar praktyczny.
+Najlepiej jak najbliżej wejścia do systemu.
 
-API i formularze są naturalnym miejscem, gdzie do systemu wpadają dane z zewnątrz.
+Czyli:
 
----
+- przy odbiorze requestu,
+- przy wczytywaniu pliku,
+- przy przyjmowaniu argumentów CLI,
+- przy odbiorze danych z zewnętrznej usługi.
 
-## Walidacja a Pydantic
+To ogranicza rozlewanie się błędnych danych po całej aplikacji.
 
-`Pydantic` bardzo dobrze wspiera walidację w nowoczesnym Pythonie.
-
-Szczególnie przydaje się w:
-
-- FastAPI,
-- konfiguracji,
-- modelach danych wejściowych.
-
----
-
-## Typowe błędy początkujących
-
-- brak walidacji,
-- walidacja zbyt późno,
-- mylenie walidacji technicznej z biznesową,
-- ufanie, że klient frontendowy "na pewno już sprawdził dane".
-
----
-
-## Praktyczne przykłady
-
-### Proste sprawdzenie
+## Prosty przykład walidacji
 
 ```python
 def validate_age(age):
+    if not isinstance(age, int):
+        raise TypeError("age musi byc int")
+
     if age < 0:
-        raise ValueError("wiek nie moze byc ujemny")
+        raise ValueError("age nie moze byc ujemny")
+
+    if age > 130:
+        raise ValueError("age ma nielogiczna wartosc")
+
+    return age
 ```
 
-### Format emaila
+### Przykładowe użycie
 
-Walidacja może sprawdzać podstawowe wymagania formatu zanim dane trafią dalej.
+```python
+print(validate_age(30))
+```
 
----
+Output:
 
-## Dobre praktyki
+```python
+30
+```
 
-- waliduj na granicy systemu,
-- rozdzielaj walidację techniczną od biznesowej,
-- nie ufaj klientowi,
-- trzymaj komunikaty błędów czytelne i przewidywalne.
+### Przykład błędu
 
----
+```python
+validate_age(-5)
+```
 
-## Podsumowanie
+Efekt:
 
-Walidacja danych to jedna z tych praktyk, które mają ogromny wpływ zarówno na bezpieczeństwo, jak i stabilność aplikacji.
+```python
+ValueError: age nie moze byc ujemny
+```
 
-To fundament, nie dodatek.
+## Walidacja pustego tekstu
 
----
+```python
+def validate_name(name):
+    if not isinstance(name, str):
+        raise TypeError("name musi byc stringiem")
 
-## Mini ściąga
+    if not name.strip():
+        raise ValueError("name nie moze byc pusty")
 
-Najważniejsze:
+    return name.strip()
+```
 
-- waliduj input,
-- rób to możliwie wcześnie,
-- rozróżniaj walidację techniczną i biznesową,
-- nie ufaj danym z zewnątrz.
+### Przykład
 
----
+```python
+print(validate_name("  Anna  "))
+```
+
+Output:
+
+```python
+Anna
+```
+
+## Walidacja prostego payloadu
+
+```python
+def validate_user_payload(payload):
+    required_fields = ["name", "email", "age"]
+
+    for field in required_fields:
+        if field not in payload:
+            raise ValueError(f"Brak pola: {field}")
+
+    name = validate_name(payload["name"])
+    age = validate_age(payload["age"])
+    email = payload["email"]
+
+    if not isinstance(email, str) or "@" not in email:
+        raise ValueError("Niepoprawny email")
+
+    return {
+        "name": name,
+        "email": email.strip(),
+        "age": age,
+    }
+```
+
+### Przykład
+
+```python
+payload = {"name": " Jan ", "email": "jan@example.com", "age": 25}
+print(validate_user_payload(payload))
+```
+
+Output:
+
+```python
+{'name': 'Jan', 'email': 'jan@example.com', 'age': 25}
+```
+
+## Walidacja a bezpieczeństwo
+
+Walidacja nie rozwiązuje całego bezpieczeństwa, ale bardzo pomaga.
+
+Dzięki niej możesz wcześnie odrzucić:
+
+- niepoprawne typy,
+- absurdalne wartości,
+- puste pola,
+- zbyt długie dane,
+- część prób nadużycia.
+
+Uwaga: walidacja nie zastępuje innych zabezpieczeń.
+
+Przykład:
+
+- walidacja nie zastępuje parametryzacji SQL,
+- walidacja nie zastępuje autoryzacji,
+- walidacja nie zastępuje kontroli dostępu do plików.
+
+## Frontend nie wystarcza
+
+To klasyczny błąd początkujących.
+
+„Przecież frontend już sprawdza formularz” nie jest argumentem bezpieczeństwa.
+
+Dlaczego?
+
+- request można wysłać ręcznie,
+- frontend można obejść,
+- aplikacja mobilna może wysłać inne dane,
+- inny system może wywoływać twoje API bez UI.
+
+Backend też musi walidować dane.
+
+## Pydantic i nowoczesny Python
+
+W nowoczesnych projektach bardzo często używa się `Pydantic`.
+
+Pozwala on definiować modele danych i walidować je automatycznie.
+
+Przykład idei:
+
+```python
+from pydantic import BaseModel, Field
+
+
+class UserInput(BaseModel):
+    name: str = Field(min_length=1)
+    email: str
+    age: int = Field(ge=0, le=130)
+```
+
+To bardzo wygodne, ale nadal trzeba rozumieć zasady walidacji. Biblioteka pomaga, ale nie myśli za ciebie.
+
+## Typowe błędy początkujących
+
+- brak walidacji w ogóle,
+- walidowanie za późno,
+- mylenie walidacji technicznej z biznesową,
+- walidacja tylko na froncie,
+- zbyt ogólne komunikaty błędów,
+- dopuszczanie pustych stringów po `strip()`,
+- brak limitów długości tekstu.
+
+## Checklista walidacji
+
+Przy każdym wejściu danych sprawdź:
+
+- Czy pole istnieje?
+- Czy ma dobry typ?
+- Czy ma dozwolony zakres?
+- Czy tekst nie jest pusty?
+- Czy długość jest sensowna?
+- Czy format jest poprawny?
+- Czy wartość ma sens biznesowo?
+
+## Szybka ściąga
+
+Dobra walidacja:
+
+- dzieje się wcześnie,
+- jest jawna,
+- rozdziela technikę od biznesu,
+- czyści dane przed dalszym użyciem,
+- nie ufa frontendowi.
 
 ## Ćwiczenia
 
-1. Wyjaśnij, po co walidować dane.
-2. Podaj przykład walidacji technicznej.
-3. Podaj przykład reguły biznesowej.
-4. Wyjaśnij, czemu frontend nie wystarcza jako jedyna walidacja.
-5. Wyjaśnij, czemu warto walidować dane na granicy systemu.
+1. Napisz walidację pola `price`, które musi być liczbą większą od zera.
+2. Napisz walidację pola `username`, które nie może być puste i ma maksymalnie 20 znaków.
+3. Rozdziel techniczną i biznesową walidację dla zamówienia.
+4. Napisz funkcję walidującą listę identyfikatorów użytkowników.
+5. Pokaż przykład, gdzie poprawny JSON nadal zawiera niepoprawne dane biznesowo.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. Po co walidować
-
-Żeby odrzucać błędne lub niebezpieczne dane, zanim trafią głębiej do systemu.
-
-### 2. Techniczna
-
-Sprawdzenie, czy pole `age` jest liczbą dodatnią.
-
-### 3. Biznesowa
-
-Sprawdzenie, czy użytkownik nie przekroczył limitu zakupów.
-
-### 4. Czemu frontend nie wystarcza
-
-Bo klient może być złośliwy, błędny albo całkowicie pominąć frontend.
-
-### 5. Granica systemu
-
-Bo wtedy problem wykrywasz najwcześniej i nie rozlewasz błędnych danych po dalszych warstwach.
+- Walidacja danych jest podstawą bezpieczeństwa i stabilności.
+- Waliduj jak najbliżej wejścia do systemu.
+- Odróżniaj walidację techniczną od biznesowej.
+- Frontend nie jest jedynym miejscem walidacji.
+- Biblioteki pomagają, ale nie zastępują myślenia projektowego.

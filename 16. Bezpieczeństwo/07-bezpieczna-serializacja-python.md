@@ -1,175 +1,213 @@
 # Bezpieczna serializacja w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Czym jest serializacja](#czym-jest-serializacja)
-3. [Po co temat bezpieczeństwa](#po-co-temat-bezpieczeństwa)
-4. [Formaty danych a ryzyko](#formaty-danych-a-ryzyko)
-5. [JSON jako bezpieczniejszy wybór](#json-jako-bezpieczniejszy-wybór)
-6. [Ryzyka przy deserializacji](#ryzyka-przy-deserializacji)
-7. [`pickle` i ostrożność](#pickle-i-ostrożność)
-8. [Zasada ograniczonego zaufania](#zasada-ograniczonego-zaufania)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
-## Wprowadzenie
-
-Serializacja to zamiana danych do formatu nadającego się do zapisu albo przesłania.
-
-Sama w sobie jest normalną praktyką, ale przy deserializacji mogą pojawić się poważne ryzyka.
-
----
-
 ## Czym jest serializacja
 
-To zapis obiektu lub danych do formatu takiego jak:
+Serializacja to zamiana danych lub obiektów na format, który można:
 
-- JSON,
-- XML,
-- binarny format własny,
-- inne reprezentacje.
+- zapisać do pliku,
+- przesłać przez sieć,
+- umieścić w cache,
+- przekazać do innego systemu.
 
-Deserializacja to proces odwrotny.
+Deserializacja to proces odwrotny, czyli odtworzenie danych z tego formatu.
 
----
+Sama serializacja jest czymś normalnym i potrzebnym. Problem zaczyna się wtedy, gdy bezrefleksyjnie deserializujesz nieufne dane.
 
-## Po co temat bezpieczeństwa
+## Dlaczego to ma związek z bezpieczeństwem
 
-Bo nie każdy format i nie każda biblioteka są równie bezpieczne dla danych z nieufnego źródła.
+Dane z zewnątrz nie są zaufane.
 
-Deserializacja potrafi być niebezpiecznym punktem wejścia.
+Jeśli aplikacja:
 
----
+- pobiera payload,
+- deserializuje go,
+- a potem traktuje jak bezpieczny,
 
-## Formaty danych a ryzyko
+to może narobić sobie problemów.
 
-Niektóre formaty są bardziej deklaratywne i przewidywalne.
+Ryzyko zależy od formatu i biblioteki, ale podstawowa zasada jest prosta:
 
-Inne mogą być bardziej ryzykowne, zwłaszcza gdy odtwarzają bardziej złożone obiekty.
-
----
+- nie każda deserializacja jest równie bezpieczna,
+- nawet poprawnie sparsowane dane nadal wymagają walidacji.
 
 ## JSON jako bezpieczniejszy wybór
 
-JSON zwykle jest dobrym i przewidywalnym wyborem dla wymiany danych.
+Dla zwykłej wymiany danych JSON jest zazwyczaj rozsądnym wyborem.
 
-Nadal wymaga walidacji treści, ale sam format jest zwykle bezpieczniejszy niż mechanizmy deserializujące arbitralne obiekty.
+Dlaczego?
 
----
+- opisuje proste struktury danych,
+- jest przewidywalny,
+- nie służy do odtwarzania arbitralnych obiektów aplikacji,
+- dobrze współpracuje z walidacją modeli wejściowych.
 
-## Ryzyka przy deserializacji
+Przykład:
 
-Największy problem zaczyna się wtedy, gdy aplikacja ufa zewnętrznym danym i próbuje odtworzyć z nich złożone obiekty bez kontroli.
+```python
+import json
 
----
+raw_data = '{"name": "Anna", "age": 25}'
+data = json.loads(raw_data)
+print(data)
+```
 
-## `pickle` i ostrożność
+Output:
 
-`pickle` jest przydatny w pewnych kontrolowanych scenariuszach, ale nie powinno się go używać do nieufnych danych z zewnątrz.
+```python
+{'name': 'Anna', 'age': 25}
+```
 
-To jeden z najważniejszych praktycznych komunikatów bezpieczeństwa w Pythonie.
+To jeszcze nie znaczy, że dane są poprawne biznesowo. To znaczy tylko, że JSON został poprawnie sparsowany.
 
----
+## Poprawny JSON nadal może być zły
 
-## Zasada ograniczonego zaufania
+Spójrz na taki przykład:
 
-Jeśli dane pochodzą z:
+```python
+import json
 
-- internetu,
+raw_data = '{"name": "", "age": -1000}'
+data = json.loads(raw_data)
+print(data)
+```
+
+Output:
+
+```python
+{'name': '', 'age': -1000}
+```
+
+Format JSON jest poprawny.
+
+Ale dane są bez sensu.
+
+To pokazuje bardzo ważną rzecz:
+
+- parsowanie formatu to nie to samo co walidacja danych.
+
+## `pickle` i dlaczego trzeba uważać
+
+`pickle` jest wygodnym mechanizmem Pythona do serializacji obiektów.
+
+Problem polega na tym, że nie powinien być używany do nieufnych danych z zewnątrz.
+
+To jedna z najważniejszych praktycznych zasad bezpieczeństwa w Pythonie.
+
+### Co zapamiętać praktycznie
+
+Jeśli dane pochodzą od:
+
 - użytkownika,
+- internetu,
 - zewnętrznego systemu,
+- pliku, któremu nie ufasz,
 
-to trzeba zakładać ograniczone zaufanie i wybierać bezpieczniejsze formaty oraz walidację.
+nie używaj `pickle.loads()` bez pełnej kontroli kontekstu.
 
----
+## Bezpieczniejszy przepływ danych
+
+Dobry, praktyczny wzorzec wygląda tak:
+
+1. odbierz dane,
+2. sparsuj prosty format, np. JSON,
+3. zwaliduj strukturę i wartości,
+4. dopiero potem użyj danych w logice aplikacji.
+
+Przykład:
+
+```python
+import json
+
+
+def validate_user(data):
+    if not isinstance(data.get("name"), str) or not data["name"].strip():
+        raise ValueError("Niepoprawne name")
+
+    if not isinstance(data.get("age"), int) or data["age"] < 0:
+        raise ValueError("Niepoprawne age")
+
+    return {"name": data["name"].strip(), "age": data["age"]}
+
+
+raw_data = '{"name": " Anna ", "age": 25}'
+parsed = json.loads(raw_data)
+validated = validate_user(parsed)
+print(validated)
+```
+
+Output:
+
+```python
+{'name': 'Anna', 'age': 25}
+```
+
+## Format a bezpieczeństwo to nie to samo
+
+Początkujący czasem myślą:
+
+- skoro coś jest JSON-em, to jest bezpieczne.
+
+To nieprawda.
+
+JSON jest zwykle bezpieczniejszy jako format niż mechanizmy odtwarzające złożone obiekty, ale nadal możesz dostać dane:
+
+- puste,
+- absurdalne,
+- zbyt duże,
+- niezgodne z kontraktem,
+- złośliwe biznesowo.
+
+## Kiedy `pickle` może mieć sens
+
+W bardzo kontrolowanych, wewnętrznych scenariuszach, gdzie:
+
+- obie strony są zaufane,
+- dokładnie rozumiesz ryzyko,
+- nie przyjmujesz danych z niepewnego źródła.
+
+Ale jako ogólna zasada nauki Python security:
+
+- nie używaj `pickle` do nieufnych danych.
 
 ## Typowe błędy początkujących
 
-- używanie niebezpiecznej deserializacji dla nieufnych danych,
-- brak walidacji po odczycie JSON lub XML,
-- mylenie wygody z bezpieczeństwem,
-- przekonanie, że "wewnętrzne dane" zawsze są bezpieczne.
+- deserializacja danych z zewnątrz bez walidacji,
+- przekonanie, że poprawny JSON oznacza poprawne dane,
+- użycie `pickle` tam, gdzie wystarczyłby JSON,
+- brak limitów na wielkość lub strukturę danych,
+- mieszanie parsowania z logiką biznesową bez etapu walidacji.
 
----
+## Checklista bezpiecznej deserializacji
 
-## Praktyczne przykłady
+- Skąd pochodzą dane?
+- Czy to źródło jest zaufane?
+- Czy używam prostego, przewidywalnego formatu?
+- Czy waliduję dane po parsowaniu?
+- Czy unikam `pickle` dla nieufnych danych?
+- Czy wiem, jaki kontrakt danych naprawdę akceptuję?
 
-### Bezpieczniejszy kierunek
+## Szybka ściąga
 
-- dane przychodzą jako JSON,
-- są parsowane,
-- potem walidowane przez model danych.
+Przy serializacji i deserializacji pamiętaj:
 
-### Ryzykowny kierunek
-
-- aplikacja odtwarza z zewnętrznego payloadu złożone obiekty bez odpowiedniej kontroli.
-
----
-
-## Dobre praktyki
-
-- dla danych z zewnątrz preferuj prostsze i przewidywalne formaty,
-- waliduj dane po deserializacji,
-- nie używaj ryzykownych mechanizmów do nieufnych źródeł,
-- rozumiej, jaki kontrakt danych naprawdę przyjmujesz.
-
----
-
-## Podsumowanie
-
-Bezpieczna serializacja to temat bardziej praktyczny, niż się początkowo wydaje.
-
-Zły wybór formatu lub zbyt duże zaufanie do wejścia potrafią stworzyć bardzo poważne problemy.
-
----
-
-## Mini ściąga
-
-Najważniejsze:
-
-- serializacja i deserializacja to punkty wrażliwe,
-- dla nieufnych danych preferuj prostsze formaty,
-- waliduj dane po odczycie,
-- ostrożnie traktuj mechanizmy odtwarzające złożone obiekty.
-
----
+- dla danych zewnętrznych preferuj prostsze formaty jak JSON,
+- parsowanie nie zastępuje walidacji,
+- poprawny format nie gwarantuje sensownych danych,
+- `pickle` wymaga dużej ostrożności,
+- nieufne dane trzeba traktować z ograniczonym zaufaniem na każdym kroku.
 
 ## Ćwiczenia
 
-1. Wyjaśnij, czym jest serializacja.
-2. Wyjaśnij, czemu deserializacja może być ryzykowna.
-3. Wyjaśnij, czemu JSON bywa bezpieczniejszym wyborem.
-4. Wyjaśnij, czemu `pickle` wymaga ostrożności.
-5. Wyjaśnij, czemu walidacja po deserializacji nadal jest potrzebna.
+1. Napisz przykład poprawnego JSON-a, który zawiera błędne dane biznesowo.
+2. Zbuduj prosty przepływ `JSON -> parse -> walidacja -> użycie`.
+3. Wyjaśnij własnymi słowami, dlaczego `pickle` nie nadaje się do nieufnych danych z internetu.
+4. Porównaj `json.loads()` i ryzykowną deserializację arbitralnych obiektów.
+5. Zastanów się, jakie pola w twoim projekcie szczególnie wymagają walidacji po parsowaniu.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. Serializacja
-
-To zamiana danych do formatu nadającego się do zapisu lub przesłania.
-
-### 2. Ryzyko deserializacji
-
-Bo aplikacja może zaufać niebezpiecznym lub niepoprawnym danym z zewnątrz.
-
-### 3. JSON
-
-Bo zwykle opisuje proste dane, a nie arbitralne obiekty wykonywalne.
-
-### 4. `pickle`
-
-Bo nie powinien być używany do nieufnych danych z zewnątrz.
-
-### 5. Walidacja
-
-Bo nawet poprawnie sparsowany format może zawierać błędne albo niezgodne biznesowo dane.
+- Serializacja sama w sobie nie jest problemem, problemem jest nieostrożna deserializacja.
+- JSON jest zwykle bezpieczniejszym wyborem dla nieufnych danych niż mechanizmy odtwarzające złożone obiekty.
+- Poprawny format danych nie oznacza, że dane są sensowne lub bezpieczne.
+- `pickle` nie powinien być używany do nieufnych danych zewnętrznych.
+- Bezpieczny przepływ to: parse, walidacja, dopiero potem użycie.

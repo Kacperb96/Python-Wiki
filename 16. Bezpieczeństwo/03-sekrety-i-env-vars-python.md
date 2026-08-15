@@ -1,204 +1,267 @@
 # Sekrety i zmienne środowiskowe w Pythonie
 
-## Spis treści
-
-1. [Wprowadzenie](#wprowadzenie)
-2. [Czym są sekrety](#czym-są-sekrety)
-3. [Po co używać env vars](#po-co-używać-env-vars)
-4. [Czego nie robić](#czego-nie-robić)
-5. [Odczyt env vars w Pythonie](#odczyt-env-vars-w-pythonie)
-6. [Brakujące zmienne i fallbacki](#brakujące-zmienne-i-fallbacki)
-7. [Sekrety a repozytorium](#sekrety-a-repozytorium)
-8. [Sekrety a środowiska](#sekrety-a-środowiska)
-9. [Typowe błędy początkujących](#typowe-błędy-początkujących)
-10. [Praktyczne przykłady](#praktyczne-przykłady)
-11. [Dobre praktyki](#dobre-praktyki)
-12. [Podsumowanie](#podsumowanie)
-13. [Mini ściąga](#mini-ściąga)
-14. [Ćwiczenia](#ćwiczenia)
-15. [Przykładowe rozwiązania](#przykładowe-rozwiązania)
-
----
-
-## Wprowadzenie
-
-Sekrety takie jak hasła, tokeny czy klucze API to jedna z najbardziej wrażliwych części projektu.
-
-Bardzo ważne jest, by od początku obchodzić się z nimi poprawnie.
-
----
-
 ## Czym są sekrety
 
-Sekrety to dane, które dają dostęp do systemów lub zasobów.
+Sekrety to dane, które dają dostęp do systemów, zasobów albo uprzywilejowanych operacji.
 
-Na przykład:
+Przykłady:
 
-- hasło do bazy,
+- hasło do bazy danych,
 - token API,
-- klucz JWT,
-- sekret integracyjny.
+- klucz do podpisywania JWT,
+- sekret integracyjny,
+- hasło do SMTP,
+- credentiale do chmury,
+- prywatne klucze.
 
----
+Jeśli takie dane wyciekną, skutki mogą być bardzo poważne.
 
-## Po co używać env vars
+## Najgorszy nawyk: sekret w kodzie
 
-Zmienne środowiskowe pomagają:
+### Zły przykład
 
-- trzymać sekrety poza kodem,
-- zmieniać konfigurację między środowiskami,
-- ograniczać ryzyko wycieku przez repozytorium.
+```python
+DB_PASSWORD = "super_tajne_haslo"
+API_TOKEN = "abc123sekret"
+JWT_SECRET = "moj-super-secret"
+```
 
----
+Na pierwszy rzut oka to wygodne.
 
-## Czego nie robić
+W praktyce to bardzo zły pomysł, bo sekret może trafić do:
 
-Nie wpisuj sekretów bezpośrednio do:
+- repozytorium,
+- historii commitów,
+- screenshotów,
+- logów,
+- cudzych forków,
+- kopii lokalnych innych osób.
 
-- kodu,
-- commitów,
-- publicznych plików konfiguracyjnych,
-- screenshotów i przykładów bez anonimizacji.
+Nawet jeśli później usuniesz taki sekret z pliku, on może nadal istnieć w historii gita.
 
----
+## Dlaczego env vars są lepsze
 
-## Odczyt env vars w Pythonie
+Zmienne środowiskowe pozwalają oddzielić:
+
+- kod aplikacji,
+- od wrażliwej konfiguracji.
+
+Dzięki temu:
+
+- nie trzymasz sekretów w repo,
+- możesz mieć inne wartości dla dev/staging/prod,
+- łatwiej zarządzać konfiguracją między środowiskami,
+- ograniczasz ryzyko przypadkowego wycieku.
+
+## Podstawowy odczyt env var
 
 ```python
 import os
 
-db_password = os.getenv("DB_PASSWORD")
+api_token = os.getenv("API_TOKEN")
+print(api_token)
 ```
 
-To bardzo podstawowy i ważny wzorzec.
+Jeśli zmienna istnieje, dostaniesz jej wartość.
 
----
+Jeśli nie istnieje, wynik będzie `None`.
 
-## Brakujące zmienne i fallbacki
+### Możliwy output
 
-Czasem zmienna może nie istnieć.
+```python
+sk_test_123456
+```
 
-Dlatego trzeba świadomie zdecydować:
+albo:
 
-- czy jest obowiązkowa,
-- czy ma mieć wartość domyślną,
-- czy program ma się zatrzymać.
+```python
+None
+```
 
----
+## Kiedy `None` jest problemem
 
-## Sekrety a repozytorium
+Jeśli dana zmienna jest obowiązkowa, ciche `None` może prowadzić do trudnych błędów.
 
-Repozytorium nie powinno przechowywać prawdziwych sekretów.
+Lepsze podejście:
 
-Można trzymać:
+```python
+import os
 
-- przykładowy `.env.example`,
-- dokumentację wymaganych zmiennych,
+api_token = os.getenv("API_TOKEN")
+if not api_token:
+    raise RuntimeError("Brak API_TOKEN w zmiennych srodowiskowych")
+```
 
-ale nie prawdziwe wartości.
+Teraz aplikacja zatrzyma się od razu i jasno pokaże problem.
 
----
+## Wartość domyślna
 
-## Sekrety a środowiska
+Czasem env var nie jest sekretem i można dać sensowny fallback.
 
-Development, staging i production mogą mieć różne wartości sekretów.
+```python
+import os
 
-To kolejny powód, dla którego nie warto ich hardkodować.
+app_env = os.getenv("APP_ENV", "development")
+print(app_env)
+```
 
----
+Output, jeśli zmienna nie istnieje:
+
+```python
+development
+```
+
+To dobre np. dla:
+
+- nazwy środowiska,
+- poziomu logowania,
+- flagi debug.
+
+To nie jest dobre dla krytycznych sekretów.
+
+## `.env` i `.env.example`
+
+W wielu projektach lokalnie używa się pliku `.env`.
+
+Przykład:
+
+```text
+API_TOKEN=twoj_token
+DB_PASSWORD=twoje_haslo
+APP_ENV=development
+```
+
+Ale bardzo ważne:
+
+- prawdziwego `.env` zwykle nie wrzucamy do repo,
+- do repo można dodać `.env.example`.
+
+### Przykład `.env.example`
+
+```text
+API_TOKEN=
+DB_PASSWORD=
+APP_ENV=development
+```
+
+To pokazuje, jakie zmienne są potrzebne, ale nie ujawnia prawdziwych wartości.
+
+## Co powinno być sekretem
+
+Najczęściej sekretem są dane, które:
+
+- dają dostęp,
+- umożliwiają podpisywanie lub uwierzytelnianie,
+- pozwalają wykonywać uprzywilejowane operacje,
+- otwierają integracje z zewnętrznymi systemami.
+
+Przykłady:
+
+- hasła,
+- tokeny,
+- klucze prywatne,
+- connection stringi z hasłem,
+- sekrety do usług płatniczych.
+
+## Co zwykle nie musi być sekretem
+
+Nie każda konfiguracja jest sekretem.
+
+Zwykle nie muszą nim być:
+
+- numer portu,
+- nazwa środowiska,
+- publiczny host API,
+- feature flag bez znaczenia bezpieczeństwa.
+
+To nadal konfiguracja, ale niekoniecznie wrażliwa.
 
 ## Typowe błędy początkujących
 
-- token wpisany w kod,
+- sekret wpisany w `.py`,
 - wrzucenie `.env` do repo,
+- logowanie tokenu do konsoli,
 - brak sprawdzenia, czy krytyczna zmienna istnieje,
-- logowanie sekretów do konsoli lub plików.
+- używanie tego samego sekretu wszędzie,
+- mylenie przykładowej konfiguracji z prawdziwą.
 
----
+## Nie loguj sekretów
 
-## Praktyczne przykłady
-
-### Odczyt tokenu
-
-```python
-import os
-
-token = os.getenv("API_TOKEN")
-```
-
-### Zła praktyka
+### Zły przykład
 
 ```python
-API_TOKEN = "super-tajny-token"
+print(f"Uruchamiam z tokenem: {api_token}")
 ```
 
----
+To wygodne podczas debugowania, ale bardzo ryzykowne.
 
-## Dobre praktyki
+Logi:
+
+- mogą trafić do plików,
+- mogą zostać wysłane do zewnętrznego systemu,
+- mogą być czytane przez osoby, które nie powinny znać sekretów.
+
+### Lepszy kierunek
+
+```python
+print("Uruchamiam aplikacje, token zostal zaladowany")
+```
+
+Jeśli musisz logować stan, loguj fakt istnienia sekretu, nie jego treść.
+
+## Środowiska: dev, staging, production
+
+To normalne, że każde środowisko ma inne wartości:
+
+- inne hasło do bazy,
+- inny token,
+- inny endpoint API,
+- inny poziom logowania.
+
+Właśnie dlatego sekrety i konfiguracja nie powinny być zaszyte w kodzie.
+
+## Co robić, gdy sekret wyciekł
+
+Jeśli sekret trafił do repo lub logów, samo usunięcie go z pliku nie wystarczy.
+
+Trzeba zwykle:
+
+- uznać go za skompromitowany,
+- wygenerować nowy,
+- unieważnić stary,
+- sprawdzić, gdzie mógł zostać skopiowany,
+- poprawić proces, który dopuścił do wycieku.
+
+## Checklista pracy z sekretami
+
+- Czy sekret nie jest w kodzie?
+- Czy prawdziwy `.env` nie trafia do repo?
+- Czy aplikacja jasno zgłasza brak wymaganej zmiennej?
+- Czy logi nie pokazują sekretów?
+- Czy dev/staging/prod mają oddzielne wartości?
+
+## Szybka ściąga
+
+Dobre praktyki:
 
 - trzymaj sekrety poza kodem,
-- dokumentuj wymagane env vars,
-- nie loguj sekretów,
-- jasno oddzielaj konfigurację od logiki.
-
----
-
-## Podsumowanie
-
-Sekrety i env vars to podstawowy temat bezpieczeństwa i konfiguracji aplikacji.
-
-Dobry nawyk tu oszczędza bardzo wielu poważnych problemów w przyszłości.
-
----
-
-## Mini ściąga
-
-```python
-import os
-
-token = os.getenv("API_TOKEN")
-```
-
-Najważniejsze:
-
-- sekrety nie powinny być w kodzie,
-- env vars to częsty sposób ich dostarczania,
-- `.env.example` może być OK, prawdziwe `.env` zwykle nie powinno trafić do repo.
-
----
+- używaj env vars lub menedżera sekretów,
+- nie loguj prawdziwych wartości,
+- dokumentuj wymagane zmienne przez `.env.example`,
+- traktuj wyciek sekretu poważnie i rotuj go.
 
 ## Ćwiczenia
 
-1. Wyjaśnij, czym jest sekret.
-2. Odczytaj zmienną `API_TOKEN`.
-3. Wskaż przykład złej praktyki z sekretami.
-4. Wyjaśnij, po co używać `.env.example`.
-5. Wyjaśnij, czemu nie wolno logować sekretów.
+1. Napisz funkcję odczytującą `DB_PASSWORD` i zgłaszającą błąd, jeśli zmiennej brakuje.
+2. Przygotuj przykładowy `.env.example` dla małej aplikacji webowej.
+3. Wypisz 5 danych konfiguracyjnych i zaznacz, które są sekretami.
+4. Pokaż zły przykład logowania sekretu i popraw go.
+5. Opisz, co robisz po wycieku tokenu do repo.
 
----
+## Najważniejsze do zapamiętania
 
-## Przykładowe rozwiązania
-
-### 1. Sekret
-
-To wrażliwa wartość dająca dostęp do systemu lub zasobu.
-
-### 2. Odczyt
-
-```python
-import os
-
-print(os.getenv("API_TOKEN"))
-```
-
-### 3. Zła praktyka
-
-Hardkodowanie hasła do bazy w pliku `.py`.
-
-### 4. `.env.example`
-
-Pomaga pokazać, jakie zmienne są potrzebne, bez ujawniania prawdziwych wartości.
-
-### 5. Czemu nie logować
-
-Bo logi też mogą wyciec albo być dostępne dla osób, które nie powinny znać tych danych.
+- Sekrety nie powinny być trzymane w kodzie ani w repo.
+- Env vars są prostym i bardzo praktycznym sposobem dostarczania wrażliwej konfiguracji.
+- Krytyczne zmienne powinny być jawnie sprawdzane przy starcie aplikacji.
+- Logowanie sekretów to również wyciek.
+- Jeśli sekret wyciekł, trzeba go rotować, a nie tylko usuwać z pliku.
